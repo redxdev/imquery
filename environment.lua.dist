@@ -1,0 +1,3 @@
+return {
+    GOOGLE_TEST_PATH = "path/to/gtest"
+}
