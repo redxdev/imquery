@@ -5,7 +5,7 @@
 #include <memory>
 #include <functional>
 
-#include "errors.h"
+#include "result.h"
 
 namespace imq
 {
@@ -26,11 +26,11 @@ namespace imq
 		virtual TypeIndex getTypeIndex() const = 0;
 		virtual String getTypeString() const = 0;
 
-		virtual bool getField(const String& name, QValue* result) const;
-		virtual bool setField(const String& name, const QValue& value);
+		virtual Result getField(const String& name, QValue* result) const;
+		virtual Result setField(const String& name, const QValue& value);
 
-		virtual bool getIndex(const QValue& index, QValue* result) const;
-		virtual bool setIndex(const QValue& index, const QValue& value);
+		virtual Result getIndex(const QValue& index, QValue* result) const;
+		virtual Result setIndex(const QValue& index, const QValue& value);
 	};
 
 	// Do not use yourself - use the IMQ_DECLARE_TYPE and IMQ_DEFINE_TYPE macros.
@@ -74,6 +74,20 @@ namespace imq
 		}
 	}
 
+	template<typename T>
+	const T* objectCast(const QObject* obj)
+	{
+		static_assert(std::is_base_of<QObject, T>::value, "objectCast is only valid for QObject types.");
+		if (obj->getTypeIndex() == T::getStaticTypeIndex())
+		{
+			return reinterpret_cast<const T*>(obj);
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+
 	// bool QFunction(int32_t argCount, QValue** args, QValue* result);
 	typedef std::function<bool(int32_t, QValue**, QValue*)> QFunction;
 
@@ -96,6 +110,9 @@ namespace imq
 		static QValue Float(float val);
 		static QValue Function(QFunction val);
 		static QValue Object(QObjectPtr val);
+		static QValue Object(QObject* val);
+
+		static String getTypeString(Type t);
 
 		QValue();
 		QValue(const QValue& other);
@@ -105,7 +122,10 @@ namespace imq
 
 		Type getType() const;
 
-		String getString() const;
+		// This is _not_ equivalent to the other toX methods - it doesn't
+		// create a new String QValue. This gets the string representation of
+		// this QValue and returns it.
+		String toString() const;
 
 		bool isNil() const;
 		bool isBool() const;

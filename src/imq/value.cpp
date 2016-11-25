@@ -4,6 +4,8 @@
 #include <limits>
 #include <cmath>
 
+#include "errors.h"
+
 namespace imq
 {
 	QObject::~QObject()
@@ -13,27 +15,29 @@ namespace imq
 
 	String QObject::toString() const
 	{
-		return getTypeString();
+		std::stringstream ss;
+		ss << "<" << getTypeString() << ">";
+		return ss.str();
 	}
 
-	bool QObject::getField(const String& name, QValue* result) const
+	Result QObject::getField(const String& name, QValue* result) const
 	{
-		return false;
+		return errors::undefined_get_field(getTypeString());
 	}
 
-	bool QObject::setField(const String& name, const QValue& value)
+	Result QObject::setField(const String& name, const QValue& value)
 	{
-		return false;
+		return errors::undefined_set_field(getTypeString());
 	}
 
-	bool QObject::getIndex(const QValue& index, QValue* result) const
+	Result QObject::getIndex(const QValue& index, QValue* result) const
 	{
-		return false;
+		return errors::undefined_get_index(getTypeString());
 	}
 
-	bool QObject::setIndex(const QValue& index, const QValue& value)
+	Result QObject::setIndex(const QValue& index, const QValue& value)
 	{
-		return false;
+		return errors::undefined_set_index(getTypeString());
 	}
 
 	TypeIndex ObjectRegistry::nextTypeIndex = 0;
@@ -102,6 +106,38 @@ namespace imq
 		return result;
 	}
 
+	imq::QValue QValue::Object(QObject* val)
+	{
+		return QValue::Object(QObjectPtr(val));
+	}
+
+	imq::String QValue::getTypeString(Type t)
+	{
+		switch (t)
+		{
+		default:
+			return "<???>";
+
+		case Type::Nil:
+			return "Nil";
+
+		case Type::Bool:
+			return "Bool";
+
+		case Type::Integer:
+			return "Integer";
+
+		case Type::Float:
+			return "Float";
+
+		case Type::Function:
+			return "Function";
+
+		case Type::Object:
+			return "Object";
+		}
+	}
+
 	QValue::QValue()
 	{
 		valueType = Type::Nil;
@@ -158,7 +194,7 @@ namespace imq
 		return valueType;
 	}
 
-	imq::String QValue::getString() const
+	imq::String QValue::toString() const
 	{
 		switch (valueType)
 		{
@@ -186,7 +222,7 @@ namespace imq
 		}
 
 		case Type::Function:
-			return "QFunction";
+			return "<QFunction>";
 
 		case Type::Object:
 			return obj->toString();
