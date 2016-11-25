@@ -1,11 +1,11 @@
 #pragma once
 
-#include "platform.hpp"
+#include "platform.h"
 
 #include <sstream>
 
 #define IMQ_ERROR_DEF(errName, fmt, ...) \
-	String errName(__VA_ARGS__) \
+	inline String errName(__VA_ARGS__) \
 	{ \
 		std::stringstream __ss; \
 		__ss << fmt; \

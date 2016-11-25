@@ -1,4 +1,4 @@
-#include "value.hpp"
+#include "value.h"
 
 namespace imq
 {
@@ -84,6 +84,7 @@ namespace imq
 	{
 		QValue result;
 		result.valueType = Type::Function;
+		new (&result.func) NativeFunction();
 		result.func = val;
 		return result;
 	}
@@ -92,6 +93,7 @@ namespace imq
 	{
 		QValue result;
 		result.valueType = Type::Object;
+		new (&result.obj) QObjectPtr();
 		result.obj = val;
 		return result;
 	}
@@ -122,10 +124,12 @@ namespace imq
 			break;
 
 		case Type::Object:
+			new (&obj) QObjectPtr();
 			obj = other.obj;
 			break;
 
 		case Type::Function:
+			new (&func) NativeFunction();
 			func = other.func;
 			break;
 		}
@@ -133,7 +137,106 @@ namespace imq
 
 	QValue::~QValue()
 	{
+		switch (valueType)
+		{
+		case Type::Object:
+			obj.~shared_ptr();
+			break;
 
+		case Type::Function:
+			func.~function();
+			break;
+		}
+	}
+
+	QValue::Type QValue::getType() const
+	{
+		return valueType;
+	}
+
+	bool QValue::isNil() const
+	{
+		return valueType == Type::Nil;
+	}
+
+	bool QValue::isBool() const
+	{
+		return valueType == Type::Bool;
+	}
+
+	bool QValue::isInteger() const
+	{
+		return valueType == Type::Integer;
+	}
+
+	bool QValue::isFloat() const
+	{
+		return valueType == Type::Float;
+	}
+
+	bool QValue::isFunction() const
+	{
+		return valueType == Type::Function;
+	}
+
+	bool QValue::isObject() const
+	{
+		return valueType == Type::Object;
+	}
+
+	bool QValue::getBool(bool* result) const
+	{
+		if (isBool())
+		{
+			*result = b;
+			return true;
+		}
+
+		return false;
+	}
+
+	bool QValue::getInteger(int32_t* result) const
+	{
+		if (isInteger())
+		{
+			*result = i;
+			return true;
+		}
+
+		return false;
+	}
+
+	bool QValue::getFloat(float* result) const
+	{
+		if (isFloat())
+		{
+			*result = f;
+			return true;
+		}
+
+		return false;
+	}
+
+	bool QValue::getFunction(NativeFunction* result) const
+	{
+		if (isFunction())
+		{
+			*result = func;
+			return true;
+		}
+
+		return false;
+	}
+
+	bool QValue::getObject(QObjectPtr* result) const
+	{
+		if (isObject())
+		{
+			*result = obj;
+			return true;
+		}
+
+		return false;
 	}
 
 	QValue& QValue::operator=(const QValue& other)
@@ -157,10 +260,12 @@ namespace imq
 			break;
 
 		case Type::Object:
+			new (&obj) QObjectPtr();
 			obj = other.obj;
 			break;
 
 		case Type::Function:
+			new (&func) NativeFunction();
 			func = other.func;
 			break;
 		}
