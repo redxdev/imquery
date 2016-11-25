@@ -10,7 +10,7 @@ TEST(QValue, Creation)
 	bool b;
 	int32_t i;
 	float f;
-	NativeFunction func;
+	QFunction func;
 	QObjectPtr obj;
 
 	QValue value;

@@ -21,7 +21,7 @@ public:
 
 	}
 
-	virtual bool equals(QObject* other) const override
+	virtual bool equals(const QObject* other) const override
 	{
 		return this == other;
 	}

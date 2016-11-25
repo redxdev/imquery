@@ -20,7 +20,7 @@ namespace imq
 
 		virtual String toString() const;
 
-		virtual bool equals(QObject* other) const = 0;
+		virtual bool equals(const QObject* other) const = 0;
 
 		// Do not implement yourself - use the IMQ_DECLARE_TYPE and IMQ_DEFINE_TYPE macros.
 		virtual TypeIndex getTypeIndex() const = 0;
@@ -74,8 +74,8 @@ namespace imq
 		}
 	}
 
-	// bool NativeFunction(int32_t argCount, QValue** args, QValue* result);
-	typedef std::function<bool(int32_t, QValue**, QValue*)> NativeFunction;
+	// bool QFunction(int32_t argCount, QValue** args, QValue* result);
+	typedef std::function<bool(int32_t, QValue**, QValue*)> QFunction;
 
     class QValue
     {
@@ -94,7 +94,7 @@ namespace imq
 		static QValue Bool(bool val);
 		static QValue Integer(int32_t val);
 		static QValue Float(float val);
-		static QValue Function(NativeFunction val);
+		static QValue Function(QFunction val);
 		static QValue Object(QObjectPtr val);
 
 		QValue();
@@ -104,6 +104,8 @@ namespace imq
 		~QValue();
 
 		Type getType() const;
+
+		String getString() const;
 
 		bool isNil() const;
 		bool isBool() const;
@@ -115,8 +117,15 @@ namespace imq
 		bool getBool(bool* result) const;
 		bool getInteger(int32_t* result) const;
 		bool getFloat(float* result) const;
-		bool getFunction(NativeFunction* result) const;
+		bool getFunction(QFunction* result) const;
 		bool getObject(QObjectPtr* result) const;
+
+		bool toBool(QValue* result) const;
+		bool toInteger(QValue* result) const;
+		bool toFloat(QValue* result) const;
+
+		friend bool operator==(const QValue& a, const QValue& b);
+		friend bool operator!=(const QValue& a, const QValue& b);
 
     private:
 		Type valueType;
@@ -127,7 +136,10 @@ namespace imq
 			int32_t i;
 			float f;
 			QObjectPtr obj;
-			NativeFunction func;
+			QFunction func;
 		};
     };
+
+	bool operator==(const QValue& a, const QValue& b);
+	bool operator!=(const QValue& a, const QValue& b);
 }
