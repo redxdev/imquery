@@ -1,5 +1,6 @@
 #include <imq/image.h>
 #include <imq/value.h>
+#include <imq/errors.h>
 #include <gtest/gtest.h>
 
 using namespace imq;
@@ -388,7 +389,7 @@ TEST(QImage, LoadFromFile)
 	
 	Result result = QImage::loadFromFile("does_not_exist.png", &image);
 	ASSERT_FALSE(result);
-	EXPECT_EQ(result.getErr(), "Image load error - Unable to open file");
+	EXPECT_EQ(result.getErr(), errors::image_load_error("Unable to open file").getErr());
 
 	ASSERT_TRUE(QImage::loadFromFile("images/checkerboard.png", &image));
 	ASSERT_EQ(image.getWidth(), 10);
