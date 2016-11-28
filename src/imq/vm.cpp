@@ -2,14 +2,10 @@
 
 #include <sstream>
 
+#include "errors.h"
+
 namespace imq
 {
-	std::ostream& operator<<(std::ostream& os, const VLocation& loc)
-	{
-		os << loc.line << ":" << loc.col;
-		return os;
-	}
-
 	VNode::VNode(const VLocation& loc)
 		: location(loc)
 	{
@@ -68,5 +64,36 @@ namespace imq
 	{
 		QValue exprValue;
 		return expression->execute(context, &exprValue);
+	}
+
+	VMachine::VMachine(ContextPtr context)
+		: rootContext(context)
+	{
+	}
+
+	ContextPtr VMachine::getRootContext() const
+	{
+		return rootContext;
+	}
+
+	Result VMachine::execute(int32_t count, VStatement** statements)
+	{
+		if (count < 0)
+			return errors::vm_invalid_statement_list();
+
+		for (int32_t i = 0; i < count; ++i)
+		{
+			VStatement* stm = statements[i];
+			if (stm != nullptr)
+			{
+				Result result = stm->execute(rootContext);
+				if (!result)
+				{
+					return result;
+				}
+			}
+		}
+
+		return true;
 	}
 }

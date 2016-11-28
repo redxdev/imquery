@@ -88,8 +88,8 @@ namespace imq
 		}
 	}
 
-	// bool QFunction(int32_t argCount, QValue** args, QValue* result);
-	typedef std::function<bool(int32_t, QValue**, QValue*)> QFunction;
+	// bool QFunction(int32_t argCount, QValue* args, QValue* result);
+	typedef std::function<bool(int32_t, QValue*, QValue*)> QFunction;
 
     class QValue
     {

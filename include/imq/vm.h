@@ -4,19 +4,12 @@
 #include "context.h"
 #include "value.h"
 #include "result.h"
+#include "utility.h"
 
 #include <ostream>
 
 namespace imq
 {
-	struct VLocation
-	{
-		int32_t line;
-		int32_t col;
-	};
-
-	std::ostream& operator<<(std::ostream& os, const VLocation& loc);
-
 	class VNode
 	{
 	public:
@@ -62,5 +55,18 @@ namespace imq
 
 	private:
 		VExpression* expression;
+	};
+
+	class VMachine
+	{
+	public:
+		VMachine(ContextPtr context);
+
+		ContextPtr getRootContext() const;
+
+		Result execute(int32_t count, VStatement** statements);
+
+	private:
+		ContextPtr rootContext;
 	};
 }

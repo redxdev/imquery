@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdint.h>
+#include <ostream>
+
 namespace imq
 {
 	namespace utility
@@ -19,4 +22,12 @@ namespace imq
 			return val;
 		}
 	}
+
+	struct VLocation
+	{
+		int32_t line;
+		int32_t col;
+	};
+
+	std::ostream& operator<<(std::ostream& os, const VLocation& loc);
 }
