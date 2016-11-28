@@ -314,6 +314,53 @@ TEST(QImage, Clear)
 	}
 }
 
+TEST(QImage, Clamp)
+{
+	QImage image(100, 100);
+	QColor color;
+
+	for (int32_t y = 0; y < 100; ++y)
+	{
+		for (int32_t x = 0; x < 100; ++x)
+		{
+			if (x == y)
+			{
+				ASSERT_TRUE(image.setPixel(x, y, QColor(0.f, 1.f, 0.5f, 0.3f)));
+			}
+			else if (x % 2 == 0)
+			{
+				ASSERT_TRUE(image.setPixel(x, y, QColor(2.f, 3.f, -0.2f, 0.5f)));
+			}
+			else
+			{
+				ASSERT_TRUE(image.setPixel(x, y, QColor(-1.f, 0.3f, 1.89f, -2.5f)));
+			}
+		}
+	}
+
+	image.clamp();
+
+	for (int32_t y = 0; y < 100; ++y)
+	{
+		for (int32_t x = 0; x < 100; ++x)
+		{
+			ASSERT_TRUE(image.getPixel(x, y, &color));
+			if (x == y)
+			{
+				EXPECT_EQ(color, QColor(0.f, 1.f, 0.5f, 0.3f));
+			}
+			else if (x % 2 == 0)
+			{
+				EXPECT_EQ(color, QColor(1.f, 1.f, 0.f, 0.5f));
+			}
+			else
+			{
+				EXPECT_EQ(color, QColor(0.f, 0.3f, 1.f, 0.f));
+			}
+		}
+	}
+}
+
 TEST(QImage, GetField)
 {
 	QImage image(123, 456);

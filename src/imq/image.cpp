@@ -400,6 +400,14 @@ namespace imq
 		}
 	}
 
+	void QImage::clamp()
+	{
+		for (size_t idx = 0; idx < (size_t)(4 * width * height); ++idx)
+		{
+			data[idx] = utility::clamp(data[idx], 0.f, 1.f);
+		}
+	}
+
 	imq::Result QImage::saveToFile(const char* filename)
 	{
 		// TODO: support for formats other than png
