@@ -73,4 +73,76 @@ namespace imq
 		int32_t argCount;
 		VExpression** args;
 	};
+
+	class SetVariableStm : public VStatement
+	{
+	public:
+		SetVariableStm(const String& variable, VExpression* valueExpr, const VLocation& loc);
+		virtual ~SetVariableStm();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context) override;
+
+	private:
+		String variable;
+		VExpression* valueExpr;
+	};
+
+	class SetFieldStm : public VStatement
+	{
+	public:
+		SetFieldStm(VExpression* objExpr, const String& field, VExpression* valueExpr, const VLocation& loc);
+		virtual ~SetFieldStm();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context) override;
+
+	private:
+		String field;
+		VExpression* objExpr;
+		VExpression* valueExpr;
+	};
+
+	class SetIndexStm : public VStatement
+	{
+	public:
+		SetIndexStm(VExpression* objExpr, VExpression* indexExpr, VExpression* valueExpr, const VLocation& loc);
+		virtual ~SetIndexStm();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context) override;
+
+	private:
+		VExpression* indexExpr;
+		VExpression* objExpr;
+		VExpression* valueExpr;
+	};
+
+	class DeleteVariableStm : public VStatement
+	{
+	public:
+		DeleteVariableStm(const String& variable, const VLocation& loc);
+		virtual ~DeleteVariableStm();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context) override;
+
+	private:
+		String variable;
+	};
+
+	class SelectStm : public VStatement
+	{
+	public:
+		SelectStm(VExpression* destExpr, VExpression* srcExpr, VExpression* calcExpr, const VLocation& loc);
+		virtual ~SelectStm();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context) override;
+
+	private:
+		VExpression* destExpr;
+		VExpression* srcExpr;
+		VExpression* calcExpr;
+	};
 }

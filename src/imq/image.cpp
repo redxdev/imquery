@@ -443,4 +443,95 @@ namespace imq
 
 		return errors::undefined_field(getTypeString(), name);
 	}
+
+	Result QImage::selection(ContextPtr context, const QValue& value, QSelection** result)
+	{
+		QObjectPtr obj;
+		if (!value.getObject(&obj))
+		{
+			return errors::selection_create_error("expected QObject destination");
+		}
+
+		QImage* dest = objectCast<QImage>(obj.get());
+		if (!dest)
+		{
+			return errors::selection_create_error("expected QImage destination");
+		}
+
+		if (width != dest->width || height != dest->height)
+		{
+			return errors::selection_create_error("destination dimensions do not match source dimensions");
+		}
+
+		*result = new QImageSelection(context, this, dest);
+		return true;
+	}
+
+	QImageSelection::QImageSelection(ContextPtr parent, QImage* source, QImage* dest)
+		: source(source), dest(dest), index(0)
+	{
+		context = std::shared_ptr<RestrictedSubContext>(new RestrictedSubContext(parent));
+		color = std::shared_ptr<QColor>(new QColor());
+		context->setRawValue("color", QValue::Object(color));
+		updateContext();
+	}
+
+	QImageSelection::~QImageSelection()
+	{
+	}
+
+	ContextPtr QImageSelection::getContext() const
+	{
+		return context;
+	}
+
+	bool QImageSelection::isValid() const
+	{
+		return index < source->width * source->height;
+	}
+
+	void QImageSelection::next()
+	{
+		++index;
+		updateContext();
+	}
+
+	Result QImageSelection::apply(const QValue& value)
+	{
+		QObjectPtr obj;
+		if (!value.getObject(&obj))
+		{
+			return errors::selection_apply_error("expected a QObject");
+		}
+
+		QColor* color = objectCast<QColor>(obj.get());
+		if (!color)
+		{
+			return errors::selection_apply_error("expected a QColor");
+		}
+
+		size_t idx = index * 4;
+		dest->data[idx] = color->getRed();
+		dest->data[idx + 1] = color->getGreen();
+		dest->data[idx + 2] = color->getBlue();
+		dest->data[idx + 3] = color->getAlpha();
+
+		return true;
+	}
+
+	void QImageSelection::updateContext()
+	{
+		if (index < source->width * source->height)
+		{
+			size_t idx = index * 4;
+			color->setRed(source->data[idx]);
+			color->setGreen(source->data[idx + 1]);
+			color->setBlue(source->data[idx + 2]);
+			color->setAlpha(source->data[idx + 3]);
+
+			context->setRawValue("x", QValue::Integer(index % source->width));
+			context->setRawValue("y", QValue::Integer(index / source->width));
+		}
+	}
+
 }

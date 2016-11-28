@@ -24,6 +24,7 @@ namespace imq
 		IMQ_ERROR_DEF(undefined_set_field, typeName << " does not have set_field defined.", const String& typeName);
 		IMQ_ERROR_DEF(undefined_get_index, typeName << " does not have get_index defined.", const String& typeName);
 		IMQ_ERROR_DEF(undefined_set_index, typeName << " does not have set_index defined.", const String& typeName);
+		IMQ_ERROR_DEF(undefined_selection, typeName << " does not implement selection.", const String& typeName);
 
 		IMQ_ERROR_DEF(undefined_field, "Invalid field " << fieldName << " for type " << typeName, const String& typeName, const String& fieldName);
 
@@ -39,6 +40,9 @@ namespace imq
 
 		IMQ_ERROR_DEF(vm_invalid_statement_list, "Invalid statement list");
 		IMQ_ERROR_DEF(vm_generic_error, loc << ": " << msg, const VLocation& loc, const String& msg);
+
+		IMQ_ERROR_DEF(selection_apply_error, "Unable to apply selection - " << msg, const String& msg);
+		IMQ_ERROR_DEF(selection_create_error, "Unable to create selection - " << msg, const String& msg);
 	}
 }
 

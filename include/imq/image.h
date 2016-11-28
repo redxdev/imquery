@@ -2,6 +2,7 @@
 
 #include "platform.h"
 #include "value.h"
+#include "object.h"
 
 namespace imq
 {
@@ -55,6 +56,8 @@ namespace imq
 		IMQ_DECLARE_TYPE(QImage);
 
 	public:
+		friend class QImageSelection;
+
 		static Result loadFromFile(const char* filename, QImage* result);
 
 		QImage();
@@ -87,9 +90,32 @@ namespace imq
 
 		virtual Result getField(const String& name, QValue* result) const override;
 
+		virtual Result selection(ContextPtr context, const QValue& value, QSelection** result) override;
+
 	private:
 		int32_t width;
 		int32_t height;
 		float* data = nullptr;
+	};
+
+	class QImageSelection : public QSelection
+	{
+	public:
+		QImageSelection(ContextPtr parent, QImage* source, QImage* dest);
+		virtual ~QImageSelection();
+
+		virtual ContextPtr getContext() const override;
+		virtual bool isValid() const override;
+		virtual void next() override;
+		virtual Result apply(const QValue& value) override;
+
+	private:
+		void updateContext();
+
+		QImage* source;
+		QImage* dest;
+		std::shared_ptr<QColor> color;
+		int32_t index;
+		std::shared_ptr<RestrictedSubContext> context;
 	};
 }

@@ -1,4 +1,5 @@
 #include <imq/value.h>
+#include <imq/object.h>
 #include <gtest/gtest.h>
 
 #include "test/sampleobject.h"
@@ -37,7 +38,7 @@ TEST(QValue, Creation)
 	value = QValue::Function(sampleNativeFunction);
 	ASSERT_TRUE(value.isFunction());
 	ASSERT_TRUE(value.getFunction(&func));
-	ASSERT_EQ(func(0, nullptr, nullptr), false);
+	ASSERT_TRUE(func(0, nullptr, &value));
 
 	value = QValue::Object(QObjectPtr(new SampleObject()));
 	ASSERT_TRUE(value.isObject());

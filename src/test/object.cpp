@@ -1,4 +1,5 @@
 #include <imq/value.h>
+#include <imq/object.h>
 #include <gtest/gtest.h>
 
 using namespace imq;

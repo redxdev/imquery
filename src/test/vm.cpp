@@ -1,0 +1,149 @@
+#include <imq/vm.h>
+#include <imq/expressions.h>
+#include <imq/image.h>
+#include <gtest/gtest.h>
+
+using namespace imq;
+
+TEST(VMachine, CallFunctionExpr)
+{
+	ContextPtr ctx(new SimpleContext());
+
+	bool functionCalled = false;
+	QValue func = QValue::Function([&](int32_t argCount, QValue* args, QValue* result) -> Result {
+		if (argCount == 1)
+		{
+			*result = args[0];
+		}
+		else if (argCount == 2)
+		{
+			*result = QValue::Float(3.f);
+		}
+		else
+		{
+			*result = QValue::Integer(argCount);
+		}
+
+		functionCalled = true;
+
+		return true;
+	});
+
+	CallFunctionExpr* expr = new CallFunctionExpr(new ConstantExpr(func, { 0, 0 }), 0, nullptr, { 0, 0 });
+	QValue value;
+	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_TRUE(functionCalled);
+	ASSERT_EQ(value, QValue::Integer(0));
+
+	functionCalled = false;
+	delete expr;
+
+	VExpression** args = new VExpression*[1]{ new ConstantExpr(QValue::Integer(321), {0,0}) };
+	expr = new CallFunctionExpr(new ConstantExpr(func, { 0, 0 }), 1, args, { 0, 0 });
+	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_TRUE(functionCalled);
+	ASSERT_EQ(value, QValue::Integer(321));
+
+	functionCalled = false;
+	delete expr;
+
+	args = new VExpression*[2]{ new ConstantExpr(QValue::Integer(321), {0,0}), new ConstantExpr(QValue::Integer(123), {0,0}) };
+	expr = new CallFunctionExpr(new ConstantExpr(func, { 0,0 }), 2, args, { 0, 0 });
+	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_TRUE(functionCalled);
+	ASSERT_EQ(value, QValue::Float(3.f));
+
+	delete expr;
+}
+
+TEST(VMachine, Variables)
+{
+	ContextPtr ctx(new SimpleContext());
+	QValue value;
+
+	VExpression* expr = new RetrieveVariableExpr("foo", { 1, 2 });
+	Result result = expr->execute(ctx, &value);
+	ASSERT_FALSE(result);
+	ASSERT_EQ(result.getErr(), "1:2: Unknown variable \"foo\"");
+
+	VStatement* stm = new SetVariableStm("foo", new ConstantExpr(QValue::Integer(345), { 0, 0 }), { 0, 0 });
+	ASSERT_TRUE(stm->execute(ctx));
+
+	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_EQ(value, QValue::Integer(345));
+
+	delete expr;
+	delete stm;
+}
+
+TEST(VMachine, Fields)
+{
+	ContextPtr ctx(new SimpleContext());
+	QValue obj = QValue::Object(new QColor(1.f, 0.3f, 0.4f, 1.f));
+	QValue value;
+
+	VExpression* expr = new RetrieveFieldExpr(new ConstantExpr(obj, { 0, 0 }), "foo", { 0, 0 });
+	ASSERT_FALSE(expr->execute(ctx, &value));
+
+	delete expr;
+	expr = new RetrieveFieldExpr(new ConstantExpr(obj, { 0, 0 }), "g", { 0, 0 });
+	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_EQ(value, QValue::Float(0.3f));
+
+	VStatement* stm = new SetFieldStm(new ConstantExpr(obj, { 0, 0 }), "green", new ConstantExpr(QValue::Float(0.89f), { 0,0 }), { 0, 0 });
+	ASSERT_TRUE(stm->execute(ctx));
+	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_EQ(value, QValue::Float(0.89f));
+
+	delete expr;
+	delete stm;
+}
+
+TEST(VMachine, Indices)
+{
+	ContextPtr ctx(new SimpleContext());
+	QValue obj = QValue::Object(new QColor(1.f, 0.3f, 0.4f, 1.f));
+	QValue value;
+
+	VExpression* expr = new RetrieveIndexExpr(new ConstantExpr(obj, { 0,0 }), new ConstantExpr(QValue::Integer(-1), { 0,0 }), { 0, 0 });
+	ASSERT_FALSE(expr->execute(ctx, &value));
+
+	delete expr;
+	expr = new RetrieveIndexExpr(new ConstantExpr(obj, { 0,0 }), new ConstantExpr(QValue::Integer(2), { 0,0 }), { 0, 0 });
+	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_EQ(value, QValue::Float(0.4f));
+
+	VStatement* stm = new SetIndexStm(new ConstantExpr(obj, { 0, 0 }), new ConstantExpr(QValue::Integer(2), { 0,0 }), new ConstantExpr(QValue::Float(0.132f), { 0,0 }), { 0,0 });
+	ASSERT_TRUE(stm->execute(ctx));
+	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_EQ(value, QValue::Float(0.132f));
+
+	delete expr;
+	delete stm;
+}
+
+TEST(VMachine, Select)
+{
+	ContextPtr ctx(new SimpleContext());
+
+	std::shared_ptr<QImage> imageA(new QImage(100, 100, QColor(1.f, 1.f, 1.f, 1.f)));
+	std::shared_ptr<QImage> imageB(new QImage(100, 100, QColor(0.f, 0.f, 0.f, 0.f)));
+
+	VStatement* stm = new SelectStm(
+		new ConstantExpr(QValue::Object(imageB), { 0, 0 }),
+		new ConstantExpr(QValue::Object(imageA), { 0, 0 }),
+		new RetrieveVariableExpr("color", { 0, 0 }),
+		{ 0, 0 }
+	);
+	ASSERT_TRUE(stm->execute(ctx));
+
+	QColor color;
+	for (int32_t y = 0; y < 100; ++y)
+	{
+		for (int32_t x = 0; x < 100; ++x)
+		{
+			ASSERT_TRUE(imageB->getPixel(x, y, &color));
+			ASSERT_EQ(color, QColor(1.f, 1.f, 1.f, 1.f));
+		}
+	}
+}

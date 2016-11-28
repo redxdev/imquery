@@ -1,8 +1,10 @@
 #include <imq/value.h>
+#include <imq/object.h>
 
-inline bool sampleNativeFunction(int argc, imq::QValue** args, imq::QValue* result)
+inline imq::Result sampleNativeFunction(int argc, imq::QValue* args, imq::QValue* result)
 {
-	return false;
+	*result = imq::QValue::Nil();
+	return true;
 }
 
 class SampleObject : public imq::QObject
