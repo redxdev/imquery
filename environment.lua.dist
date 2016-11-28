@@ -1,3 +1,6 @@
 return {
-    GOOGLE_TEST_PATH = "path/to/gtest"
+    GTEST_PATH = "path/to/gtest",
+    GTEST_INCLUDE_DIR = "include",
+    GTEST_LIB_DIR = "Debug",
+    GTEST_LIB = "gtest"
 }
