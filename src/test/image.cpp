@@ -384,3 +384,51 @@ TEST(QImage, LoadFromFile)
 		}
 	}
 }
+
+TEST(QImage, SaveToFile)
+{
+	QImage image(100, 100);
+	QColor color;
+
+	for (int32_t y = 0; y < 100; ++y)
+	{
+		for (int32_t x = 0; x < 100; ++x)
+		{
+			if (x == y)
+			{
+				ASSERT_TRUE(image.setPixel(x, y, QColor(0.f, 0.f, 1.f, 1.f)));
+			}
+			else if (x % 2 == 0)
+			{
+				ASSERT_TRUE(image.setPixel(x, y, QColor(0.f, 0.f, 0.f, 1.f)));
+			}
+			else
+			{
+				ASSERT_TRUE(image.setPixel(x, y, QColor(1.f, 1.f, 1.f, 1.f)));
+			}
+		}
+	}
+
+	ASSERT_TRUE(image.saveToFile("images/test.png"));
+	ASSERT_TRUE(QImage::loadFromFile("images/test.png", &image));
+
+	for (int32_t y = 0; y < 100; ++y)
+	{
+		for (int32_t x = 0; x < 100; ++x)
+		{
+			ASSERT_TRUE(image.getPixel(x, y, &color));
+			if (x == y)
+			{
+				EXPECT_EQ(color, QColor(0.f, 0.f, 1.f, 1.f));
+			}
+			else if (x % 2 == 0)
+			{
+				EXPECT_EQ(color, QColor(0.f, 0.f, 0.f, 1.f));
+			}
+			else
+			{
+				EXPECT_EQ(color, QColor(1.f, 1.f, 1.f, 1.f));
+			}
+		}
+	}
+}

@@ -30,6 +30,7 @@ namespace imq
 		IMQ_ERROR_DEF(invalid_index_type, "Invalid index type " << QValue::getTypeString(index.getType()) << " for type " << typeName, const String& typeName, const QValue& index);
 
 		IMQ_ERROR_DEF(image_load_error, "Image load error - " << reason, const String& reason);
+		IMQ_ERROR_DEF(image_save_error, "Image save error - unable to save image file " << filename, const String& filename);
 	}
 }
 

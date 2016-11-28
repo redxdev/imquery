@@ -81,6 +81,8 @@ namespace imq
 
 		void clear(const QColor& color);
 
+		Result saveToFile(const char* filename);
+
 		virtual Result getField(const String& name, QValue* result) const override;
 
 	private:

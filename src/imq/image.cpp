@@ -241,16 +241,9 @@ namespace imq
 		}
 
 		*result = QImage(width, height);
-		for (int32_t y = 0; y < height; ++y)
+		for (size_t idx = 0; idx < (size_t)(4 * width * height); ++idx)
 		{
-			for (int32_t x = 0; x < width; ++x)
-			{
-				size_t idx = (size_t)(y * width + x) * 4;
-				result->data[idx] = (float)(data[idx] / 255.f);
-				result->data[idx + 1] = (float)(data[idx + 1] / 255.f);
-				result->data[idx + 2] = (float)(data[idx + 2] / 255.f);
-				result->data[idx + 3] = (float)(data[idx + 3] / 255.f);
-			}
+			result->data[idx] = (float)(data[idx] / 255.f);
 		}
 
 		stbi_image_free(data);
@@ -405,6 +398,26 @@ namespace imq
 				data[idx + 3] = color.getAlpha();
 			}
 		}
+	}
+
+	imq::Result QImage::saveToFile(const char* filename)
+	{
+		// TODO: support for formats other than png
+		unsigned char* out = new unsigned char[4 * width * height];
+		for (size_t idx = 0; idx < (size_t)(4 * width * height); ++idx)
+		{
+			out[idx] = (unsigned char)(data[idx] * 255);
+		}
+
+		int res = stbi_write_png(filename, width, height, 4, out, 4 * width * sizeof(unsigned char));
+		delete[] out;
+
+		if (res == 0)
+		{
+			return errors::image_save_error(filename);
+		}
+
+		return true;
 	}
 
 	imq::Result QImage::getField(const String& name, QValue* result) const
