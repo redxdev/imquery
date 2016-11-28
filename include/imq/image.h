@@ -12,6 +12,9 @@ namespace imq
 	public:
 		QColor();
 		QColor(float r, float g, float b, float a = 1.f);
+		QColor(const QColor& other);
+
+		QColor& operator=(const QColor& other);
 
 		virtual ~QColor();
 
@@ -28,6 +31,8 @@ namespace imq
 		void setGreen(float val);
 		void setBlue(float val);
 		void setAlpha(float val);
+
+		QColor clamp() const;
 
 		virtual Result getField(const String& name, QValue* result) const override;
 		virtual Result setField(const String& name, const QValue& value) override;

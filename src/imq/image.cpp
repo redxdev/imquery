@@ -2,10 +2,13 @@
 
 #include <string>
 
+#include "utility.h"
 #include "errors.h"
 
 namespace imq
 {
+	IMQ_DEFINE_TYPE(QColor);
+
 	QColor::QColor()
 		: QObject(),
 		red(0.f), green(0.f), blue(0.f), alpha(1.f)
@@ -18,6 +21,23 @@ namespace imq
 	{
 	}
 
+
+	QColor::QColor(const QColor& other)
+	{
+		this->red = other.red;
+		this->green = other.green;
+		this->blue = other.blue;
+		this->alpha = other.alpha;
+	}
+
+	QColor& QColor::operator=(const QColor& other)
+	{
+		this->red = other.red;
+		this->green = other.green;
+		this->blue = other.blue;
+		this->alpha = other.alpha;
+		return *this;
+	}
 
 	QColor::~QColor()
 	{
@@ -77,6 +97,16 @@ namespace imq
 	void QColor::setAlpha(float val)
 	{
 		alpha = val;
+	}
+
+	imq::QColor QColor::clamp() const
+	{
+		return QColor(
+			utility::clamp(red, 0.f, 1.f),
+			utility::clamp(green, 0.f, 1.f),
+			utility::clamp(blue, 0.f, 1.f),
+			utility::clamp(alpha, 0.f, 1.f)
+		);
 	}
 
 	Result QColor::getField(const String& name, QValue* result) const
