@@ -26,7 +26,11 @@ namespace imq
 
 		IMQ_ERROR_DEF(undefined_field, "Invalid field " << fieldName << " for type " << typeName, const String& typeName, const String& fieldName);
 
-		IMQ_ERROR_DEF(undefined_index, "Invalid index " << index.toString() << " for type " << typeName, const String typeName, const QValue& index);
-		IMQ_ERROR_DEF(invalid_index_type, "Invalid index type " << QValue::getTypeString(index.getType()) << " for type " << typeName, const String typeName, const QValue& index);
+		IMQ_ERROR_DEF(undefined_index, "Invalid index " << index.toString() << " for type " << typeName, const String& typeName, const QValue& index);
+		IMQ_ERROR_DEF(invalid_index_type, "Invalid index type " << QValue::getTypeString(index.getType()) << " for type " << typeName, const String& typeName, const QValue& index);
+
+		IMQ_ERROR_DEF(image_load_error, "Image load error - " << reason, const String& reason);
 	}
 }
+
+#undef IMQ_ERROR_DEF

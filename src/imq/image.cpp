@@ -2,11 +2,15 @@
 
 #include <string>
 
+#include "thirdparty/stb_image.h"
+#include "thirdparty/stb_image_write.h"
 #include "utility.h"
 #include "errors.h"
 
 namespace imq
 {
+	// QColor
+
 	IMQ_DEFINE_TYPE(QColor);
 
 	QColor::QColor()
@@ -57,6 +61,16 @@ namespace imq
 			return false;
 
 		return red == color->red && green == color->green && blue == color->blue && alpha == color->alpha;
+	}
+
+	bool QColor::operator==(const QColor& other) const
+	{
+		return red == other.red && green == other.green && blue == other.blue && alpha == other.alpha;
+	}
+
+	bool QColor::operator!=(const QColor& other) const
+	{
+		return !(*this == other);
 	}
 
 	float QColor::getRed() const
@@ -211,4 +225,201 @@ namespace imq
 		}
 	}
 
+	// QImage
+
+	IMQ_DEFINE_TYPE(QImage);
+
+	Result QImage::loadFromFile(const char* filename, QImage* result)
+	{
+		int width;
+		int height;
+		int comp;
+		unsigned char* data = stbi_load(filename, &width, &height, &comp, 4);
+		if (data == nullptr)
+		{
+			return errors::image_load_error(stbi_failure_reason());
+		}
+
+		*result = QImage(width, height);
+		for (int32_t y = 0; y < height; ++y)
+		{
+			for (int32_t x = 0; x < width; ++x)
+			{
+				size_t idx = (size_t)(y * width + x) * 4;
+				result->data[idx] = (float)(data[idx] / 255.f);
+				result->data[idx + 1] = (float)(data[idx + 1] / 255.f);
+				result->data[idx + 2] = (float)(data[idx + 2] / 255.f);
+				result->data[idx + 3] = (float)(data[idx + 3] / 255.f);
+			}
+		}
+
+		stbi_image_free(data);
+
+		return true;
+	}
+
+	QImage::QImage()
+		: QObject()
+	{
+		width = 0;
+		height = 0;
+		data = nullptr;
+	}
+
+	QImage::QImage(int32_t width, int32_t height)
+		: QImage(width, height, QColor(0.f, 0.f, 0.f))
+	{
+	}
+
+	QImage::QImage(int32_t width, int32_t height, const QColor& color)
+		: QObject()
+	{
+		this->width = width;
+		this->height = height;
+		data = new float[4 * width * height];
+		clear(color);
+	}
+
+	QImage::QImage(const QImage& other)
+	{
+		this->width = other.width;
+		this->height = other.height;
+		data = new float[4 * width * height];
+		memcpy(data, other.data, sizeof(float) * 4 * width * height);
+	}
+
+	QImage& QImage::operator=(const QImage& other)
+	{
+		if (data != nullptr)
+			delete[] data;
+
+		this->width = other.width;
+		this->height = other.height;
+		data = new float[4 * width * height];
+		memcpy(data, other.data, sizeof(float) * 4 * width * height);
+		return *this;
+	}
+
+	QImage::~QImage()
+	{
+		delete[] data;
+		data = nullptr;
+	}
+
+	imq::String QImage::toString() const
+	{
+		std::stringstream ss;
+		ss << "QImage[" << width << "," << height << "]";
+		return ss.str();
+	}
+
+	bool QImage::equals(const QObject* other) const
+	{
+		const QImage* image = objectCast<QImage>(other);
+		if (image != nullptr)
+		{
+			if (width != image->width || height != image->height)
+				return false;
+
+			if (data == image->data)
+				return true;
+
+			QColor colorA;
+			QColor colorB;
+			for (int32_t y = 0; y < height; ++y)
+			{
+				for (int32_t x = 0; x < width; ++x)
+				{
+					if (!getPixel(x, y, &colorA) || !image->getPixel(x, y, &colorB))
+						return false;
+
+					if (colorA != colorB)
+						return false;
+				}
+			}
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	int32_t QImage::getWidth() const
+	{
+		return width;
+	}
+
+	int32_t QImage::getHeight() const
+	{
+		return height;
+	}
+
+	float* QImage::getData() const
+	{
+		return data;
+	}
+
+	bool QImage::setPixel(int32_t x, int32_t y, const QColor& color)
+	{
+		if (x < 0 || y < 0 || x > width || y > height)
+		{
+			return false;
+		}
+
+		size_t idx = (size_t)(y * width + x) * 4;
+		data[idx] = color.getRed();
+		data[idx + 1] = color.getGreen();
+		data[idx + 2] = color.getBlue();
+		data[idx + 3] = color.getAlpha();
+		return true;
+	}
+
+	bool QImage::getPixel(int32_t x, int32_t y, QColor* result) const
+	{
+		if (x < 0 || y < 0 || x > width || y > height)
+		{
+			return false;
+		}
+
+		size_t idx = (size_t)(y * width + x) * 4;
+		result->setRed(data[idx]);
+		result->setGreen(data[idx + 1]);
+		result->setBlue(data[idx + 2]);
+		result->setAlpha(data[idx + 3]);
+
+		return true;
+	}
+
+	void QImage::clear(const QColor& color)
+	{
+		for (int32_t y = 0; y < height; ++y)
+		{
+			for (int32_t x = 0; x < width; ++x)
+			{
+				size_t idx = (size_t)(y * width + x) * 4;
+				data[idx] = color.getRed();
+				data[idx + 1] = color.getGreen();
+				data[idx + 2] = color.getBlue();
+				data[idx + 3] = color.getAlpha();
+			}
+		}
+	}
+
+	imq::Result QImage::getField(const String& name, QValue* result) const
+	{
+		if (name == "width" || name == "w")
+		{
+			*result = QValue::Integer(width);
+			return true;
+		}
+		else if (name == "height" || name == "h")
+		{
+			*result = QValue::Integer(height);
+			return true;
+		}
+
+		return errors::undefined_field(getTypeString(), name);
+	}
 }

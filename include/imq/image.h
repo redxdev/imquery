@@ -22,6 +22,9 @@ namespace imq
 		
 		virtual bool equals(const QObject* other) const override;
 
+		bool operator==(const QColor& other) const;
+		bool operator!=(const QColor& other) const;
+
 		float getRed() const;
 		float getGreen() const;
 		float getBlue() const;
@@ -45,5 +48,44 @@ namespace imq
 		float green;
 		float blue;
 		float alpha;
+	};
+
+	class QImage : public QObject
+	{
+		IMQ_DECLARE_TYPE(QImage);
+
+	public:
+		static Result loadFromFile(const char* filename, QImage* result);
+
+		QImage();
+		QImage(int32_t width, int32_t height);
+		QImage(int32_t width, int32_t height, const QColor& color);
+		QImage(const QImage& other);
+
+		QImage& operator=(const QImage& other);
+
+		virtual ~QImage();
+
+		virtual String toString() const override;
+
+		// warning - slow operation. This is a pixel-by-pixel equivalence check.
+		virtual bool equals(const QObject* other) const override;
+
+		int32_t getWidth() const;
+		int32_t getHeight() const;
+
+		float* getData() const;
+
+		bool getPixel(int32_t x, int32_t y, QColor* result) const;
+		bool setPixel(int32_t x, int32_t y, const QColor& color);
+
+		void clear(const QColor& color);
+
+		virtual Result getField(const String& name, QValue* result) const override;
+
+	private:
+		int32_t width;
+		int32_t height;
+		float* data = nullptr;
 	};
 }
