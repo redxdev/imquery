@@ -327,6 +327,528 @@ namespace imq
 		}
 	}
 
+	imq::Result QValue::opAdd(const QValue& rhs, QValue* result) const
+	{
+		switch (valueType)
+		{
+		case Type::Nil:
+			return errors::math_operator_invalid("Nil", "+");
+
+		case Type::Bool:
+			return errors::math_operator_invalid("Bool", "+");
+
+		case Type::Integer:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "+");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "+");
+
+			case Type::Integer:
+				*result = QValue::Integer(i + rhs.i);
+				return true;
+
+			case Type::Float:
+				*result = QValue::Float(i + rhs.f);
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "+");
+
+			case Type::Object:
+				return errors::math_object_order("+");
+			}
+			return errors::math_operator_invalid("<???>", "+");
+
+		case Type::Float:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "+");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "+");
+
+			case Type::Integer:
+				*result = QValue::Float(f + rhs.i);
+				return true;
+
+			case Type::Float:
+				*result = QValue::Float(f + rhs.f);
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "+");
+
+			case Type::Object:
+				return errors::math_object_order("+");
+			}
+			return errors::math_operator_invalid("<???>", "+");
+
+		case Type::Function:
+			return errors::math_operator_invalid("Function", "+");
+
+		case Type::Object:
+			return obj->opAdd(rhs, result);
+		}
+
+		return errors::math_operator_invalid("<???>", "+");
+	}
+
+	imq::Result QValue::opSub(const QValue& rhs, QValue* result) const
+	{
+		switch (valueType)
+		{
+		case Type::Nil:
+			return errors::math_operator_invalid("Nil", "-");
+
+		case Type::Bool:
+			return errors::math_operator_invalid("Bool", "-");
+
+		case Type::Integer:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "-");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "-");
+
+			case Type::Integer:
+				*result = QValue::Integer(i - rhs.i);
+				return true;
+
+			case Type::Float:
+				*result = QValue::Float(i - rhs.f);
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "-");
+
+			case Type::Object:
+				return errors::math_object_order("-");
+			}
+			return errors::math_operator_invalid("<???>", "-");
+
+		case Type::Float:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "-");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "-");
+
+			case Type::Integer:
+				*result = QValue::Float(f - rhs.i);
+				return true;
+
+			case Type::Float:
+				*result = QValue::Float(f - rhs.f);
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "-");
+
+			case Type::Object:
+				return errors::math_object_order("-");
+			}
+			return errors::math_operator_invalid("<???>", "-");
+
+		case Type::Function:
+			return errors::math_operator_invalid("Function", "-");
+
+		case Type::Object:
+			return obj->opSub(rhs, result);
+		}
+
+		return errors::math_operator_invalid("<???>", "-");
+	}
+
+	imq::Result QValue::opMul(const QValue& rhs, QValue* result) const
+	{
+		switch (valueType)
+		{
+		case Type::Nil:
+			return errors::math_operator_invalid("Nil", "*");
+
+		case Type::Bool:
+			return errors::math_operator_invalid("Bool", "*");
+
+		case Type::Integer:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "*");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "*");
+
+			case Type::Integer:
+				*result = QValue::Integer(i * rhs.i);
+				return true;
+
+			case Type::Float:
+				*result = QValue::Float(i * rhs.f);
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "*");
+
+			case Type::Object:
+				return errors::math_object_order("*");
+			}
+			return errors::math_operator_invalid("<???>", "*");
+
+		case Type::Float:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "*");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "*");
+
+			case Type::Integer:
+				*result = QValue::Float(f * rhs.i);
+				return true;
+
+			case Type::Float:
+				*result = QValue::Float(f * rhs.f);
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "*");
+
+			case Type::Object:
+				return errors::math_object_order("*");
+			}
+			return errors::math_operator_invalid("<???>", "*");
+
+		case Type::Function:
+			return errors::math_operator_invalid("Function", "*");
+
+		case Type::Object:
+			return obj->opMul(rhs, result);
+		}
+
+		return errors::math_operator_invalid("<???>", "*");
+	}
+
+	imq::Result QValue::opDiv(const QValue& rhs, QValue* result) const
+	{
+		switch (valueType)
+		{
+		case Type::Nil:
+			return errors::math_operator_invalid("Nil", "/");
+
+		case Type::Bool:
+			return errors::math_operator_invalid("Bool", "/");
+
+		case Type::Integer:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "/");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "/");
+
+			case Type::Integer:
+				if (rhs.i == 0)
+					return errors::math_divide_by_zero();
+
+				*result = QValue::Integer(i / rhs.i);
+				return true;
+
+			case Type::Float:
+				if (rhs.f == 0.f)
+					return errors::math_divide_by_zero();
+
+				*result = QValue::Float(i / rhs.f);
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "/");
+
+			case Type::Object:
+				return errors::math_object_order("/");
+			}
+			return errors::math_operator_invalid("<???>", "/");
+
+		case Type::Float:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "/");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "/");
+
+			case Type::Integer:
+				if (rhs.i == 0)
+					return errors::math_divide_by_zero();
+
+				*result = QValue::Float(f / rhs.i);
+				return true;
+
+			case Type::Float:
+				if (rhs.f == 0.f)
+					return errors::math_divide_by_zero();
+
+				*result = QValue::Float(f / rhs.f);
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "/");
+
+			case Type::Object:
+				return errors::math_object_order("/");
+			}
+			return errors::math_operator_invalid("<???>", "/");
+
+		case Type::Function:
+			return errors::math_operator_invalid("Function", "/");
+
+		case Type::Object:
+			return obj->opDiv(rhs, result);
+		}
+
+		return errors::math_operator_invalid("<???>", "/");
+	}
+
+	imq::Result QValue::opMod(const QValue& rhs, QValue* result) const
+	{
+		switch (valueType)
+		{
+		case Type::Nil:
+			return errors::math_operator_invalid("Nil", "%");
+
+		case Type::Bool:
+			return errors::math_operator_invalid("Bool", "%");
+
+		case Type::Integer:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "%");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "%");
+
+			case Type::Integer:
+				if (rhs.i == 0)
+					return errors::math_mod_by_zero();
+
+				*result = QValue::Integer(i % rhs.i);
+				return true;
+
+			case Type::Float:
+				if (rhs.f == 0.f)
+					return errors::math_mod_by_zero();
+				*result = QValue::Float(std::fmod((float) i, rhs.f));
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "%");
+
+			case Type::Object:
+				return errors::math_object_order("%");
+			}
+			return errors::math_operator_invalid("<???>", "%");
+
+		case Type::Float:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "%");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "%");
+
+			case Type::Integer:
+				if (rhs.i == 0)
+					return errors::math_mod_by_zero();
+
+				*result = QValue::Float(std::fmod(f, (float)rhs.i));
+				return true;
+
+			case Type::Float:
+				if (rhs.f == 0.f)
+					return errors::math_mod_by_zero();
+
+				*result = QValue::Float(std::fmod(f, rhs.f));
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "%");
+
+			case Type::Object:
+				return errors::math_object_order("%");
+			}
+			return errors::math_operator_invalid("<???>", "%");
+
+		case Type::Function:
+			return errors::math_operator_invalid("Function", "%");
+
+		case Type::Object:
+			return obj->opMod(rhs, result);
+		}
+
+		return errors::math_operator_invalid("<???>", "%");
+	}
+
+	imq::Result QValue::opNegate(QValue* result) const
+	{
+		switch (valueType)
+		{
+		case Type::Nil:
+			return errors::math_operator_invalid("Nil", "-");
+
+		case Type::Bool:
+			return errors::math_operator_invalid("Bool", "-");
+
+		case Type::Integer:
+			*result = QValue::Integer(-i);
+			return true;
+
+		case Type::Float:
+			*result = QValue::Float(-f);
+			return true;
+
+		case Type::Function:
+			return errors::math_operator_invalid("Function", "-");
+
+		case Type::Object:
+			return obj->opNegate(result);
+		}
+
+		return errors::math_operator_invalid("<???>", "-");
+	}
+
+	imq::Result QValue::opNot(QValue* result) const
+	{
+		switch (valueType)
+		{
+		case Type::Nil:
+			return errors::math_operator_invalid("Nil", "!");
+
+		case Type::Bool:
+			*result = QValue::Bool(!b);
+			return true;
+
+		case Type::Integer:
+			return errors::math_operator_invalid("Integer", "!");
+
+		case Type::Float:
+			return errors::math_operator_invalid("Float", "!");
+
+		case Type::Function:
+			return errors::math_operator_invalid("Function", "!");
+
+		case Type::Object:
+			return obj->opNot(result);
+		}
+
+		return errors::math_operator_invalid("<???>", "!");
+	}
+
+	imq::Result QValue::opAnd(const QValue& rhs, QValue* result) const
+	{
+		switch (valueType)
+		{
+		case Type::Nil:
+			return errors::math_operator_invalid("Nil", "&&");
+
+		case Type::Bool:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "&&");
+
+			case Type::Bool:
+				*result = QValue::Bool(b && rhs.b);
+				return true;
+
+			case Type::Integer:
+				return errors::math_operator_invalid("Integer", "&&");
+
+			case Type::Float:
+				return errors::math_operator_invalid("Float", "&&");
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "&&");
+
+			case Type::Object:
+				return errors::math_object_order("&&");
+			}
+			return errors::math_operator_invalid("<???>", "&&");
+
+		case Type::Integer:
+			return errors::math_operator_invalid("Integer", "&&");
+
+		case Type::Float:
+			return errors::math_operator_invalid("Float", "&&");
+
+		case Type::Function:
+			return errors::math_operator_invalid("Function", "&&");
+
+		case Type::Object:
+			return obj->opAnd(rhs, result);
+		}
+
+		return errors::math_operator_invalid("<???>", "&&");
+	}
+
+	imq::Result QValue::opOr(const QValue& rhs, QValue* result) const
+	{
+		switch (valueType)
+		{
+		case Type::Nil:
+			return errors::math_operator_invalid("Nil", "||");
+
+		case Type::Bool:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "||");
+
+			case Type::Bool:
+				*result = QValue::Bool(b || rhs.b);
+				return true;
+
+			case Type::Integer:
+				return errors::math_operator_invalid("Integer", "||");
+
+			case Type::Float:
+				return errors::math_operator_invalid("Float", "||");
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "||");
+
+			case Type::Object:
+				return errors::math_object_order("||");
+			}
+			return errors::math_operator_invalid("<???>", "||");
+
+		case Type::Integer:
+			return errors::math_operator_invalid("Integer", "||");
+
+		case Type::Float:
+			return errors::math_operator_invalid("Float", "||");
+
+		case Type::Function:
+			return errors::math_operator_invalid("Function", "||");
+
+		case Type::Object:
+			return obj->opOr(rhs, result);
+		}
+
+		return errors::math_operator_invalid("<???>", "||");
+	}
+
 	QValue& QValue::operator=(const QValue& other)
 	{
 		valueType = other.valueType;

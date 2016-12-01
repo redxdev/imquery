@@ -42,10 +42,15 @@ namespace imq
 		virtual Result selection(ContextPtr context, const QValue& value, QSelection** result);
 
 		// Operators
-		virtual Result add(const QValue& rhs, QValue* result) const;
-		virtual Result sub(const QValue& rhs, QValue* result) const;
-		virtual Result mul(const QValue& rhs, QValue* result) const;
-		virtual Result div(const QValue& rhs, QValue* result) const;
+		virtual Result opAdd(const QValue& rhs, QValue* result) const;
+		virtual Result opSub(const QValue& rhs, QValue* result) const;
+		virtual Result opMul(const QValue& rhs, QValue* result) const;
+		virtual Result opDiv(const QValue& rhs, QValue* result) const;
+		virtual Result opMod(const QValue& rhs, QValue* result) const;
+		virtual Result opNegate(QValue* result) const;
+		virtual Result opNot(QValue* result) const;
+		virtual Result opAnd(const QValue& rhs, QValue* result) const;
+		virtual Result opOr(const QValue& rhs, QValue* result) const;
 	};
 
 	// Do not use yourself - use the IMQ_DECLARE_TYPE and IMQ_DEFINE_TYPE macros.
@@ -72,32 +77,4 @@ namespace imq
 #define IMQ_DEFINE_TYPE(name) \
 	static_assert(std::is_base_of<imq::QObject, name>::value, "IMQ_DEFINE_TYPE is only valid for QObject types."); \
 	imq::ObjectRegistry name::__objreg_##name;
-
-	template<typename T>
-	T* objectCast(QObject* obj)
-	{
-		static_assert(std::is_base_of<QObject, T>::value, "objectCast is only valid for QObject types.");
-		if (obj->getTypeIndex() == T::getStaticTypeIndex())
-		{
-			return reinterpret_cast<T*>(obj);
-		}
-		else
-		{
-			return nullptr;
-		}
-	}
-
-	template<typename T>
-	const T* objectCast(const QObject* obj)
-	{
-		static_assert(std::is_base_of<QObject, T>::value, "objectCast is only valid for QObject types.");
-		if (obj->getTypeIndex() == T::getStaticTypeIndex())
-		{
-			return reinterpret_cast<const T*>(obj);
-		}
-		else
-		{
-			return nullptr;
-		}
-	}
 }

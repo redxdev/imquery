@@ -4,6 +4,7 @@
 
 #include "thirdparty/stb_image.h"
 #include "thirdparty/stb_image_write.h"
+#include "cast.h"
 #include "utility.h"
 #include "errors.h"
 

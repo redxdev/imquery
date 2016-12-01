@@ -73,10 +73,16 @@ namespace imq
 		friend bool operator==(const QValue& a, const QValue& b);
 		friend bool operator!=(const QValue& a, const QValue& b);
 
-		Result add(const QValue& rhs, QValue* result) const;
-		Result sub(const QValue& rhs, QValue* result) const;
-		Result mul(const QValue& rhs, QValue* result) const;
-		Result div(const QValue& rhs, QValue* result) const;
+		// TODO: Support rhs objects
+		Result opAdd(const QValue& rhs, QValue* result) const;
+		Result opSub(const QValue& rhs, QValue* result) const;
+		Result opMul(const QValue& rhs, QValue* result) const;
+		Result opDiv(const QValue& rhs, QValue* result) const;
+		Result opMod(const QValue& rhs, QValue* result) const;
+		Result opNegate(QValue* result) const;
+		Result opNot(QValue* result) const;
+		Result opAnd(const QValue& rhs, QValue* result) const;
+		Result opOr(const QValue& rhs, QValue* result) const;
 
     private:
 		Type valueType;

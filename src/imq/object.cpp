@@ -42,24 +42,49 @@ namespace imq
 		return errors::undefined_selection(getTypeString());
 	}
 
-	imq::Result QObject::add(const QValue& rhs, QValue* result) const
+	imq::Result QObject::opAdd(const QValue& rhs, QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "add");
 	}
 
-	imq::Result QObject::sub(const QValue& rhs, QValue* result) const
+	imq::Result QObject::opSub(const QValue& rhs, QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "sub");
 	}
 
-	imq::Result QObject::mul(const QValue& rhs, QValue* result) const
+	imq::Result QObject::opMul(const QValue& rhs, QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "mul");
 	}
 
-	imq::Result QObject::div(const QValue& rhs, QValue* result) const
+	imq::Result QObject::opDiv(const QValue& rhs, QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "div");
+	}
+
+	imq::Result QObject::opMod(const QValue& rhs, QValue* result) const
+	{
+		return errors::undefined_operator(getTypeString(), "mod");
+	}
+
+	imq::Result QObject::opNegate(QValue* result) const
+	{
+		return errors::undefined_operator(getTypeString(), "negate");
+	}
+
+	imq::Result QObject::opNot(QValue* result) const
+	{
+		return errors::undefined_operator(getTypeString(), "not");
+	}
+
+	imq::Result QObject::opAnd(const QValue& rhs, QValue* result) const
+	{
+		return errors::undefined_operator(getTypeString(), "and");
+	}
+
+	imq::Result QObject::opOr(const QValue& rhs, QValue* result) const
+	{
+		return errors::undefined_operator(getTypeString(), "or");
 	}
 
 	TypeIndex ObjectRegistry::nextTypeIndex = 0;

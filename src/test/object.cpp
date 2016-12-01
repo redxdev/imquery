@@ -1,5 +1,6 @@
 #include <imq/value.h>
 #include <imq/object.h>
+#include <imq/cast.h>
 #include <gtest/gtest.h>
 
 using namespace imq;
