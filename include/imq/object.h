@@ -40,6 +40,12 @@ namespace imq
 		virtual Result setIndex(const QValue& index, const QValue& value);
 
 		virtual Result selection(ContextPtr context, const QValue& value, QSelection** result);
+
+		// Operators
+		virtual Result add(const QValue& rhs, QValue* result) const;
+		virtual Result sub(const QValue& rhs, QValue* result) const;
+		virtual Result mul(const QValue& rhs, QValue* result) const;
+		virtual Result div(const QValue& rhs, QValue* result) const;
 	};
 
 	// Do not use yourself - use the IMQ_DECLARE_TYPE and IMQ_DEFINE_TYPE macros.

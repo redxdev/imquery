@@ -42,6 +42,26 @@ namespace imq
 		return errors::undefined_selection(getTypeString());
 	}
 
+	imq::Result QObject::add(const QValue& rhs, QValue* result) const
+	{
+		return errors::undefined_operator(getTypeString(), "add");
+	}
+
+	imq::Result QObject::sub(const QValue& rhs, QValue* result) const
+	{
+		return errors::undefined_operator(getTypeString(), "sub");
+	}
+
+	imq::Result QObject::mul(const QValue& rhs, QValue* result) const
+	{
+		return errors::undefined_operator(getTypeString(), "mul");
+	}
+
+	imq::Result QObject::div(const QValue& rhs, QValue* result) const
+	{
+		return errors::undefined_operator(getTypeString(), "div");
+	}
+
 	TypeIndex ObjectRegistry::nextTypeIndex = 0;
 
 	TypeIndex ObjectRegistry::createTypeIndex()

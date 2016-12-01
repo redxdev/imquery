@@ -25,6 +25,7 @@ namespace imq
 		IMQ_ERROR_DEF(undefined_get_index, typeName << " does not have get_index defined.", const String& typeName);
 		IMQ_ERROR_DEF(undefined_set_index, typeName << " does not have set_index defined.", const String& typeName);
 		IMQ_ERROR_DEF(undefined_selection, typeName << " does not implement selection.", const String& typeName);
+		IMQ_ERROR_DEF(undefined_operator, typeName << " does not implement operator " << op, const String& typeName, const String& op);
 
 		IMQ_ERROR_DEF(undefined_field, "Invalid field " << fieldName << " for type " << typeName, const String& typeName, const String& fieldName);
 

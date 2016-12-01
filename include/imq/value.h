@@ -73,6 +73,11 @@ namespace imq
 		friend bool operator==(const QValue& a, const QValue& b);
 		friend bool operator!=(const QValue& a, const QValue& b);
 
+		Result add(const QValue& rhs, QValue* result) const;
+		Result sub(const QValue& rhs, QValue* result) const;
+		Result mul(const QValue& rhs, QValue* result) const;
+		Result div(const QValue& rhs, QValue* result) const;
+
     private:
 		Type valueType;
 
