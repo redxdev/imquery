@@ -121,4 +121,14 @@ namespace imq
 		virtual String getName() const override;
 		virtual Result operate(const QValue& value, QValue* result) override;
 	};
+
+	class EqualExpr : public TwoOperatorMathExpr
+	{
+	public:
+		EqualExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
+		virtual ~EqualExpr();
+
+		virtual String getName() const;
+		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
+	};
 }

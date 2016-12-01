@@ -1,5 +1,6 @@
 #include <imq/vm.h>
 #include <imq/expressions.h>
+#include <imq/mathexpr.h>
 #include <imq/image.h>
 #include <gtest/gtest.h>
 
@@ -146,4 +147,75 @@ TEST(VMachine, Select)
 			ASSERT_EQ(color, QColor(1.f, 1.f, 1.f, 1.f));
 		}
 	}
+}
+
+TEST(VMachine, MathExpressions)
+{
+	ContextPtr ctx(new SimpleContext());
+
+	// (8 + (5 - 3)) / 2 * 4
+	VExpression* expr = new MulExpr(
+		new DivExpr(
+			new AddExpr(
+				new ConstantExpr(QValue::Integer(8), { 0,0 }),
+				new SubExpr(
+					new ConstantExpr(QValue::Integer(5), { 0,0 }),
+					new ConstantExpr(QValue::Integer(3), { 0,0 }),
+					{ 0,0 }
+				),
+				{ 0,0 }
+			),
+			new ConstantExpr(QValue::Integer(2), { 0,0 }),
+			{ 0,0 }
+		),
+		new ConstantExpr(QValue::Integer(4), { 0,0 }),
+		{ 0,0 }
+	);
+
+	QValue value;
+	int32_t i;
+	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_TRUE(value.getInteger(&i));
+	ASSERT_EQ(i, 20);
+
+	delete expr;
+
+	// 25.8 / 2
+	expr = new DivExpr(
+		new ConstantExpr(QValue::Float(25.8f), { 0,0 }),
+		new ConstantExpr(QValue::Integer(2), { 0,0 }),
+		{ 0,0 }
+	);
+
+	float f;
+	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_TRUE(value.getFloat(&f));
+	ASSERT_FLOAT_EQ(f, 12.9f);
+
+	delete expr;
+
+	// true || (false && !(5 == 5))
+	expr = new OrExpr(
+		new ConstantExpr(QValue::Bool(true), { 0,0 }),
+		new AndExpr(
+			new ConstantExpr(QValue::Bool(false), { 0,0 }),
+			new NotExpr(
+				new EqualExpr(
+					new ConstantExpr(QValue::Integer(5), { 0,0 }),
+					new ConstantExpr(QValue::Integer(5), { 0,0 }),
+					{ 0,0 }
+				),
+				{ 0,0 }
+			),
+			{ 0,0 }
+		),
+		{ 0,0 }
+	);
+
+	bool b;
+	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_TRUE(value.getBool(&b));
+	ASSERT_TRUE(b);
+
+	delete expr;
 }

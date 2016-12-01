@@ -297,4 +297,24 @@ namespace imq
 
 		return true;
 	}
+
+	EqualExpr::EqualExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc)
+		: TwoOperatorMathExpr(lhs, rhs, loc)
+	{
+	}
+
+	EqualExpr::~EqualExpr()
+	{
+	}
+
+	String EqualExpr::getName() const
+	{
+		return "Equal";
+	}
+
+	Result EqualExpr::operate(const QValue& lhs, const QValue& rhs, QValue* result)
+	{
+		*result = QValue::Bool(lhs == rhs);
+		return true;
+	}
 }
