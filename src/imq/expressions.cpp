@@ -604,8 +604,9 @@ namespace imq
 		if (!checkExpr)
 			return errors::vm_generic_error(getLocation(), "Invalid check subexpression for Branch");
 
+		ContextPtr subContext(new SubContext(context));
 		QValue value;
-		Result res = checkExpr->execute(context, &value);
+		Result res = checkExpr->execute(subContext, &value);
 
 		bool result;
 		if (!value.getBool(&result))
@@ -617,7 +618,7 @@ namespace imq
 		{
 			if (trueStm)
 			{
-				return trueStm->execute(context);
+				return trueStm->execute(subContext);
 			}
 
 			return true;
@@ -626,10 +627,158 @@ namespace imq
 		{
 			if (falseStm)
 			{
-				return falseStm->execute(context);
+				return falseStm->execute(subContext);
 			}
 
 			return true;
 		}
+	}
+
+	ForLoopStm::ForLoopStm(VStatement* initStm, VExpression* checkExpr, VStatement* incrStm, VStatement* execStm, const VLocation& loc)
+		: VStatement(loc), initStm(initStm), checkExpr(checkExpr), incrStm(incrStm), execStm(execStm)
+	{
+	}
+
+	ForLoopStm::~ForLoopStm()
+	{
+		delete initStm;
+		delete checkExpr;
+		delete incrStm;
+		delete execStm;
+	}
+
+	String ForLoopStm::getName() const
+	{
+		return "For";
+	}
+
+	Result ForLoopStm::execute(ContextPtr context)
+	{
+		if (!checkExpr)
+		{
+			return errors::vm_generic_error(getLocation(), "Invalid check subexpression for For");
+		}
+
+		ContextPtr subContext(new SubContext(context));
+		Result res;
+
+		if (initStm)
+		{
+			res = initStm->execute(subContext);
+			if (!res)
+			{
+				return res;
+			}
+		}
+
+		QValue value;
+		bool checkResult;
+
+		res = checkExpr->execute(subContext, &value);
+		if (!res)
+		{
+			return res;
+		}
+
+		if (!value.getBool(&checkResult))
+		{
+			return errors::vm_generic_error(getLocation(), "For loop check subexpression must return a boolean");
+		}
+
+		while (checkResult)
+		{
+			if (execStm)
+			{
+				res = execStm->execute(subContext);
+				if (!res)
+				{
+					return res;
+				}
+			}
+
+			if (incrStm)
+			{
+				res = incrStm->execute(subContext);
+				if (!res)
+				{
+					return res;
+				}
+			}
+
+			res = checkExpr->execute(subContext, &value);
+			if (!res)
+			{
+				return res;
+			}
+
+			if (!value.getBool(&checkResult))
+			{
+				return errors::vm_generic_error(getLocation(), "For loop check subexpression must return a boolean");
+			}
+		}
+
+		return true;
+	}
+
+	WhileLoopStm::WhileLoopStm(VExpression* checkExpr, VStatement* execStm, const VLocation& loc)
+		: VStatement(loc), checkExpr(checkExpr), execStm(execStm)
+	{
+	}
+
+	WhileLoopStm::~WhileLoopStm()
+	{
+		delete checkExpr;
+		delete execStm;
+	}
+
+	String WhileLoopStm::getName() const
+	{
+		return "While";
+	}
+
+	Result WhileLoopStm::execute(ContextPtr context)
+	{
+		if (!checkExpr)
+		{
+			return errors::vm_generic_error(getLocation(), "Invalid check subexpression for While");
+		}
+
+		ContextPtr subContext(new SubContext(context));
+		Result res;
+
+		QValue value;
+		bool checkResult;
+		res = checkExpr->execute(subContext, &value);
+		if (!res)
+		{
+			return res;
+		}
+
+		if (!value.getBool(&checkResult))
+		{
+			return errors::vm_generic_error(getLocation(), "While loop check subexpression must return a boolean");
+		}
+
+		while (checkResult)
+		{
+			res = execStm->execute(subContext);
+			if (!res)
+			{
+				return res;
+			}
+
+			res = checkExpr->execute(subContext, &value);
+			if (!res)
+			{
+				return res;
+			}
+
+			if (!value.getBool(&checkResult))
+			{
+				return errors::vm_generic_error(getLocation(), "While loop check subexpression must return a boolean");
+			}
+		}
+
+		return true;
 	}
 }

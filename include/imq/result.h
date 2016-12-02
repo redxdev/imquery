@@ -5,6 +5,11 @@ namespace imq
 	class Result
 	{
 	public:
+		Result()
+		{
+			this->ok = true;
+		}
+
 		Result(bool ok, const String& err)
 		{
 			this->ok = ok;

@@ -24,7 +24,11 @@ statement
     |   delete_variable_stm SEMICOLON
     |   select_stm SEMICOLON
     |   branch_stm // no semicolon, uses block syntax
+    |   for_loop_stm // ^^
+    |   while_loop_stm // ^^
+    |   do_while_loop_stm // ^^
     |   expression SEMICOLON
+    |   SEMICOLON
     ;
 
 define_input_stm
@@ -59,6 +63,18 @@ branch_stm
     (
         ELSE L_BRACE statements? R_BRACE
     )?
+    ;
+
+for_loop_stm
+    :   FOR statement expression SEMICOLON statement L_BRACE statements? R_BRACE
+    ;
+
+while_loop_stm
+    :   WHILE expression L_BRACE statements? R_BRACE
+    ;
+
+do_while_loop_stm
+    :   DO L_BRACE statements? R_BRACE WHILE expression SEMICOLON
     ;
 
 expression
@@ -181,6 +197,18 @@ IF
 
 ELSE
     :   'else'
+    ;
+
+FOR
+    :   'for'
+    ;
+
+WHILE
+    :   'while'
+    ;
+
+DO
+    :   'do'
     ;
 
 L_PAREN

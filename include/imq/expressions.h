@@ -174,7 +174,6 @@ namespace imq
 		VExpression* valueExpr;
 	};
 
-
 	class BranchStm : public VStatement
 	{
 	public:
@@ -188,5 +187,35 @@ namespace imq
 		VExpression* checkExpr;
 		VStatement* trueStm;
 		VStatement* falseStm;
+	};
+
+	class ForLoopStm : public VStatement
+	{
+	public:
+		ForLoopStm(VStatement* initStm, VExpression* checkExpr, VStatement* incrStm, VStatement* execStm, const VLocation& loc);
+		virtual ~ForLoopStm();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context) override;
+
+	private:
+		VStatement* initStm;
+		VExpression* checkExpr;
+		VStatement* incrStm;
+		VStatement* execStm;
+	};
+
+	class WhileLoopStm : public VStatement
+	{
+	public:
+		WhileLoopStm(VExpression* checkExpr, VStatement* execStm, const VLocation& loc);
+		virtual ~WhileLoopStm();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context) override;
+
+	private:
+		VExpression* checkExpr;
+		VStatement* execStm;
 	};
 }
