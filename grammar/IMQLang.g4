@@ -54,6 +54,9 @@ select_stm
 branch_stm
     :   IF expression L_BRACE statements? R_BRACE
     (
+        ELSE IF expression L_BRACE statements? R_BRACE
+    )*
+    (
         ELSE L_BRACE statements? R_BRACE
     )?
     ;
