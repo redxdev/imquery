@@ -18,6 +18,9 @@ namespace imq
 		virtual Result getValue(const String& key, QValue* result) const = 0;
 		virtual Result setValue(const String& key, const QValue& value) = 0;
 		virtual Result deleteValue(const String& key) = 0;
+
+		virtual Result registerInput(const String& key, const QValue& value) = 0;
+		virtual Result registerOutput(const String& key, const QValue& value) = 0;
 	};
 
 	typedef std::shared_ptr<Context> ContextPtr;
@@ -33,9 +36,33 @@ namespace imq
 		virtual Result getValue(const String& key, QValue* result) const override;
 		virtual Result setValue(const String& key, const QValue& value) override;
 		virtual Result deleteValue(const String& key) override;
+		virtual Result registerInput(const String& key, const QValue& value) override;
+		virtual Result registerOutput(const String& key, const QValue& value) override;
 
 	protected:
 		std::unordered_map<String, QValue> values;
+	};
+
+	class RootContext : public Context
+	{
+	public:
+		virtual bool hasValue(const String& key) const override;
+		virtual Result getValue(const String& key, QValue* result) const override;
+		virtual Result setValue(const String& key, const QValue& value) override;
+		virtual Result deleteValue(const String& key) override;
+		virtual Result registerInput(const String& key, const QValue& value) override;
+		virtual Result registerOutput(const String& key, const QValue& value) override;
+
+		void setInput(const String& key, const QValue& value);
+		void setOutput(const String& key, const QValue& value);
+
+		const std::unordered_map<String, QValue>& getInputs() const;
+		const std::unordered_map<String, QValue>& getOutputs() const;
+
+	protected:
+		std::unordered_map<String, QValue> values;
+		std::unordered_map<String, QValue> inputs;
+		std::unordered_map<String, QValue> outputs;
 	};
 
 	// A context that has a parent and passes undefined get/deletes to it.
@@ -51,6 +78,8 @@ namespace imq
 		virtual Result getValue(const String& key, QValue* result) const override;
 		virtual Result setValue(const String& key, const QValue& value) override;
 		virtual Result deleteValue(const String& key) override;
+		virtual Result registerInput(const String& key, const QValue& value) override;
+		virtual Result registerOutput(const String& key, const QValue& value) override;
 
 	protected:
 		ContextPtr parent;

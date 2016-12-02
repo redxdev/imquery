@@ -521,4 +521,64 @@ namespace imq
 
 		return true;
 	}
+
+	DefineInputStm::DefineInputStm(const String& name, VExpression* valueExpr, const VLocation& loc)
+		: VStatement(loc), name(name), valueExpr(valueExpr)
+	{
+	}
+
+	DefineInputStm::~DefineInputStm()
+	{
+		delete valueExpr;
+	}
+
+	String DefineInputStm::getName() const
+	{
+		return "Input";
+	}
+
+	Result DefineInputStm::execute(ContextPtr context)
+	{
+		QValue value;
+		if (valueExpr)
+		{
+			Result res = valueExpr->execute(context, &value);
+			if (!res)
+			{
+				return res;
+			}
+		}
+
+		return context->registerInput(name, value);
+	}
+
+	DefineOutputStm::DefineOutputStm(const String& name, VExpression* valueExpr, const VLocation& loc)
+		: VStatement(loc), name(name), valueExpr(valueExpr)
+	{
+	}
+
+	DefineOutputStm::~DefineOutputStm()
+	{
+		delete valueExpr;
+	}
+
+	String DefineOutputStm::getName() const
+	{
+		return "Output";
+	}
+
+	Result DefineOutputStm::execute(ContextPtr context)
+	{
+		QValue value;
+		if (valueExpr)
+		{
+			Result res = valueExpr->execute(context, &value);
+			if (!res)
+			{
+				return res;
+			}
+		}
+
+		return context->registerOutput(name, value);
+	}
 }

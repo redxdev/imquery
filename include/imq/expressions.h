@@ -145,4 +145,32 @@ namespace imq
 		VExpression* srcExpr;
 		VExpression* calcExpr;
 	};
+
+	class DefineInputStm : public VStatement
+	{
+	public:
+		DefineInputStm(const String& name, VExpression* valueExpr, const VLocation& loc);
+		virtual ~DefineInputStm();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context) override;
+
+	private:
+		String name;
+		VExpression* valueExpr;
+	};
+
+	class DefineOutputStm : public VStatement
+	{
+	public:
+		DefineOutputStm(const String& name, VExpression* valueExpr, const VLocation& loc);
+		virtual ~DefineOutputStm();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context) override;
+
+	private:
+		String name;
+		VExpression* valueExpr;
+	};
 }

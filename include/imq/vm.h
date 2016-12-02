@@ -60,13 +60,13 @@ namespace imq
 	class VMachine
 	{
 	public:
-		VMachine(ContextPtr context);
+		VMachine();
 
-		ContextPtr getRootContext() const;
+		std::shared_ptr<RootContext> getRootContext() const;
 
 		Result execute(int32_t count, VStatement** statements);
 
 	private:
-		ContextPtr rootContext;
+		std::shared_ptr<RootContext> rootContext;
 	};
 }

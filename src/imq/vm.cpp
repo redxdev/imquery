@@ -66,12 +66,12 @@ namespace imq
 		return expression->execute(context, &exprValue);
 	}
 
-	VMachine::VMachine(ContextPtr context)
-		: rootContext(context)
+	VMachine::VMachine()
 	{
+		rootContext = std::shared_ptr<RootContext>(new RootContext());
 	}
 
-	ContextPtr VMachine::getRootContext() const
+	std::shared_ptr<RootContext> VMachine::getRootContext() const
 	{
 		return rootContext;
 	}

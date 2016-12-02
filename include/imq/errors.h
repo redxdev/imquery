@@ -35,6 +35,11 @@ namespace imq
 		IMQ_ERROR_DEF(context_undefined_value, "Unknown variable \"" << key << "\"", const String& key);
 		IMQ_ERROR_DEF(context_no_write_access, "Variables may not be defined in the current context.");
 		IMQ_ERROR_DEF(context_no_delete_access, "Variables may not be deleted in the current context.");
+		IMQ_ERROR_DEF(context_root_flags, "Inputs/outputs must be defined in the root context.");
+		IMQ_ERROR_DEF(context_input_set, "Inputs may not be redefined.");
+		IMQ_ERROR_DEF(context_output_set, "Outputs may not be redefined.");
+		IMQ_ERROR_DEF(context_input_delete, "Inputs may not be deleted.");
+		IMQ_ERROR_DEF(context_output_delete, "Outputs may not be deleted.");
 
 		IMQ_ERROR_DEF(image_load_error, "Image load error - " << reason, const String& reason);
 		IMQ_ERROR_DEF(image_save_error, "Image save error - unable to save image file " << filename, const String& filename);
