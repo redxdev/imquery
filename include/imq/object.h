@@ -51,6 +51,10 @@ namespace imq
 		virtual Result opNot(QValue* result) const;
 		virtual Result opAnd(const QValue& rhs, QValue* result) const;
 		virtual Result opOr(const QValue& rhs, QValue* result) const;
+		virtual Result opLess(const QValue& rhs, QValue* result) const;
+		virtual Result opLessEq(const QValue& rhs, QValue* result) const;
+		virtual Result opGreater(const QValue& rhs, QValue* result) const;
+		virtual Result opGreaterEq(const QValue& rhs, QValue* result) const;
 	};
 
 	// Do not use yourself - use the IMQ_DECLARE_TYPE and IMQ_DEFINE_TYPE macros.

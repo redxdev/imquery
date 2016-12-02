@@ -317,4 +317,104 @@ namespace imq
 		*result = QValue::Bool(lhs == rhs);
 		return true;
 	}
+
+	LessExpr::LessExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc)
+		: TwoOperatorMathExpr(lhs, rhs, loc)
+	{
+	}
+
+	LessExpr::~LessExpr()
+	{
+	}
+
+	String LessExpr::getName() const
+	{
+		return "Less";
+	}
+
+	Result LessExpr::operate(const QValue& lhs, const QValue& rhs, QValue* result)
+	{
+		Result res = lhs.opLess(rhs, result);
+		if (!res)
+		{
+			return errors::vm_generic_error(getLocation(), res.getErr());
+		}
+
+		return true;
+	}
+
+	LessEqExpr::LessEqExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc)
+		: TwoOperatorMathExpr(lhs, rhs, loc)
+	{
+	}
+
+	LessEqExpr::~LessEqExpr()
+	{
+	}
+
+	String LessEqExpr::getName() const
+	{
+		return "LessEq";
+	}
+
+	Result LessEqExpr::operate(const QValue& lhs, const QValue& rhs, QValue* result)
+	{
+		Result res = lhs.opLessEq(rhs, result);
+		if (!res)
+		{
+			return errors::vm_generic_error(getLocation(), res.getErr());
+		}
+
+		return true;
+	}
+
+	GreaterExpr::GreaterExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc)
+		: TwoOperatorMathExpr(lhs, rhs, loc)
+	{
+	}
+
+	GreaterExpr::~GreaterExpr()
+	{
+	}
+
+	String GreaterExpr::getName() const
+	{
+		return "Greater";
+	}
+
+	Result GreaterExpr::operate(const QValue& lhs, const QValue& rhs, QValue* result)
+	{
+		Result res = lhs.opGreater(rhs, result);
+		if (!res)
+		{
+			return errors::vm_generic_error(getLocation(), res.getErr());
+		}
+
+		return true;
+	}
+
+	GreaterEqExpr::GreaterEqExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc)
+		: TwoOperatorMathExpr(lhs, rhs, loc)
+	{
+	}
+
+	GreaterEqExpr::~GreaterEqExpr()
+	{
+	}
+
+	String GreaterEqExpr::getName() const
+	{
+		return "GreaterEq";
+	}
+
+	Result GreaterEqExpr::operate(const QValue& lhs, const QValue& rhs, QValue* result)
+	{
+		Result res = lhs.opGreaterEq(rhs, result);
+		if (!res)
+		{
+			return errors::vm_generic_error(getLocation(), res.getErr());
+		}
+
+		return true;
+	}
 }

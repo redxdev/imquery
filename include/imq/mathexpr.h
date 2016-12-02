@@ -131,4 +131,44 @@ namespace imq
 		virtual String getName() const;
 		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
 	};
+
+	class LessExpr : public TwoOperatorMathExpr
+	{
+	public:
+		LessExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
+		virtual ~LessExpr();
+
+		virtual String getName() const;
+		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
+	};
+
+	class LessEqExpr : public TwoOperatorMathExpr
+	{
+	public:
+		LessEqExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
+		virtual ~LessEqExpr();
+
+		virtual String getName() const;
+		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
+	};
+
+	class GreaterExpr : public TwoOperatorMathExpr
+	{
+	public:
+		GreaterExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
+		virtual ~GreaterExpr();
+
+		virtual String getName() const;
+		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
+	};
+
+	class GreaterEqExpr : public TwoOperatorMathExpr
+	{
+	public:
+		GreaterEqExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
+		virtual ~GreaterEqExpr();
+
+		virtual String getName() const;
+		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
+	};
 }

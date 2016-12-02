@@ -9,3 +9,5 @@ obj/
 *.VC.db
 *.VC.opendb
 images/test.png
+.idea/
+grammar/gen/

@@ -87,6 +87,26 @@ namespace imq
 		return errors::undefined_operator(getTypeString(), "or");
 	}
 
+	imq::Result QObject::opLess(const QValue& rhs, QValue* result) const
+	{
+		return errors::undefined_operator(getTypeString(), "less");
+	}
+
+	imq::Result QObject::opLessEq(const QValue& rhs, QValue* result) const
+	{
+		return errors::undefined_operator(getTypeString(), "lesseq");
+	}
+
+	imq::Result QObject::opGreater(const QValue& rhs, QValue* result) const
+	{
+		return errors::undefined_operator(getTypeString(), "greater");
+	}
+
+	imq::Result QObject::opGreaterEq(const QValue& rhs, QValue* result) const
+	{
+		return errors::undefined_operator(getTypeString(), "greatereq");
+	}
+
 	TypeIndex ObjectRegistry::nextTypeIndex = 0;
 
 	TypeIndex ObjectRegistry::createTypeIndex()

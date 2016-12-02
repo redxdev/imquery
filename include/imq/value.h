@@ -83,6 +83,10 @@ namespace imq
 		Result opNot(QValue* result) const;
 		Result opAnd(const QValue& rhs, QValue* result) const;
 		Result opOr(const QValue& rhs, QValue* result) const;
+		Result opLess(const QValue& rhs, QValue* result) const;
+		Result opLessEq(const QValue& rhs, QValue* result) const;
+		Result opGreater(const QValue& rhs, QValue* result) const;
+		Result opGreaterEq(const QValue& rhs, QValue* result) const;
 
     private:
 		Type valueType;

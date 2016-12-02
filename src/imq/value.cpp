@@ -733,20 +733,20 @@ namespace imq
 		switch (valueType)
 		{
 		case Type::Nil:
-			return errors::math_operator_invalid("Nil", "!");
+			return errors::math_operator_invalid("Nil", "not");
 
 		case Type::Bool:
 			*result = QValue::Bool(!b);
 			return true;
 
 		case Type::Integer:
-			return errors::math_operator_invalid("Integer", "!");
+			return errors::math_operator_invalid("Integer", "not");
 
 		case Type::Float:
-			return errors::math_operator_invalid("Float", "!");
+			return errors::math_operator_invalid("Float", "not");
 
 		case Type::Function:
-			return errors::math_operator_invalid("Function", "!");
+			return errors::math_operator_invalid("Function", "not");
 
 		case Type::Object:
 			return obj->opNot(result);
@@ -760,46 +760,46 @@ namespace imq
 		switch (valueType)
 		{
 		case Type::Nil:
-			return errors::math_operator_invalid("Nil", "&&");
+			return errors::math_operator_invalid("Nil", "and");
 
 		case Type::Bool:
 			switch (rhs.valueType)
 			{
 			case Type::Nil:
-				return errors::math_operator_invalid("Nil", "&&");
+				return errors::math_operator_invalid("Nil", "and");
 
 			case Type::Bool:
 				*result = QValue::Bool(b && rhs.b);
 				return true;
 
 			case Type::Integer:
-				return errors::math_operator_invalid("Integer", "&&");
+				return errors::math_operator_invalid("Integer", "and");
 
 			case Type::Float:
-				return errors::math_operator_invalid("Float", "&&");
+				return errors::math_operator_invalid("Float", "and");
 
 			case Type::Function:
-				return errors::math_operator_invalid("Function", "&&");
+				return errors::math_operator_invalid("Function", "and");
 
 			case Type::Object:
-				return errors::math_object_order("&&");
+				return errors::math_object_order("and");
 			}
-			return errors::math_operator_invalid("<???>", "&&");
+			return errors::math_operator_invalid("<???>", "and");
 
 		case Type::Integer:
-			return errors::math_operator_invalid("Integer", "&&");
+			return errors::math_operator_invalid("Integer", "and");
 
 		case Type::Float:
-			return errors::math_operator_invalid("Float", "&&");
+			return errors::math_operator_invalid("Float", "and");
 
 		case Type::Function:
-			return errors::math_operator_invalid("Function", "&&");
+			return errors::math_operator_invalid("Function", "and");
 
 		case Type::Object:
 			return obj->opAnd(rhs, result);
 		}
 
-		return errors::math_operator_invalid("<???>", "&&");
+		return errors::math_operator_invalid("<???>", "and");
 	}
 
 	imq::Result QValue::opOr(const QValue& rhs, QValue* result) const
@@ -807,46 +807,326 @@ namespace imq
 		switch (valueType)
 		{
 		case Type::Nil:
-			return errors::math_operator_invalid("Nil", "||");
+			return errors::math_operator_invalid("Nil", "or");
 
 		case Type::Bool:
 			switch (rhs.valueType)
 			{
 			case Type::Nil:
-				return errors::math_operator_invalid("Nil", "||");
+				return errors::math_operator_invalid("Nil", "or");
 
 			case Type::Bool:
 				*result = QValue::Bool(b || rhs.b);
 				return true;
 
 			case Type::Integer:
-				return errors::math_operator_invalid("Integer", "||");
+				return errors::math_operator_invalid("Integer", "or");
 
 			case Type::Float:
-				return errors::math_operator_invalid("Float", "||");
+				return errors::math_operator_invalid("Float", "or");
 
 			case Type::Function:
-				return errors::math_operator_invalid("Function", "||");
+				return errors::math_operator_invalid("Function", "or");
 
 			case Type::Object:
-				return errors::math_object_order("||");
+				return errors::math_object_order("or");
 			}
-			return errors::math_operator_invalid("<???>", "||");
+			return errors::math_operator_invalid("<???>", "or");
 
 		case Type::Integer:
-			return errors::math_operator_invalid("Integer", "||");
+			return errors::math_operator_invalid("Integer", "or");
 
 		case Type::Float:
-			return errors::math_operator_invalid("Float", "||");
+			return errors::math_operator_invalid("Float", "or");
 
 		case Type::Function:
-			return errors::math_operator_invalid("Function", "||");
+			return errors::math_operator_invalid("Function", "or");
 
 		case Type::Object:
 			return obj->opOr(rhs, result);
 		}
 
-		return errors::math_operator_invalid("<???>", "||");
+		return errors::math_operator_invalid("<???>", "or");
+	}
+
+	Result QValue::opLess(const QValue& rhs, QValue* result) const
+	{
+		switch (valueType)
+		{
+		case Type::Nil:
+			return errors::math_operator_invalid("Nil", "less");
+
+		case Type::Bool:
+			return errors::math_operator_invalid("Bool", "less");
+
+		case Type::Integer:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "less");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "less");
+
+			case Type::Integer:
+				*result = QValue::Bool(i < rhs.i);
+				return true;
+
+			case Type::Float:
+				*result = QValue::Bool(i < rhs.f);
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "less");
+
+			case Type::Object:
+				return errors::math_object_order("less");
+			}
+			return errors::math_operator_invalid("<???>", "less");
+
+		case Type::Float:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "less");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "less");
+
+			case Type::Integer:
+				*result = QValue::Bool(f < rhs.i);
+				return true;
+
+			case Type::Float:
+				*result = QValue::Bool(f < rhs.f);
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "less");
+
+			case Type::Object:
+				return errors::math_object_order("less");
+			}
+			return errors::math_operator_invalid("<???>", "less");
+
+		case Type::Function:
+			return errors::math_operator_invalid("Function", "less");
+
+		case Type::Object:
+			return obj->opLess(rhs, result);
+		}
+
+		return errors::math_operator_invalid("<???>", "less");
+	}
+
+	Result QValue::opLessEq(const QValue& rhs, QValue* result) const
+	{
+		switch (valueType)
+		{
+		case Type::Nil:
+			return errors::math_operator_invalid("Nil", "lesseq");
+
+		case Type::Bool:
+			return errors::math_operator_invalid("Bool", "lesseq");
+
+		case Type::Integer:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "lesseq");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "lesseq");
+
+			case Type::Integer:
+				*result = QValue::Bool(i <= rhs.i);
+				return true;
+
+			case Type::Float:
+				*result = QValue::Bool(i <= rhs.f);
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "lesseq");
+
+			case Type::Object:
+				return errors::math_object_order("lesseq");
+			}
+			return errors::math_operator_invalid("<???>", "lesseq");
+
+		case Type::Float:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "lesseq");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "lesseq");
+
+			case Type::Integer:
+				*result = QValue::Bool(f <= rhs.i);
+				return true;
+
+			case Type::Float:
+				*result = QValue::Bool(f <= rhs.f);
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "lesseq");
+
+			case Type::Object:
+				return errors::math_object_order("lesseq");
+			}
+			return errors::math_operator_invalid("<???>", "lesseq");
+
+		case Type::Function:
+			return errors::math_operator_invalid("Function", "lesseq");
+
+		case Type::Object:
+			return obj->opLessEq(rhs, result);
+		}
+
+		return errors::math_operator_invalid("<???>", "lesseq");
+	}
+
+	Result QValue::opGreater(const QValue& rhs, QValue* result) const
+	{
+		switch (valueType)
+		{
+		case Type::Nil:
+			return errors::math_operator_invalid("Nil", "greater");
+
+		case Type::Bool:
+			return errors::math_operator_invalid("Bool", "greater");
+
+		case Type::Integer:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "greater");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "greater");
+
+			case Type::Integer:
+				*result = QValue::Bool(i > rhs.i);
+				return true;
+
+			case Type::Float:
+				*result = QValue::Bool(i > rhs.f);
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "greater");
+
+			case Type::Object:
+				return errors::math_object_order("greater");
+			}
+			return errors::math_operator_invalid("<???>", "greater");
+
+		case Type::Float:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "greater");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "greater");
+
+			case Type::Integer:
+				*result = QValue::Bool(f > rhs.i);
+				return true;
+
+			case Type::Float:
+				*result = QValue::Bool(f > rhs.f);
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "greater");
+
+			case Type::Object:
+				return errors::math_object_order("greater");
+			}
+			return errors::math_operator_invalid("<???>", "greater");
+
+		case Type::Function:
+			return errors::math_operator_invalid("Function", "greater");
+
+		case Type::Object:
+			return obj->opGreater(rhs, result);
+		}
+
+		return errors::math_operator_invalid("<???>", "greater");
+	}
+
+	Result QValue::opGreaterEq(const QValue& rhs, QValue* result) const
+	{
+		switch (valueType)
+		{
+		case Type::Nil:
+			return errors::math_operator_invalid("Nil", "greatereq");
+
+		case Type::Bool:
+			return errors::math_operator_invalid("Bool", "greatereq");
+
+		case Type::Integer:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "greatereq");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "greatereq");
+
+			case Type::Integer:
+				*result = QValue::Bool(i >= rhs.i);
+				return true;
+
+			case Type::Float:
+				*result = QValue::Bool(i >= rhs.f);
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "greatereq");
+
+			case Type::Object:
+				return errors::math_object_order("greatereq");
+			}
+			return errors::math_operator_invalid("<???>", "greatereq");
+
+		case Type::Float:
+			switch (rhs.valueType)
+			{
+			case Type::Nil:
+				return errors::math_operator_invalid("Nil", "greatereq");
+
+			case Type::Bool:
+				return errors::math_operator_invalid("Bool", "greatereq");
+
+			case Type::Integer:
+				*result = QValue::Bool(f >= rhs.i);
+				return true;
+
+			case Type::Float:
+				*result = QValue::Bool(f >= rhs.f);
+				return true;
+
+			case Type::Function:
+				return errors::math_operator_invalid("Function", "greatereq");
+
+			case Type::Object:
+				return errors::math_object_order("greatereq");
+			}
+			return errors::math_operator_invalid("<???>", "greatereq");
+
+		case Type::Function:
+			return errors::math_operator_invalid("Function", "greatereq");
+
+		case Type::Object:
+			return obj->opGreaterEq(rhs, result);
+		}
+
+		return errors::math_operator_invalid("<???>", "greatereq");
 	}
 
 	QValue& QValue::operator=(const QValue& other)
