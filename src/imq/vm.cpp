@@ -66,6 +66,41 @@ namespace imq
 		return expression->execute(context, &exprValue);
 	}
 
+	VBlock::VBlock(int32_t count, VStatement** statements, const VLocation loc)
+		: VStatement(loc), count(count), statements(statements)
+	{
+	}
+
+	VBlock::~VBlock()
+	{
+		for (int32_t i = 0; i < count; ++i)
+		{
+			delete statements[i];
+		}
+
+		delete statements;
+	}
+
+	String VBlock::getName() const
+	{
+		return "Block";
+	}
+
+	Result VBlock::execute(ContextPtr context)
+	{
+		if (count < 0)
+			return errors::vm_generic_error(getLocation(), "Invalid statement block - count < 0");
+
+		for (int32_t i = 0; i < count; ++i)
+		{
+			Result res = statements[i]->execute(context);
+			if (!res)
+				return res;
+		}
+
+		return true;
+	}
+
 	VMachine::VMachine()
 	{
 		rootContext = std::shared_ptr<RootContext>(new RootContext());
@@ -76,24 +111,11 @@ namespace imq
 		return rootContext;
 	}
 
-	Result VMachine::execute(int32_t count, VStatement** statements)
+	Result VMachine::execute(VBlock* block)
 	{
-		if (count < 0)
-			return errors::vm_invalid_statement_list();
+		if (!block)
+			return errors::vm_invalid_block();
 
-		for (int32_t i = 0; i < count; ++i)
-		{
-			VStatement* stm = statements[i];
-			if (stm != nullptr)
-			{
-				Result result = stm->execute(rootContext);
-				if (!result)
-				{
-					return result;
-				}
-			}
-		}
-
-		return true;
+		return block->execute(rootContext);
 	}
 }

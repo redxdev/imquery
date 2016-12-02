@@ -297,3 +297,55 @@ TEST(VMachine, DefineOutput)
 
 	delete stm;
 }
+
+TEST(VMachine, Branch)
+{
+	ContextPtr ctx(new SimpleContext());
+	bool trueCalled = false;
+	bool falseCalled = false;
+	QValue trueFunc = QValue::Function([&](int32_t argCount, QValue* args, QValue* result) -> Result {
+		trueCalled = true;
+		*result = QValue::Nil();
+		return true;
+	});
+	QValue falseFunc = QValue::Function([&](int32_t argCount, QValue* args, QValue* result) -> Result {
+		falseCalled = true;
+		*result = QValue::Nil();
+		return true;
+	});
+
+	VStatement* stm = new BranchStm(new ConstantExpr(QValue::Integer(123), { 0,0 }), nullptr, nullptr, { 0,0 });
+	Result res = stm->execute(ctx);
+	ASSERT_FALSE(res);
+	ASSERT_EQ(res.getErr(), "0:0: Subexpression must return a boolean within a Branch");
+
+	delete stm;
+
+	stm = new BranchStm(
+		new ConstantExpr(QValue::Bool(false), { 0,0 }),
+		new VExpressionAsStatement(new CallFunctionExpr(new ConstantExpr(trueFunc, { 0,0 }), 0, nullptr, { 0,0 }), { 0,0 }),
+		new VExpressionAsStatement(new CallFunctionExpr(new ConstantExpr(falseFunc, { 0,0 }), 0, nullptr, { 0,0 }), { 0,0 }),
+		{ 0,0 }
+	);
+
+	ASSERT_TRUE(stm->execute(ctx));
+	EXPECT_FALSE(trueCalled);
+	EXPECT_TRUE(falseCalled);
+
+	trueCalled = false;
+	falseCalled = false;
+	delete stm;
+
+	stm = new BranchStm(
+		new ConstantExpr(QValue::Bool(true), { 0,0 }),
+		new VExpressionAsStatement(new CallFunctionExpr(new ConstantExpr(trueFunc, { 0,0 }), 0, nullptr, { 0,0 }), { 0,0 }),
+		new VExpressionAsStatement(new CallFunctionExpr(new ConstantExpr(falseFunc, { 0,0 }), 0, nullptr, { 0,0 }), { 0,0 }),
+		{ 0,0 }
+	);
+
+	ASSERT_TRUE(stm->execute(ctx));
+	EXPECT_TRUE(trueCalled);
+	EXPECT_FALSE(falseCalled);
+
+	delete stm;
+}

@@ -57,6 +57,20 @@ namespace imq
 		VExpression* expression;
 	};
 
+	class VBlock : public VStatement
+	{
+	public:
+		VBlock(int32_t count, VStatement** statements, const VLocation loc);
+		virtual ~VBlock();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context) override;
+
+	private:
+		int32_t count;
+		VStatement** statements;
+	};
+
 	class VMachine
 	{
 	public:
@@ -64,7 +78,7 @@ namespace imq
 
 		std::shared_ptr<RootContext> getRootContext() const;
 
-		Result execute(int32_t count, VStatement** statements);
+		Result execute(VBlock* block);
 
 	private:
 		std::shared_ptr<RootContext> rootContext;

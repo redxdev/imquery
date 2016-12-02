@@ -173,4 +173,20 @@ namespace imq
 		String name;
 		VExpression* valueExpr;
 	};
+
+
+	class BranchStm : public VStatement
+	{
+	public:
+		BranchStm(VExpression* checkExpr, VStatement* trueStm, VStatement* falseStm, const VLocation& loc);
+		virtual ~BranchStm();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context) override;
+
+	private:
+		VExpression* checkExpr;
+		VStatement* trueStm;
+		VStatement* falseStm;
+	};
 }

@@ -581,4 +581,55 @@ namespace imq
 
 		return context->registerOutput(name, value);
 	}
+
+	BranchStm::BranchStm(VExpression* checkExpr, VStatement* trueStm, VStatement* falseStm, const VLocation& loc)
+		: VStatement(loc), checkExpr(checkExpr), trueStm(trueStm), falseStm(falseStm)
+	{
+	}
+
+	BranchStm::~BranchStm()
+	{
+		delete checkExpr;
+		delete trueStm;
+		delete falseStm;
+	}
+
+	String BranchStm::getName() const
+	{
+		return "Branch";
+	}
+
+	Result BranchStm::execute(ContextPtr context)
+	{
+		if (!checkExpr)
+			return errors::vm_generic_error(getLocation(), "Invalid check subexpression for Branch");
+
+		QValue value;
+		Result res = checkExpr->execute(context, &value);
+
+		bool result;
+		if (!value.getBool(&result))
+		{
+			return errors::vm_generic_error(getLocation(), "Subexpression must return a boolean within a Branch");
+		}
+
+		if (result)
+		{
+			if (trueStm)
+			{
+				return trueStm->execute(context);
+			}
+
+			return true;
+		}
+		else
+		{
+			if (falseStm)
+			{
+				return falseStm->execute(context);
+			}
+
+			return true;
+		}
+	}
 }
