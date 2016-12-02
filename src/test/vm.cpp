@@ -219,3 +219,81 @@ TEST(VMachine, MathExpressions)
 
 	delete expr;
 }
+
+TEST(VMachine, DefineInput)
+{
+	ContextPtr ctx(new SimpleContext());
+	VStatement* stm = new DefineInputStm("foo", nullptr, { 0,0 });
+	Result res = stm->execute(ctx);
+	ASSERT_FALSE(res);
+	ASSERT_EQ(res.getErr(), "Inputs/outputs must be defined in the root context.");
+
+	delete stm;
+	std::shared_ptr<RootContext> rootCtx(new RootContext());
+
+	stm = new DefineInputStm("foo", nullptr, { 0,0 });
+	ASSERT_TRUE(stm->execute(rootCtx));
+	ASSERT_TRUE(rootCtx->hasValue("foo"));
+	
+	QValue value;
+	ASSERT_TRUE(rootCtx->getValue("foo", &value));
+	ASSERT_EQ(value, QValue::Nil());
+
+	rootCtx->setInput("foo", QValue::Integer(123));
+	ASSERT_TRUE(rootCtx->getValue("foo", &value));
+	ASSERT_EQ(value, QValue::Integer(123));
+
+	res = stm->execute(rootCtx);
+	ASSERT_FALSE(res);
+	ASSERT_EQ(res.getErr(), "Inputs may not be redefined.");
+
+	delete stm;
+	
+	stm = new DefineInputStm("bar", new ConstantExpr(QValue::Float(1.34f), { 0,0 }), { 0,0 });
+	ASSERT_TRUE(stm->execute(rootCtx));
+	ASSERT_TRUE(rootCtx->hasValue("bar"));
+
+	ASSERT_TRUE(rootCtx->getValue("bar", &value));
+	ASSERT_EQ(value, QValue::Float(1.34f));
+
+	delete stm;
+}
+
+TEST(VMachine, DefineOutput)
+{
+	ContextPtr ctx(new SimpleContext());
+	VStatement* stm = new DefineOutputStm("foo", nullptr, { 0,0 });
+	Result res = stm->execute(ctx);
+	ASSERT_FALSE(res);
+	ASSERT_EQ(res.getErr(), "Inputs/outputs must be defined in the root context.");
+
+	delete stm;
+	std::shared_ptr<RootContext> rootCtx(new RootContext());
+
+	stm = new DefineOutputStm("foo", nullptr, { 0,0 });
+	ASSERT_TRUE(stm->execute(rootCtx));
+	ASSERT_TRUE(rootCtx->hasValue("foo"));
+
+	QValue value;
+	ASSERT_TRUE(rootCtx->getValue("foo", &value));
+	ASSERT_EQ(value, QValue::Nil());
+
+	rootCtx->setOutput("foo", QValue::Integer(123));
+	ASSERT_TRUE(rootCtx->getValue("foo", &value));
+	ASSERT_EQ(value, QValue::Integer(123));
+
+	res = stm->execute(rootCtx);
+	ASSERT_FALSE(res);
+	ASSERT_EQ(res.getErr(), "Outputs may not be redefined.");
+
+	delete stm;
+
+	stm = new DefineOutputStm("bar", new ConstantExpr(QValue::Float(1.34f), { 0,0 }), { 0,0 });
+	ASSERT_TRUE(stm->execute(rootCtx));
+	ASSERT_TRUE(rootCtx->hasValue("bar"));
+
+	ASSERT_TRUE(rootCtx->getValue("bar", &value));
+	ASSERT_EQ(value, QValue::Float(1.34f));
+
+	delete stm;
+}
