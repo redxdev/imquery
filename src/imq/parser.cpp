@@ -1,9 +1,12 @@
 #include "parser.h"
 
 #include <sstream>
+#include <fstream>
 
 #include "imq/grammar/IMQLangLexer.h"
 #include "imq/grammar/IMQLangParser.h"
+
+#include "errors.h"
 
 using namespace antlr4;
 
@@ -21,9 +24,22 @@ namespace imq
 		return lastMessage;
 	}
 
-	Result QueryParser::parse(const String& data, VBlock** result) const
+	Result QueryParser::parseString(const String& data, VBlock** result) const
 	{
 		ANTLRInputStream stream(data);
+		return parseStream(&stream, result);
+	}
+
+	Result QueryParser::parseFile(const String& filename, VBlock** result) const
+	{
+		std::fstream fs;
+		fs.open(filename.data(), std::ios::in);
+		if (!fs.is_open())
+		{
+			return errors::file_open(filename);
+		}
+
+		ANTLRInputStream stream(fs);
 		return parseStream(&stream, result);
 	}
 

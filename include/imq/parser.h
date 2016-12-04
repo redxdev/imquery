@@ -22,7 +22,9 @@ namespace imq
 	class QueryParser
 	{
 	public:
-		Result parse(const String& data, VBlock** result) const;
+		Result parseString(const String& data, VBlock** result) const;
+
+		Result parseFile(const String& filename, VBlock** result) const;
 
 		Result parseStream(antlr4::ANTLRInputStream* stream, VBlock** result) const;
 	};

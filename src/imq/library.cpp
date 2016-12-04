@@ -1,14 +1,18 @@
 #include "library.h"
 
+#include <iostream>
+
 #include "errors.h"
 #include "image.h"
 #include "cast.h"
+#include "value.h"
 
 namespace imq
 {
 	IMQ_LIB(register_stdlib)
 	{
 		IMQ_LIB_SUB(register_image);
+		IMQ_LIB_SUB(register_io);
 
 		return true;
 	}
@@ -100,6 +104,26 @@ namespace imq
 	IMQ_LIB(register_image)
 	{
 		IMQ_LIB_FUNC("image", image_construct);
+
+		return true;
+	}
+
+	Result io_print(int32_t argCount, QValue* args, QValue* result)
+	{
+		for (int32_t i = 0; i < argCount; ++i)
+		{
+			std::cout << args[i].toString();
+		}
+
+		std::cout << std::endl;
+
+		*result = QValue::Nil();
+		return true;
+	}
+
+	IMQ_LIB(register_io)
+	{
+		IMQ_LIB_FUNC("print", io_print);
 
 		return true;
 	}

@@ -22,8 +22,8 @@ TEST(Full, Parse)
 {
 	QueryParser parser;
 	VBlock* block;
-	ASSERT_FALSE(parser.parse(bad_query, &block));
-	ASSERT_TRUE(parser.parse(copy_image, &block));
+	ASSERT_FALSE(parser.parseString(bad_query, &block));
+	ASSERT_TRUE(parser.parseString(copy_image, &block));
 
 	delete block;
 }
@@ -36,7 +36,7 @@ TEST(Full, ImageCopy)
 
 	ASSERT_TRUE(register_stdlib(&vm));
 
-	ASSERT_TRUE(parser.parse(copy_image, &block));
+	ASSERT_TRUE(parser.parseString(copy_image, &block));
 
 	QImage* srcImage;
 

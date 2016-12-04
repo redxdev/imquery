@@ -40,17 +40,34 @@ project "libimq"
 		libdirs {environment.ANTLR_RELEASE_LIB_DIR}
         defines {"NDEBUG"}
         optimize "On"
+		
+project "iqc"
+	kind "ConsoleApp"
+	language "C++"
+	targetdir "bin/%{cfg.buildcfg}"
+	files {"include/iqc/**.h", "src/iqc/**.cpp"}
+    includedirs {"include", "include/iqc", "include/iqc/thirdparty", "grammar", environment.ANTLR_CPP_PATH}
+    libdirs {"bin"}
+    links {"libimq", environment.ANTLR_LIB}
+	
+	filter "configurations:Debug"
+		libdirs {environment.ANTLR_DEBUG_LIB_DIR}
+        defines {"DEBUG"}
+        symbols "On"
 
+    filter "configurations:Release"
+		libdirs {environment.ANTLR_RELEASE_LIB_DIR}
+        defines {"NDEBUG"}
+        optimize "On"
+		
 project "testimq"
     kind "ConsoleApp"
     language "C++"
     targetdir "bin/%{cfg.buildcfg}"
     files {"include/test/**.h", "src/test/**.cpp"}
-    includedirs {"include", "grammar", environment.GTEST_PATH .. "/" .. environment.GTEST_INCLUDE_DIR, environment.ANTLR_CPP_PATH}
+    includedirs {"include", "include/test", "grammar", environment.GTEST_PATH .. "/" .. environment.GTEST_INCLUDE_DIR, environment.ANTLR_CPP_PATH}
     libdirs {"bin"}
     links {"libimq", environment.GTEST_LIB, environment.ANTLR_LIB}
-
-    defines {"IMQ_LIB_IMPORT"}
 
     filter "configurations:Debug"
 		libdirs {environment.GTEST_PATH .. "/" .. environment.GTEST_DEBUG_LIB_DIR, environment.ANTLR_DEBUG_LIB_DIR}
