@@ -502,7 +502,19 @@ namespace imq
 					return true;
 				}
 			});
+			return true;
+		}
+		else if (name == "clamp")
+		{
+			*result = QValue::Function([&](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 0)
+					return errors::args_count("clamp", 0, argCount);
 
+				clamp();
+
+				*result = QValue::Nil();
+				return true;
+			});
 			return true;
 		}
 
