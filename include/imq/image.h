@@ -38,10 +38,10 @@ namespace imq
 
 		QColor clamp() const;
 
-		virtual Result getField(const String& name, QValue* result) const override;
+		virtual Result getField(const String& name, QValue* result) override;
 		virtual Result setField(const String& name, const QValue& value) override;
 
-		virtual Result getIndex(const QValue& index, QValue* result) const override;
+		virtual Result getIndex(const QValue& index, QValue* result) override;
 		virtual Result setIndex(const QValue& index, const QValue& value) override;
 
 	private:
@@ -88,7 +88,7 @@ namespace imq
 
 		Result saveToFile(const char* filename);
 
-		virtual Result getField(const String& name, QValue* result) const override;
+		virtual Result getField(const String& name, QValue* result) override;
 
 		virtual Result selection(ContextPtr context, const QValue& value, QSelection** result) override;
 

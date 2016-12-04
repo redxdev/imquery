@@ -17,7 +17,7 @@ namespace imq
 		return ss.str();
 	}
 
-	Result QObject::getField(const String& name, QValue* result) const
+	Result QObject::getField(const String& name, QValue* result)
 	{
 		return errors::undefined_get_field(getTypeString());
 	}
@@ -27,7 +27,7 @@ namespace imq
 		return errors::undefined_set_field(getTypeString());
 	}
 
-	Result QObject::getIndex(const QValue& index, QValue* result) const
+	Result QObject::getIndex(const QValue& index, QValue* result)
 	{
 		return errors::undefined_get_index(getTypeString());
 	}

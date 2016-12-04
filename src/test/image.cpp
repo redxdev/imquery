@@ -157,15 +157,15 @@ TEST(QColor, SetIndex)
 {
 	QColor color(0.f, 0.f, 0.f, 0.f);
 
-	ASSERT_TRUE(color.setIndex(QValue::Integer(0), QValue::Float(0.1f)));
-	ASSERT_TRUE(color.setIndex(QValue::Integer(1), QValue::Float(0.3f)));
-	ASSERT_TRUE(color.setIndex(QValue::Integer(2), QValue::Float(0.25f)));
-	ASSERT_TRUE(color.setIndex(QValue::Integer(3), QValue::Float(0.56f)));
+	ASSERT_FALSE(color.setIndex(QValue::Integer(0), QValue::Float(0.1f)));
+	ASSERT_FALSE(color.setIndex(QValue::Integer(1), QValue::Float(0.3f)));
+	ASSERT_FALSE(color.setIndex(QValue::Integer(2), QValue::Float(0.25f)));
+	ASSERT_FALSE(color.setIndex(QValue::Integer(3), QValue::Float(0.56f)));
 
-	EXPECT_FLOAT_EQ(color.getRed(), 0.1f);
-	EXPECT_FLOAT_EQ(color.getGreen(), 0.3f);
-	EXPECT_FLOAT_EQ(color.getBlue(), 0.25f);
-	EXPECT_FLOAT_EQ(color.getAlpha(), 0.56f);
+	EXPECT_FLOAT_EQ(color.getRed(), 0.f);
+	EXPECT_FLOAT_EQ(color.getGreen(), 0.f);
+	EXPECT_FLOAT_EQ(color.getBlue(), 0.f);
+	EXPECT_FLOAT_EQ(color.getAlpha(), 0.f);
 }
 
 TEST(QImage, Construction)

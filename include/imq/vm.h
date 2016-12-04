@@ -66,9 +66,15 @@ namespace imq
 		virtual String getName() const override;
 		virtual Result execute(ContextPtr context) override;
 
+		int32_t getCount() const;
+		VStatement** getStatements() const;
+
+		void setEmitLastResult(QValue* loc);
+
 	private:
 		int32_t count;
 		VStatement** statements;
+		QValue* lastResult;
 	};
 
 	class VMachine

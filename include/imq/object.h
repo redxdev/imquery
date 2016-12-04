@@ -33,10 +33,10 @@ namespace imq
 		virtual TypeIndex getTypeIndex() const = 0;
 		virtual String getTypeString() const = 0;
 
-		virtual Result getField(const String& name, QValue* result) const;
+		virtual Result getField(const String& name, QValue* result);
 		virtual Result setField(const String& name, const QValue& value);
 
-		virtual Result getIndex(const QValue& index, QValue* result) const;
+		virtual Result getIndex(const QValue& index, QValue* result);
 		virtual Result setIndex(const QValue& index, const QValue& value);
 
 		virtual Result selection(ContextPtr context, const QValue& value, QSelection** result);

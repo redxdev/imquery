@@ -124,7 +124,7 @@ namespace imq
 		);
 	}
 
-	Result QColor::getField(const String& name, QValue* result) const
+	Result QColor::getField(const String& name, QValue* result)
 	{
 		if (name == "red" || name == "r")
 		{
@@ -186,11 +186,11 @@ namespace imq
 		return errors::undefined_field(getTypeString(), name);
 	}
 
-	Result QColor::getIndex(const QValue& index, QValue* result) const
+	Result QColor::getIndex(const QValue& index, QValue* result)
 	{
 		int32_t idx;
 		if (!index.getInteger(&idx))
-			return false;
+			return errors::invalid_index_type(getTypeString(), index);
 
 		switch (idx)
 		{
@@ -217,6 +217,7 @@ namespace imq
 
 	Result QColor::setIndex(const QValue& index, const QValue& value)
 	{
+		/*
 		int32_t idx;
 		if (!index.getInteger(&idx))
 			return errors::invalid_index_type(getTypeString(), index);
@@ -238,6 +239,9 @@ namespace imq
 		case 3:
 			return value.getFloat(&alpha);
 		}
+		*/
+
+		return errors::immutable_obj(getTypeString());
 	}
 
 	// QImage
@@ -443,7 +447,7 @@ namespace imq
 		return true;
 	}
 
-	imq::Result QImage::getField(const String& name, QValue* result) const
+	imq::Result QImage::getField(const String& name, QValue* result)
 	{
 		if (name == "width" || name == "w")
 		{
@@ -453,6 +457,52 @@ namespace imq
 		else if (name == "height" || name == "h")
 		{
 			*result = QValue::Integer(height);
+			return true;
+		}
+		else if (name == "pixel")
+		{
+			*result = QValue::Function([&](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 2 && argCount != 3)
+					return errors::args_count("pixel", 2, 3, argCount);
+
+				int32_t x;
+				int32_t y;
+
+				if (!args[0].getInteger(&x))
+					return errors::args_type("pixel", 0, "Integer", args[0]);
+
+				if (!args[1].getInteger(&y))
+					return errors::args_type("pixel", 1, "Integer", args[1]);
+
+				if (argCount == 2)
+				{
+					QColor col;
+					bool res = getPixel(x, y, &col);
+					if (!res)
+						return errors::func_generic_error("Unable to get pixel");
+
+					*result = QValue::Object(new QColor(col));
+					return true;
+				}
+				else
+				{
+					QObjectPtr obj;
+					if (!args[2].getObject(&obj))
+						return errors::args_type("pixel", 2, "Object", args[2]);
+
+					QColor* col = objectCast<QColor>(obj.get());
+					if (!col)
+						return errors::args_type("pixel", 2, "Color", args[2]);
+
+					bool res = setPixel(x, y, *col);
+					if (!res)
+						return errors::func_generic_error("Unable to set pixel");
+
+					*result = QValue::Nil();
+					return true;
+				}
+			});
+
 			return true;
 		}
 

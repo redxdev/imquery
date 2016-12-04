@@ -31,9 +31,11 @@ bool execute(VMachine* vm, VBlock* block, bool bDebugMode)
 	parser.setDebugMode(bDebugMode);
 
 	Result res;
+	QValue lastResult;
 
 	while (true)
 	{
+		lastResult = QValue();
 		std::cout << "> ";
 		std::string line;
 		std::getline(std::cin, line);
@@ -47,10 +49,17 @@ bool execute(VMachine* vm, VBlock* block, bool bDebugMode)
 			continue;
 		}
 
+		block->setEmitLastResult(&lastResult);
+
 		res = vm->execute(block);
 		if (!res)
 		{
 			std::cout << "runtime error: " << res.getErr() << std::endl;
+		}
+
+		if (lastResult.getType() != QValue::Type::Nil)
+		{
+			std::cout << lastResult.toString() << std::endl;
 		}
 
 		delete block;

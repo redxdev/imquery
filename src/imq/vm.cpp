@@ -96,12 +96,40 @@ namespace imq
 			if (!statements[i])
 				continue;
 
+			if (i == count - 1 && lastResult)
+			{
+				VExpressionAsStatement* exprStm = dynamic_cast<VExpressionAsStatement*>(statements[i]);
+				if (exprStm)
+				{
+					Result res = exprStm->getExpression()->execute(context, lastResult);
+					if (!res)
+						return res;
+
+					return true;
+				}
+			}
+
 			Result res = statements[i]->execute(context);
 			if (!res)
 				return res;
 		}
 
 		return true;
+	}
+
+	int32_t VBlock::getCount() const
+	{
+		return count;
+	}
+
+	VStatement** VBlock::getStatements() const
+	{
+		return statements;
+	}
+
+	void VBlock::setEmitLastResult(QValue* loc)
+	{
+		lastResult = loc;
 	}
 
 	VMachine::VMachine()

@@ -1131,6 +1131,17 @@ namespace imq
 
 	QValue& QValue::operator=(const QValue& other)
 	{
+		switch (valueType)
+		{
+		case Type::Object:
+			obj.~shared_ptr();
+			break;
+
+		case Type::Function:
+			func.~function();
+			break;
+		}
+
 		valueType = other.valueType;
 		switch (valueType)
 		{

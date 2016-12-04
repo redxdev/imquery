@@ -115,9 +115,9 @@ TEST(VMachine, Indices)
 	ASSERT_EQ(value, QValue::Float(0.4f));
 
 	VStatement* stm = new SetIndexStm(new ConstantExpr(obj, { 0, 0 }), new ConstantExpr(QValue::Integer(2), { 0,0 }), new ConstantExpr(QValue::Float(0.132f), { 0,0 }), { 0,0 });
-	ASSERT_TRUE(stm->execute(ctx));
+	ASSERT_FALSE(stm->execute(ctx));
 	ASSERT_TRUE(expr->execute(ctx, &value));
-	ASSERT_EQ(value, QValue::Float(0.132f));
+	ASSERT_EQ(value, QValue::Float(0.4f));
 
 	delete expr;
 	delete stm;

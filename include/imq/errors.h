@@ -32,6 +32,8 @@ namespace imq
 		IMQ_ERROR_DEF(undefined_index, "Invalid index " << index.toString() << " for type " << typeName, const String& typeName, const QValue& index);
 		IMQ_ERROR_DEF(invalid_index_type, "Invalid index type " << QValue::getTypeString(index.getType()) << " for type " << typeName, const String& typeName, const QValue& index);
 
+		IMQ_ERROR_DEF(immutable_obj, "Object " << typeName << " is immutable.", const String& typeName);
+
 		IMQ_ERROR_DEF(context_undefined_value, "Unknown variable \"" << key << "\"", const String& key);
 		IMQ_ERROR_DEF(context_no_write_access, "Variables may not be defined in the current context.");
 		IMQ_ERROR_DEF(context_no_delete_access, "Variables may not be deleted in the current context.");
