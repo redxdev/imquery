@@ -230,7 +230,7 @@ namespace imq
 
 	IMQ_DEFINE_TYPE(QImage);
 
-	Result QImage::loadFromFile(const char* filename, QImage* result)
+	Result QImage::loadFromFile(const char* filename, QImage** result)
 	{
 		int width;
 		int height;
@@ -241,10 +241,10 @@ namespace imq
 			return errors::image_load_error(stbi_failure_reason());
 		}
 
-		*result = QImage(width, height);
+		*result = new QImage(width, height);
 		for (size_t idx = 0; idx < (size_t)(4 * width * height); ++idx)
 		{
-			result->data[idx] = (float)(data[idx] / 255.f);
+			(*result)->data[idx] = (float)(data[idx] / 255.f);
 		}
 
 		stbi_image_free(data);

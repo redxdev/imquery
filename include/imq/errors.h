@@ -40,6 +40,9 @@ namespace imq
 		IMQ_ERROR_DEF(context_output_set, "Outputs may not be redefined.");
 		IMQ_ERROR_DEF(context_input_delete, "Inputs may not be deleted.");
 		IMQ_ERROR_DEF(context_output_delete, "Outputs may not be deleted.");
+		IMQ_ERROR_DEF(context_input_overwrite, "Inputs may not be defined on top of a variable.");
+		IMQ_ERROR_DEF(context_output_overwrite, "Outputs may not be defined on top of a variable.");
+		IMQ_ERROR_DEF(context_input_invalid_type, "Input " << key << " has the wrong type.", const String& key);
 
 		IMQ_ERROR_DEF(image_load_error, "Image load error - " << reason, const String& reason);
 		IMQ_ERROR_DEF(image_save_error, "Image save error - unable to save image file " << filename, const String& filename);
@@ -54,6 +57,11 @@ namespace imq
 		IMQ_ERROR_DEF(math_object_order, "Operator " << op << " cannot operate on objects unless they are on the left-hand side.", const String& op);
 		IMQ_ERROR_DEF(math_divide_by_zero, "Divide by zero error");
 		IMQ_ERROR_DEF(math_mod_by_zero, "Mod by zero error");
+
+		IMQ_ERROR_DEF(args_count, "Wrong number of arguments to " << funcName << " (expected " << expected << ", got " << actual << ")", const String& funcName, int32_t expected, int32_t actual);
+		IMQ_ERROR_DEF(args_type, "Invalid type for argument #" << argNum << " to " << funcName << " (expected " << expected << ", got " << actual << ")", const String& funcName, int32_t argNum, const String& expected, const String& actual);
+		
+		IMQ_ERROR_DEF(func_generic_error, msg, const String& msg);
 	}
 }
 

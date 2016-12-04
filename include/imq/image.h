@@ -58,7 +58,7 @@ namespace imq
 	public:
 		friend class QImageSelection;
 
-		static Result loadFromFile(const char* filename, QImage* result);
+		static Result loadFromFile(const char* filename, QImage** result);
 
 		QImage();
 		QImage(int32_t width, int32_t height);

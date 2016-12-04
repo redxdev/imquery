@@ -318,6 +318,26 @@ namespace imq
 		return true;
 	}
 
+	NotEqualExpr::NotEqualExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc)
+		: TwoOperatorMathExpr(lhs, rhs, loc)
+	{
+	}
+
+	NotEqualExpr::~NotEqualExpr()
+	{
+	}
+
+	String NotEqualExpr::getName() const
+	{
+		return "NotEqual";
+	}
+
+	Result NotEqualExpr::operate(const QValue& lhs, const QValue& rhs, QValue* result)
+	{
+		*result = QValue::Bool(lhs != rhs);
+		return true;
+	}
+
 	LessExpr::LessExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc)
 		: TwoOperatorMathExpr(lhs, rhs, loc)
 	{

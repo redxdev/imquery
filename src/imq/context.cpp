@@ -1,5 +1,6 @@
 #include "context.h"
 
+#include "cast.h"
 #include "errors.h"
 
 namespace imq
@@ -125,9 +126,22 @@ namespace imq
 
 	Result RootContext::registerInput(const String& key, const QValue& value)
 	{
-		if (inputs.find(key) != inputs.end())
+		auto valFound = values.find(key);
+		if (valFound != values.end())
 		{
-			return errors::context_input_set();
+			return errors::context_input_overwrite();
+		}
+
+		auto found = inputs.find(key);
+		if (found != inputs.end())
+		{
+			if (!checkTypesEqual(value, found->second))
+			{
+				return errors::context_input_invalid_type(key);
+			}
+
+			// ignore, we've set the input elsewhere
+			return true;
 		}
 
 		inputs[key] = value;
@@ -136,6 +150,12 @@ namespace imq
 
 	Result RootContext::registerOutput(const String& key, const QValue& value)
 	{
+		auto valFound = values.find(key);
+		if (valFound != values.end())
+		{
+			return errors::context_output_overwrite();
+		}
+
 		if (outputs.find(key) != outputs.end())
 		{
 			return errors::context_output_set();

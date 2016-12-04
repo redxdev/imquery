@@ -2,19 +2,42 @@ local environment = require "environment"
 
 workspace "imquery"
     configurations{ "Debug", "Release" }
+	startproject "testimq"
 
 project "libimq"
     kind "StaticLib"
     language "C++"
     targetdir "bin/%{cfg.buildcfg}"
-    files {"include/imq/**.h", "src/imq/**.cpp"}
-    includedirs {"include/imq"}
+    files {
+		"include/imq/**.h",
+		"src/imq/**.cpp",
+		"grammar/imq/grammar/IMQLangBaseListener.cpp",
+		"grammar/imq/grammar/IMQLangBaseListener.h",
+		"grammar/imq/grammar/IMQLangLexer.cpp",
+		"grammar/imq/grammar/IMQLangLexer.h",
+		"grammar/imq/grammar/IMQLangListener.cpp",
+		"grammar/imq/grammar/IMQLangListener.h",
+		"grammar/imq/grammar/IMQLangParser.cpp",
+		"grammar/imq/grammar/IMQLangParser.h"
+	}
+    includedirs {"include/imq", "grammar", environment.ANTLR_CPP_PATH}
+	links {environment.ANTLR_LIB}
+	defines {"_SCL_SECURE_NO_WARNINGS"}
+	
+	prebuildcommands {
+		"{ECHO} Cleaning grammar",
+		"{RMDIR} grammar/imq/grammar",
+		"{ECHO} Building grammar",
+		environment.ANTLR_CMD .. " -o grammar/imq/grammar -package imq grammar/IMQLang.g4"
+	}
 
     filter "configurations:Debug"
+		libdirs {environment.ANTLR_DEBUG_LIB_DIR}
         defines {"DEBUG"}
         symbols "On"
 
     filter "configurations:Release"
+		libdirs {environment.ANTLR_RELEASE_LIB_DIR}
         defines {"NDEBUG"}
         optimize "On"
 
@@ -23,16 +46,18 @@ project "testimq"
     language "C++"
     targetdir "bin/%{cfg.buildcfg}"
     files {"include/test/**.h", "src/test/**.cpp"}
-    includedirs {"include", environment.GTEST_PATH .. "/" .. environment.GTEST_INCLUDE_DIR}
-    libdirs {"bin", environment.GTEST_PATH .. "/" .. environment.GTEST_LIB_DIR}
-    links {"libimq", environment.GTEST_LIB}
+    includedirs {"include", "grammar", environment.GTEST_PATH .. "/" .. environment.GTEST_INCLUDE_DIR, environment.ANTLR_CPP_PATH}
+    libdirs {"bin"}
+    links {"libimq", environment.GTEST_LIB, environment.ANTLR_LIB}
 
     defines {"IMQ_LIB_IMPORT"}
 
     filter "configurations:Debug"
+		libdirs {environment.GTEST_PATH .. "/" .. environment.GTEST_DEBUG_LIB_DIR, environment.ANTLR_DEBUG_LIB_DIR}
         defines {"DEBUG"}
         symbols "On"
 
     filter "configurations:Release"
+		libdirs {environment.GTEST_PATH .. "/" .. environment.GTEST_RELEASE_LIB_DIR, environment.ANTLR_RELEASE_LIB_DIR}
         defines {"NDEBUG"}
         optimize "On"

@@ -132,6 +132,16 @@ namespace imq
 		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
 	};
 
+	class NotEqualExpr : public TwoOperatorMathExpr
+	{
+	public:
+		NotEqualExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
+		virtual ~NotEqualExpr();
+
+		virtual String getName() const;
+		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
+	};
+
 	class LessExpr : public TwoOperatorMathExpr
 	{
 	public:

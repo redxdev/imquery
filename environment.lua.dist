@@ -1,6 +1,13 @@
 return {
     GTEST_PATH = "path/to/gtest",
     GTEST_INCLUDE_DIR = "include",
-    GTEST_LIB_DIR = "Debug",
-    GTEST_LIB = "gtest"
+    GTEST_DEBUG_LIB_DIR = "Debug",
+	GTEST_RELEASE_LIB_DIR = "Release",
+    GTEST_LIB = "gtest",
+	
+	ANTLR_CMD = "java -jar antlr4-4.6.jar",
+	ANTLR_CPP_PATH = "path/to/antlr4/runtime/Cpp/runtime/src",
+	ANTLR_DEBUG_LIB_DIR = "path/to/antlr4/runtime/Cpp/runtime/bin/vs-2015/x86/Debug Static",
+	ANTLR_RELEASE_LIB_DIR = "path/to/antlr4/runtime/Cpp/runtime/bin/vs-2015/x86/Release Static",
+	ANTLR_LIB = "antlr4-runtime"
 }

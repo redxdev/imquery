@@ -223,15 +223,15 @@ TEST(VMachine, MathExpressions)
 TEST(VMachine, DefineInput)
 {
 	ContextPtr ctx(new SimpleContext());
-	VStatement* stm = new DefineInputStm("foo", nullptr, { 0,0 });
+	VStatement* stm = new DefineInputStm("foo", new ConstantExpr(QValue::Nil(), { 0,0 }), { 0,0 });
 	Result res = stm->execute(ctx);
 	ASSERT_FALSE(res);
-	ASSERT_EQ(res.getErr(), "Inputs/outputs must be defined in the root context.");
+	ASSERT_EQ(res.getErr(), "0:0: Inputs/outputs must be defined in the root context.");
 
 	delete stm;
 	std::shared_ptr<RootContext> rootCtx(new RootContext());
 
-	stm = new DefineInputStm("foo", nullptr, { 0,0 });
+	stm = new DefineInputStm("foo", new ConstantExpr(QValue::Nil(), { 0,0 }), { 0,0 });
 	ASSERT_TRUE(stm->execute(rootCtx));
 	ASSERT_TRUE(rootCtx->hasValue("foo"));
 	
@@ -245,7 +245,7 @@ TEST(VMachine, DefineInput)
 
 	res = stm->execute(rootCtx);
 	ASSERT_FALSE(res);
-	ASSERT_EQ(res.getErr(), "Inputs may not be redefined.");
+	ASSERT_EQ(res.getErr(), "0:0: Input foo has the wrong type.");
 
 	delete stm;
 	
@@ -265,7 +265,7 @@ TEST(VMachine, DefineOutput)
 	VStatement* stm = new DefineOutputStm("foo", nullptr, { 0,0 });
 	Result res = stm->execute(ctx);
 	ASSERT_FALSE(res);
-	ASSERT_EQ(res.getErr(), "Inputs/outputs must be defined in the root context.");
+	ASSERT_EQ(res.getErr(), "0:0: Inputs/outputs must be defined in the root context.");
 
 	delete stm;
 	std::shared_ptr<RootContext> rootCtx(new RootContext());
@@ -284,7 +284,7 @@ TEST(VMachine, DefineOutput)
 
 	res = stm->execute(rootCtx);
 	ASSERT_FALSE(res);
-	ASSERT_EQ(res.getErr(), "Outputs may not be redefined.");
+	ASSERT_EQ(res.getErr(), "0:0: Outputs may not be redefined.");
 
 	delete stm;
 

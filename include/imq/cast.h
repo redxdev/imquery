@@ -9,6 +9,11 @@ namespace imq
 	T* objectCast(QObject* obj)
 	{
 		static_assert(std::is_base_of<QObject, T>::value, "objectCast is only valid for QObject types.");
+		if (obj == nullptr)
+		{
+			return nullptr;
+		}
+
 		if (obj->getTypeIndex() == T::getStaticTypeIndex())
 		{
 			return reinterpret_cast<T*>(obj);
@@ -23,6 +28,11 @@ namespace imq
 	const T* objectCast(const QObject* obj)
 	{
 		static_assert(std::is_base_of<QObject, T>::value, "objectCast is only valid for QObject types.");
+		if (obj == nullptr)
+		{
+			return nullptr;
+		}
+
 		if (obj->getTypeIndex() == T::getStaticTypeIndex())
 		{
 			return reinterpret_cast<const T*>(obj);
@@ -31,5 +41,22 @@ namespace imq
 		{
 			return nullptr;
 		}
+	}
+
+	inline bool checkTypesEqual(const QValue& a, const QValue& b)
+	{
+		if (a.getType() != b.getType())
+			return false;
+
+		if (a.getType() != QValue::Type::Object)
+			return true;
+
+		QObjectPtr objA;
+		QObjectPtr objB;
+
+		if (!a.getObject(&objA) || !b.getObject(&objB))
+			return false;
+
+		return objA && objB && objA->getTypeIndex() == objB->getTypeIndex();
 	}
 }

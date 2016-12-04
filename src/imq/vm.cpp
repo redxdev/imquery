@@ -93,6 +93,9 @@ namespace imq
 
 		for (int32_t i = 0; i < count; ++i)
 		{
+			if (!statements[i])
+				continue;
+
 			Result res = statements[i]->execute(context);
 			if (!res)
 				return res;

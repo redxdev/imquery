@@ -18,6 +18,22 @@ namespace imq
 		QValue value;
 	};
 
+	class ColorExpr : public VExpression
+	{
+	public:
+		ColorExpr(VExpression* rExpr, VExpression* gExpr, VExpression* bExpr, VExpression* aExpr, const VLocation& loc);
+		virtual ~ColorExpr();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context, QValue* result) override;
+
+	private:
+		VExpression* rExpr;
+		VExpression* gExpr;
+		VExpression* bExpr;
+		VExpression* aExpr;
+	};
+
 	class RetrieveVariableExpr : public VExpression
 	{
 	public:
@@ -39,7 +55,7 @@ namespace imq
 
 		virtual String getName() const override;
 		virtual Result execute(ContextPtr context, QValue* result) override;
-
+	
 	private:
 		VExpression* objExpr;
 		String field;

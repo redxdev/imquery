@@ -1,6 +1,7 @@
 #include "expressions.h"
 
 #include "object.h"
+#include "image.h"
 #include "errors.h"
 
 namespace imq
@@ -24,6 +25,93 @@ namespace imq
 	Result ConstantExpr::execute(ContextPtr context, QValue* result)
 	{
 		*result = value;
+		return true;
+	}
+
+	ColorExpr::ColorExpr(VExpression* rExpr, VExpression* gExpr, VExpression* bExpr, VExpression* aExpr, const VLocation& loc)
+		: VExpression(loc), rExpr(rExpr), gExpr(gExpr), bExpr(bExpr), aExpr(aExpr)
+	{
+	}
+
+	ColorExpr::~ColorExpr()
+	{
+		delete rExpr;
+		delete gExpr;
+		delete bExpr;
+		delete aExpr;
+	}
+
+	String ColorExpr::getName() const
+	{
+		return "Color";
+	}
+
+	Result ColorExpr::execute(ContextPtr context, QValue* result)
+	{
+		Result res;
+		QValue value;
+		float red = 0.f;
+		float green = 0.f;
+		float blue = 0.f;
+		float alpha = 1.f;
+
+		if (rExpr)
+		{
+			res = rExpr->execute(context, &value);
+			if (!res)
+			{
+				return res;
+			}
+
+			if (!value.getFloat(&red))
+			{
+				return errors::vm_generic_error(getLocation(), "Expected floats for color components");
+			}
+		}
+
+		if (gExpr)
+		{
+			res = gExpr->execute(context, &value);
+			if (!res)
+			{
+				return res;
+			}
+
+			if (!value.getFloat(&green))
+			{
+				return errors::vm_generic_error(getLocation(), "Expected floats for color components");
+			}
+		}
+
+		if (bExpr)
+		{
+			res = bExpr->execute(context, &value);
+			if (!res)
+			{
+				return res;
+			}
+
+			if (!value.getFloat(&blue))
+			{
+				return errors::vm_generic_error(getLocation(), "Expected floats for color components");
+			}
+		}
+
+		if (aExpr)
+		{
+			res = aExpr->execute(context, &value);
+			if (!res)
+			{
+				return res;
+			}
+
+			if (!value.getFloat(&alpha))
+			{
+				return errors::vm_generic_error(getLocation(), "Expected floats for color components");
+			}
+		}
+
+		*result = QValue::Object(new QColor(red, green, blue, alpha));
 		return true;
 	}
 
@@ -209,23 +297,29 @@ namespace imq
 			return errors::vm_generic_error(getLocation(), "Expected valid QFunction subexpression for RetrieveField");
 		}
 
-		QValue* argValues = new QValue[argCount];
+		QValue* argValues = nullptr;
+		if (argCount > 0)
+			argValues = new QValue[argCount];
+
 		for (int32_t i = 0; i < argCount; ++i)
 		{
 			VExpression* expr = args[i];
 			if (!expr)
 			{
+				delete[] argValues;
 				return errors::vm_generic_error(getLocation(), "Invalid argument subexpression for CallFunction");
 			}
 
 			res = expr->execute(context, &argValues[i]);
 			if (!res)
 			{
+				delete[] argValues;
 				return res;
 			}
 		}
 
 		res = func(argCount, argValues, result);
+		delete[] argValues;
 		if (!res)
 		{
 			return errors::vm_generic_error(getLocation(), res.getErr());
@@ -539,17 +633,25 @@ namespace imq
 
 	Result DefineInputStm::execute(ContextPtr context)
 	{
-		QValue value;
-		if (valueExpr)
+		if (!valueExpr)
 		{
-			Result res = valueExpr->execute(context, &value);
-			if (!res)
-			{
-				return res;
-			}
+			return errors::vm_generic_error(getLocation(), "Invalid value subexpression for DefineInput");
 		}
 
-		return context->registerInput(name, value);
+		QValue value;
+		Result res = valueExpr->execute(context, &value);
+		if (!res)
+		{
+			return res;
+		}
+
+		res = context->registerInput(name, value);
+		if (!res)
+		{
+			return errors::vm_generic_error(getLocation(), res.getErr());
+		}
+
+		return true;
 	}
 
 	DefineOutputStm::DefineOutputStm(const String& name, VExpression* valueExpr, const VLocation& loc)
@@ -579,7 +681,13 @@ namespace imq
 			}
 		}
 
-		return context->registerOutput(name, value);
+		Result res = context->registerOutput(name, value);
+		if (!res)
+		{
+			return errors::vm_generic_error(getLocation(), res.getErr());
+		}
+
+		return true;
 	}
 
 	BranchStm::BranchStm(VExpression* checkExpr, VStatement* trueStm, VStatement* falseStm, const VLocation& loc)
@@ -761,10 +869,13 @@ namespace imq
 
 		while (checkResult)
 		{
-			res = execStm->execute(subContext);
-			if (!res)
+			if (execStm)
 			{
-				return res;
+				res = execStm->execute(subContext);
+				if (!res)
+				{
+					return res;
+				}
 			}
 
 			res = checkExpr->execute(subContext, &value);

@@ -384,7 +384,7 @@ TEST(QImage, GetField)
 
 TEST(QImage, LoadFromFile)
 {
-	QImage image;
+	QImage* image;
 	QColor color;
 	
 	Result result = QImage::loadFromFile("does_not_exist.png", &image);
@@ -392,14 +392,14 @@ TEST(QImage, LoadFromFile)
 	EXPECT_EQ(result.getErr(), errors::image_load_error("Unable to open file").getErr());
 
 	ASSERT_TRUE(QImage::loadFromFile("images/checkerboard.png", &image));
-	ASSERT_EQ(image.getWidth(), 10);
-	ASSERT_EQ(image.getHeight(), 10);
+	ASSERT_EQ(image->getWidth(), 10);
+	ASSERT_EQ(image->getHeight(), 10);
 
 	for (int32_t y = 0; y < 10; ++y)
 	{
 		for (int32_t x = 0; x < 10; ++x)
 		{
-			ASSERT_TRUE(image.getPixel(x, y, &color));
+			ASSERT_TRUE(image->getPixel(x, y, &color));
 			if (x == y)
 			{
 				EXPECT_EQ(color, QColor(1.f, 0.f, 0.f, 1.f));
@@ -431,11 +431,13 @@ TEST(QImage, LoadFromFile)
 			}
 		}
 	}
+
+	delete image;
 }
 
 TEST(QImage, SaveToFile)
 {
-	QImage image(100, 100);
+	QImage* image = new QImage(100, 100);
 	QColor color;
 
 	for (int32_t y = 0; y < 100; ++y)
@@ -444,27 +446,28 @@ TEST(QImage, SaveToFile)
 		{
 			if (x == y)
 			{
-				ASSERT_TRUE(image.setPixel(x, y, QColor(0.f, 0.f, 1.f, 1.f)));
+				ASSERT_TRUE(image->setPixel(x, y, QColor(0.f, 0.f, 1.f, 1.f)));
 			}
 			else if (x % 2 == 0)
 			{
-				ASSERT_TRUE(image.setPixel(x, y, QColor(0.f, 0.f, 0.f, 1.f)));
+				ASSERT_TRUE(image->setPixel(x, y, QColor(0.f, 0.f, 0.f, 1.f)));
 			}
 			else
 			{
-				ASSERT_TRUE(image.setPixel(x, y, QColor(1.f, 1.f, 1.f, 1.f)));
+				ASSERT_TRUE(image->setPixel(x, y, QColor(1.f, 1.f, 1.f, 1.f)));
 			}
 		}
 	}
 
-	ASSERT_TRUE(image.saveToFile("images/test.png"));
+	ASSERT_TRUE(image->saveToFile("images/test.png"));
+	delete image;
 	ASSERT_TRUE(QImage::loadFromFile("images/test.png", &image));
 
 	for (int32_t y = 0; y < 100; ++y)
 	{
 		for (int32_t x = 0; x < 100; ++x)
 		{
-			ASSERT_TRUE(image.getPixel(x, y, &color));
+			ASSERT_TRUE(image->getPixel(x, y, &color));
 			if (x == y)
 			{
 				EXPECT_EQ(color, QColor(0.f, 0.f, 1.f, 1.f));
@@ -479,4 +482,6 @@ TEST(QImage, SaveToFile)
 			}
 		}
 	}
+
+	delete image;
 }
