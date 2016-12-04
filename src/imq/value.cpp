@@ -280,7 +280,7 @@ namespace imq
 			return true;
 
 		case Type::Float:
-			*result = QValue::Bool(std::abs(f) < std::numeric_limits<float>::epsilon());
+			*result = QValue::Bool(std::abs(f) >= std::numeric_limits<float>::epsilon());
 			return true;
 		}
 	}

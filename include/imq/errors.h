@@ -72,6 +72,8 @@ namespace imq
 		IMQ_ERROR_DEF(func_generic_error, msg, const String& msg);
 
 		IMQ_ERROR_DEF(file_open, "Unable to open file " << filename, const String& filename);
+
+		IMQ_ERROR_DEF(conversion, "Unable to convert " << QValue::getTypeString(value.getType()) << " to " << targetType, const QValue& value, const String& targetType);
 	}
 }
 
