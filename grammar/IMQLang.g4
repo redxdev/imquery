@@ -169,6 +169,7 @@ value returns [VExpression* expr]
 const_value returns [QValue val]
     :   INTEGER     {$val = QValue::Integer(std::stoi($INTEGER.text));}
     |   FLOAT       {$val = QValue::Float(std::stof($FLOAT.text));}
+    |   NIL         {$val = QValue::Nil();}
     |   boolean     {$val = QValue::Bool($boolean.val);}
     ;
 
@@ -397,6 +398,10 @@ B_TRUE
 
 B_FALSE
     :   'false'
+    ;
+
+NIL
+    :   'nil'
     ;
 
 FLOAT
