@@ -12,11 +12,26 @@ using namespace antlr4;
 
 namespace imq
 {
+
+	SavedErrorListener::SavedErrorListener(bool bDebugMode)
+		: bDebugMode(bDebugMode)
+	{
+	}
+
 	void SavedErrorListener::syntaxError(antlr4::IRecognizer* recognizer, antlr4::Token* offendingSymbol, size_t line, size_t charPositionInLine, const std::string& msg, std::exception_ptr e)
 	{
 		std::stringstream ss;
 		ss << "line " << line << ":" << charPositionInLine << ": " << msg;
 		lastMessage = ss.str();
+	}
+
+	void SavedErrorListener::reportAmbiguity(Parser *recognizer, const dfa::DFA &dfa, size_t startIndex, size_t stopIndex, bool exact, const antlrcpp::BitSet &ambigAlts, atn::ATNConfigSet *configs)
+	{
+		if (!bDebugMode)
+			return;
+
+		auto token = recognizer->getCurrentToken();
+		std::cerr << "line " << token->getLine() << ":" << token->getCharPositionInLine() << ": ambiguity around here - " << configs->toString() << std::endl;
 	}
 
 	const String& SavedErrorListener::getLastMessage() const
@@ -49,7 +64,7 @@ namespace imq
 		CommonTokenStream tokens(&lexer);
 
 		Ref<BailErrorStrategy> errorStrategy(new BailErrorStrategy());
-		SavedErrorListener errorListener;
+		SavedErrorListener errorListener(bDebugMode);
 		IMQLangParser parser(&tokens);
 		parser.removeErrorListeners();
 		parser.addErrorListener(&errorListener);

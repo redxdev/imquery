@@ -146,6 +146,20 @@ namespace imq
 			*result = QValue::Float(alpha);
 			return true;
 		}
+		else if (name == "clamp")
+		{
+			*result = QValue::Function([&](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 0)
+				{
+					return errors::args_count("QColor.clamp", 0, argCount);
+				}
+
+				*result = QValue::Object(new QColor(this->clamp()));
+				return true;
+			});
+
+			return true;
+		}
 
 		return errors::undefined_field(getTypeString(), name);
 	}

@@ -10,7 +10,7 @@
 
 using namespace imq;
 
-bool execute(VMachine* vm, VBlock* block)
+bool execute(VMachine* vm, VBlock* block, bool bDebugMode)
 {
 	if (block)
 	{
@@ -28,6 +28,8 @@ bool execute(VMachine* vm, VBlock* block)
 	}
 
 	QueryParser parser;
+	parser.setDebugMode(bDebugMode);
+
 	Result res;
 
 	while (true)
@@ -60,6 +62,7 @@ int main(int argc, char** argv)
 	TCLAP::CmdLine cmd("Interactive frontend to imquery", ' ', "1.0");
 
 	TCLAP::ValueArg<std::string> fileArg("f", "file", "The script file to load.", false, "", "string", cmd);
+	TCLAP::SwitchArg debugArg("d", "debug", "Enable parser debug mode", cmd, false);
 
 	try
 	{
@@ -92,5 +95,5 @@ int main(int argc, char** argv)
 		}
 	}
 
-	return execute(&vm, block);
+	return execute(&vm, block, debugArg.getValue());
 }
