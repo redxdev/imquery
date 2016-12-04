@@ -55,6 +55,11 @@ namespace imq
 		float blue = 0.f;
 		float alpha = 1.f;
 
+		bool r = false;
+		bool g = false;
+		bool b = false;
+		bool a = false;
+
 		if (rExpr)
 		{
 			res = rExpr->execute(context, &value);
@@ -67,6 +72,8 @@ namespace imq
 			{
 				return errors::vm_generic_error(getLocation(), "Expected floats for color components");
 			}
+
+			r = true;
 		}
 
 		if (gExpr)
@@ -81,6 +88,8 @@ namespace imq
 			{
 				return errors::vm_generic_error(getLocation(), "Expected floats for color components");
 			}
+
+			g = true;
 		}
 
 		if (bExpr)
@@ -95,6 +104,8 @@ namespace imq
 			{
 				return errors::vm_generic_error(getLocation(), "Expected floats for color components");
 			}
+
+			b = true;
 		}
 
 		if (aExpr)
@@ -109,6 +120,28 @@ namespace imq
 			{
 				return errors::vm_generic_error(getLocation(), "Expected floats for color components");
 			}
+
+			a = true;
+		}
+
+		if (!r)
+		{
+			return errors::vm_generic_error(getLocation(), "Invalid first component subexpression for Color");
+		}
+
+		if (g)
+		{
+			if (!b)
+			{
+				alpha = green;
+				green = red;
+				blue = red;
+			}
+		}
+		else
+		{
+			green = red;
+			blue = red;
 		}
 
 		*result = QValue::Object(new QColor(red, green, blue, alpha));

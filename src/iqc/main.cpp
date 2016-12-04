@@ -41,11 +41,16 @@ bool execute(VMachine* vm, VBlock* block)
 		res = parser.parseString(line, &block);
 		if (!res)
 		{
-			std::cout << res.getErr() << std::endl;
+			std::cout << "parse error: " << res.getErr() << std::endl;
 			continue;
 		}
 
-		vm->execute(block);
+		res = vm->execute(block);
+		if (!res)
+		{
+			std::cout << "runtime error: " << res.getErr() << std::endl;
+		}
+
 		delete block;
 	}
 }
