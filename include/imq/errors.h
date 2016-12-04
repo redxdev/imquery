@@ -59,7 +59,13 @@ namespace imq
 		IMQ_ERROR_DEF(math_mod_by_zero, "Mod by zero error");
 
 		IMQ_ERROR_DEF(args_count, "Wrong number of arguments to " << funcName << " (expected " << expected << ", got " << actual << ")", const String& funcName, int32_t expected, int32_t actual);
-		IMQ_ERROR_DEF(args_type, "Invalid type for argument #" << argNum << " to " << funcName << " (expected " << expected << ", got " << actual << ")", const String& funcName, int32_t argNum, const String& expected, const String& actual);
+		IMQ_ERROR_DEF(args_count, "Wrong number of arguments to " << funcName << " (expected between " << low << " and " << high << ", got " << actual << ")", const String& funcName, int32_t low, int32_t high, int32_t actual);
+		IMQ_ERROR_DEF(args_count, "Wrong number of arguments to " << funcName << " (expected " << expected << ", got " << actual << ")", const String& funcName, const String& expected, int32_t actual);
+		
+		IMQ_ERROR_DEF(args_type, "Invalid type for argument #" << (argIndex + 1) << " to " << funcName << " (expected " << expected << ", got " << actual << ")", const String& funcName, int32_t argIndex, const String& expected, const String& actual);
+		IMQ_ERROR_DEF(args_type, "Invalid type for argument #" << (argIndex + 1) << " to " << funcName << " (expected " << expected << ", got " << QValue::getTypeString(val.getType()) << ")", const String& funcName, int32_t argIndex, const String& expected, const QValue& val);
+
+		IMQ_ERROR_DEF(args_bounds, "Argument #" << (argIndex + 1) << " to " << funcName << " is out of bounds - " << msg, const String& funcName, int32_t argIndex, const String& msg);
 		
 		IMQ_ERROR_DEF(func_generic_error, msg, const String& msg);
 	}

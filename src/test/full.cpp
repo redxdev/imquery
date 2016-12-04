@@ -3,6 +3,7 @@
 #include <imq/image.h>
 #include <imq/cast.h>
 #include <imq/errors.h>
+#include <imq/library.h>
 #include <gtest/gtest.h>
 
 using namespace imq;
@@ -33,6 +34,8 @@ TEST(Full, ImageCopy)
 	VBlock* block;
 	VMachine vm;
 
+	ASSERT_TRUE(register_stdlib(&vm));
+
 	ASSERT_TRUE(parser.parse(copy_image, &block));
 
 	QImage* srcImage;
@@ -40,39 +43,6 @@ TEST(Full, ImageCopy)
 	ASSERT_TRUE(QImage::loadFromFile("images/checkerboard.png", &srcImage));
 
 	vm.getRootContext()->setInput("input", QValue::Object(srcImage));
-	vm.getRootContext()->setValue("image", QValue::Function([](int32_t argCount, QValue* args, QValue* result) -> Result {
-		if (argCount == 0)
-		{
-			*result = QValue::Object(new QImage());
-			return true;
-		}
-		
-		if (argCount != 2)
-		{
-			return errors::args_count("image", 2, argCount);
-		}
-
-		int32_t w;
-		int32_t h;
-
-		if (!args[0].getInteger(&w))
-		{
-			return errors::args_type("image", 1, "Integer", QValue::getTypeString(args[0].getType()));
-		}
-
-		if (!args[1].getInteger(&h))
-		{
-			return errors::args_type("image", 2, "Integer", QValue::getTypeString(args[1].getType()));
-		}
-
-		if (w < 0 || h < 0)
-		{
-			return errors::func_generic_error("Image dimensions must be >= 0");
-		}
-
-		*result = QValue::Object(new QImage(w, h));
-		return true;
-	}));
 
 	ASSERT_TRUE(vm.execute(block));
 
