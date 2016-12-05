@@ -97,4 +97,43 @@ namespace imq
 		return true;
 	}
 
+	imq::Result QueryParser::parseExpression(const String& data, VExpression** result) const
+	{
+		ANTLRInputStream stream(data);
+		IMQLangLexer lexer(&stream);
+		CommonTokenStream tokens(&lexer);
+
+		Ref<BailErrorStrategy> errorStrategy(new BailErrorStrategy());
+		SavedErrorListener errorListener(bDebugMode);
+		IMQLangParser parser(&tokens);
+		parser.removeErrorListeners();
+		parser.addErrorListener(&errorListener);
+		parser.setErrorHandler(errorStrategy);
+
+		try
+		{
+			auto outCtx = parser.expression();
+			*result = outCtx->expr;
+		}
+		catch (const std::exception& outer)
+		{
+			if (!errorListener.getLastMessage().empty())
+			{
+				return Result(false, errorListener.getLastMessage());
+			}
+
+			try
+			{
+				std::rethrow_if_nested(outer);
+			}
+			catch (const std::exception& inner)
+			{
+				return Result(false, inner.what());
+			}
+
+			return Result(false, outer.what());
+		}
+
+		return true;
+	}
 }

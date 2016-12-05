@@ -33,6 +33,8 @@ namespace imq
 
 		Result parseStream(antlr4::ANTLRInputStream* stream, VBlock** result) const;
 
+		Result parseExpression(const String& data, VExpression** result) const;
+
 		inline void setDebugMode(bool bValue)
 		{
 			bDebugMode = bValue;

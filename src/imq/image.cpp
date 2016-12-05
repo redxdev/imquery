@@ -613,5 +613,4 @@ namespace imq
 			context->setRawValue("y", QValue::Integer(index / source->width));
 		}
 	}
-
 }
