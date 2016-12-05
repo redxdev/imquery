@@ -148,7 +148,8 @@ namespace imq
 		}
 		else if (name == "clamp")
 		{
-			*result = QValue::Function([&](int32_t argCount, QValue* args, QValue* result) -> Result {
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
 				if (argCount != 0)
 				{
 					return errors::args_count("QColor.clamp", 0, argCount);
@@ -461,7 +462,8 @@ namespace imq
 		}
 		else if (name == "pixel")
 		{
-			*result = QValue::Function([&](int32_t argCount, QValue* args, QValue* result) -> Result {
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
 				if (argCount != 2 && argCount != 3)
 					return errors::args_count("pixel", 2, 3, argCount);
 
@@ -506,7 +508,8 @@ namespace imq
 		}
 		else if (name == "clamp")
 		{
-			*result = QValue::Function([&](int32_t argCount, QValue* args, QValue* result) -> Result {
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
 				if (argCount != 0)
 					return errors::args_count("clamp", 0, argCount);
 

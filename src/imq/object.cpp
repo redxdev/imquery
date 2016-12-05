@@ -1,5 +1,7 @@
 #include "object.h"
 
+#include <cassert>
+
 #include "value.h"
 #include "errors.h"
 
@@ -105,6 +107,18 @@ namespace imq
 	imq::Result QObject::opGreaterEq(const QValue& rhs, QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "greatereq");
+	}
+
+	void QObject::updateSelfPointer(const std::shared_ptr<QObject> ptr)
+	{
+		assert(ptr.get() == this && "updateSelfPointer() called with pointer to different object");
+
+		selfPtr = ptr;
+	}
+
+	const std::weak_ptr<imq::QObject>& QObject::getSelfPointer() const
+	{
+		return selfPtr;
 	}
 
 	TypeIndex ObjectRegistry::nextTypeIndex = 0;

@@ -53,6 +53,7 @@ namespace imq
 		result.valueType = Type::Object;
 		new (&result.obj) QObjectPtr();
 		result.obj = val;
+		val->updateSelfPointer(val);
 		return result;
 	}
 
@@ -116,6 +117,7 @@ namespace imq
 		case Type::Object:
 			new (&obj) QObjectPtr();
 			obj = other.obj;
+			obj->updateSelfPointer(obj);
 			break;
 
 		case Type::Function:

@@ -109,7 +109,7 @@ while_loop_stm returns [VStatement* stm]
     ;
 
 expression returns [VExpression* expr]
-    :   orExpr  {$expr = $orExpr.expr;}
+    :   orExpr {$expr = $orExpr.expr;}
     ;
 
 orExpr returns [VExpression* expr]
@@ -164,7 +164,22 @@ mulExpr returns [VExpression* expr]
 notExpr returns [VExpression* expr]
     :   NOT notExpr     {$expr = createNodeFromToken<NotExpr>($NOT, $notExpr.expr);}
     |   MINUS notExpr   {$expr = createNodeFromToken<NegateExpr>($MINUS, $notExpr.expr);}
-    |   atom            {$expr = $atom.expr;}
+    |   fieldExpr       {$expr = $fieldExpr.expr;}
+    ;
+
+fieldExpr returns [VExpression* expr]
+    :   callExpr            {$expr = $callExpr.expr;}
+    (
+        DOT field[$expr]    {$expr = $field.expr;}
+    )*
+    ;
+
+callExpr returns [VExpression* expr]
+    :   atom                {$expr = $atom.expr;}
+    (
+        func_parameters     {$expr = createNodeFromToken<CallFunctionExpr>($atom.start, $atom.expr, $func_parameters.count, $func_parameters.args);}
+    |   index_parameters    {$expr = createNodeFromToken<RetrieveIndexExpr>($atom.start, $atom.expr, $index_parameters.expr);}
+    )?
     ;
 
 atom returns [VExpression* expr]
@@ -204,52 +219,15 @@ color returns [VExpression* expr]
     ;
 
 variable returns [VExpression* expr]
-    :   resolved_variable   {$expr = $resolved_variable.expr;}
+    :   IDENT {$expr = createNodeFromToken<RetrieveVariableExpr>($IDENT, $IDENT.text);}
+    ;
+
+field [VExpression* subexpr] returns [VExpression* expr]
+    :   IDENT               {$expr = createNodeFromToken<RetrieveFieldExpr>($IDENT, $subexpr, $IDENT.text);}
     (
-        DOT resolved_field[$expr]  {$expr = $resolved_field.expr;}
-    )*
-    ;
-
-resolved_variable returns [VExpression* expr]
-    :   IDENT                   {$expr = createNodeFromToken<RetrieveVariableExpr>($IDENT, $IDENT.text);}
-    |   IDENT func_parameters
-        {
-            $expr = createNodeFromToken<CallFunctionExpr>(
-                $IDENT,
-                createNodeFromToken<RetrieveVariableExpr>($IDENT, $IDENT.text),
-                $func_parameters.count,
-                $func_parameters.args
-            );
-        }
-    |   IDENT index_parameters
-        {
-            $expr = createNodeFromToken<RetrieveIndexExpr>(
-                $IDENT,
-                createNodeFromToken<RetrieveVariableExpr>($IDENT, $IDENT.text),
-                $index_parameters.expr
-            );
-        }
-    ;
-
-resolved_field [VExpression* subexpr] returns [VExpression* expr]
-    :   IDENT                   {$expr = createNodeFromToken<RetrieveFieldExpr>($IDENT, $subexpr, $IDENT.text);}
-    |   IDENT func_parameters
-        {
-            $expr = createNodeFromToken<CallFunctionExpr>(
-                $IDENT,
-                createNodeFromToken<RetrieveFieldExpr>($IDENT, $subexpr, $IDENT.text),
-                $func_parameters.count,
-                $func_parameters.args
-            );
-        }
-    |   IDENT index_parameters
-        {
-            $expr = createNodeFromToken<RetrieveIndexExpr>(
-                $IDENT,
-                createNodeFromToken<RetrieveFieldExpr>($IDENT, $subexpr, $IDENT.text),
-                $index_parameters.expr
-            );
-        }
+        func_parameters     {$expr = createNodeFromToken<CallFunctionExpr>($IDENT, $expr, $func_parameters.count, $func_parameters.args);}
+    |   index_parameters    {$expr = createNodeFromToken<RetrieveIndexExpr>($IDENT, $expr, $index_parameters.expr);}
+    )?
     ;
 
 func_parameters returns [int32_t count, VExpression** args]

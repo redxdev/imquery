@@ -55,6 +55,12 @@ namespace imq
 		virtual Result opLessEq(const QValue& rhs, QValue* result) const;
 		virtual Result opGreater(const QValue& rhs, QValue* result) const;
 		virtual Result opGreaterEq(const QValue& rhs, QValue* result) const;
+
+		void updateSelfPointer(const std::shared_ptr<QObject> ptr);
+		const std::weak_ptr<QObject>& getSelfPointer() const;
+
+	private:
+		std::weak_ptr<QObject> selfPtr;
 	};
 
 	// Do not use yourself - use the IMQ_DECLARE_TYPE and IMQ_DEFINE_TYPE macros.
