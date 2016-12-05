@@ -1,9 +1,5 @@
 grammar IMQLang;
 
-options {
-    language=Cpp;
-}
-
 @parser::header {
     #include "expressions.h"
     #include "mathexpr.h"
@@ -118,35 +114,51 @@ expression returns [VExpression* expr]
 
 orExpr returns [VExpression* expr]
     :   andExpr             {$expr = $andExpr.expr;}
-    |   andExpr OR orExpr   {$expr = createNodeFromToken<OrExpr>($andExpr.start, $andExpr.expr, $orExpr.expr);}
+    (
+        OR orExpr           {$expr = createNodeFromToken<OrExpr>($andExpr.start, $andExpr.expr, $orExpr.expr);}
+    )?
     ;
 
 andExpr returns [VExpression* expr]
     :   equalityExpr                {$expr = $equalityExpr.expr;}
-    |   equalityExpr AND andExpr    {$expr = createNodeFromToken<AndExpr>($equalityExpr.start, $equalityExpr.expr, $andExpr.expr);}
+    (
+        AND andExpr                 {$expr = createNodeFromToken<AndExpr>($equalityExpr.start, $equalityExpr.expr, $andExpr.expr);}
+    )?
     ;
 
 equalityExpr returns [VExpression* expr]
     :   addExpr                             {$expr = $addExpr.expr;}
-    |   addExpr EQUAL EQUAL equalityExpr    {$expr = createNodeFromToken<EqualExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
-    |   addExpr BANG EQUAL equalityExpr     {$expr = createNodeFromToken<NotEqualExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
-    |   addExpr LESS equalityExpr           {$expr = createNodeFromToken<LessExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
-    |   addExpr LESS EQUAL equalityExpr     {$expr = createNodeFromToken<LessEqExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
-    |   addExpr GREATER equalityExpr        {$expr = createNodeFromToken<GreaterExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
-    |   addExpr GREATER EQUAL equalityExpr  {$expr = createNodeFromToken<GreaterEqExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
+    (
+        EQUAL EQUAL equalityExpr            {$expr = createNodeFromToken<EqualExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
+    |   BANG EQUAL equalityExpr             {$expr = createNodeFromToken<NotEqualExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
+    |   LESS
+        (
+            EQUAL equalityExpr              {$expr = createNodeFromToken<LessEqExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
+        |   equalityExpr                    {$expr = createNodeFromToken<LessExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
+        )
+    |   GREATER
+        (
+            EQUAL equalityExpr              {$expr = createNodeFromToken<GreaterEqExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
+        |   equalityExpr                    {$expr = createNodeFromToken<GreaterExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
+        )
+    )?
     ;
 
 addExpr returns [VExpression* expr]
     :   mulExpr                 {$expr = $mulExpr.expr;}
-    |   mulExpr PLUS addExpr    {$expr = createNodeFromToken<AddExpr>($mulExpr.start, $mulExpr.expr, $addExpr.expr);}
-    |   mulExpr MINUS addExpr   {$expr = createNodeFromToken<SubExpr>($mulExpr.start, $mulExpr.expr, $addExpr.expr);}
+    (
+        PLUS addExpr            {$expr = createNodeFromToken<AddExpr>($mulExpr.start, $mulExpr.expr, $addExpr.expr);}
+    |   MINUS addExpr           {$expr = createNodeFromToken<SubExpr>($mulExpr.start, $mulExpr.expr, $addExpr.expr);}
+    )?
     ;
 
 mulExpr returns [VExpression* expr]
     :   notExpr                     {$expr = $notExpr.expr;}
-    |   notExpr MULTIPLY mulExpr    {$expr = createNodeFromToken<MulExpr>($notExpr.start, $notExpr.expr, $mulExpr.expr);}
-    |   notExpr DIVIDE mulExpr      {$expr = createNodeFromToken<DivExpr>($notExpr.start, $notExpr.expr, $mulExpr.expr);}
-    |   notExpr MODULUS mulExpr     {$expr = createNodeFromToken<ModExpr>($notExpr.start, $notExpr.expr, $mulExpr.expr);}
+    (
+        MULTIPLY mulExpr            {$expr = createNodeFromToken<MulExpr>($notExpr.start, $notExpr.expr, $mulExpr.expr);}
+    |   DIVIDE mulExpr              {$expr = createNodeFromToken<DivExpr>($notExpr.start, $notExpr.expr, $mulExpr.expr);}
+    |   MODULUS mulExpr             {$expr = createNodeFromToken<ModExpr>($notExpr.start, $notExpr.expr, $mulExpr.expr);}
+    )?
     ;
 
 notExpr returns [VExpression* expr]
@@ -181,17 +193,12 @@ boolean returns [bool val]
 color returns [VExpression* expr]
     locals [VExpression* rExpr = nullptr, VExpression* gExpr = nullptr, VExpression* bExpr = nullptr, VExpression* aExpr = nullptr]
     :   L_BRACE
+        r=expression                            {$rExpr = $r.expr;}
     (
-        r=expression {$rExpr = $r.expr;} // single element applied to rgb
-    |   r=expression COMMA g=expression COMMA b=expression // all elements
-    {
-        $rExpr = $r.expr;
-        $gExpr = $g.expr;
-        $bExpr = $b.expr;
-    }
-    )
+        COMMA g=expression COMMA b=expression   {$gExpr = $g.expr; $bExpr = $b.expr;}
+    )?
     (
-        COMMA a=expression {$aExpr = $a.expr;} // alpha element
+        COMMA a=expression {$aExpr = $a.expr;}
     )?
         R_BRACE {$expr = createNodeFromToken<ColorExpr>($L_BRACE, $rExpr, $gExpr, $bExpr, $aExpr);}
     ;

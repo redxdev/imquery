@@ -124,21 +124,7 @@ namespace imq
 			a = true;
 		}
 
-		if (!r)
-		{
-			return errors::vm_generic_error(getLocation(), "Invalid first component subexpression for Color");
-		}
-
-		if (g)
-		{
-			if (!b)
-			{
-				alpha = green;
-				green = red;
-				blue = red;
-			}
-		}
-		else
+		if (r && !g && !b)
 		{
 			green = red;
 			blue = red;
