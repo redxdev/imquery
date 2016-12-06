@@ -612,7 +612,7 @@ namespace imq
 		}
 
 		QValue value;
-		while (selection->isValid() && !selection->getContext()->isContextBroken())
+		while (selection->isValid() && !selection->getContext()->isContextBroken() && !selection->getContext()->isContextReturnedFrom())
 		{
 			res = calcExpr->execute(selection->getContext(), &value);
 			if (!res)
@@ -824,7 +824,7 @@ namespace imq
 				}
 			}
 
-			if (subContext->isContextBroken())
+			if (subContext->isContextBroken() || subContext->isContextReturnedFrom())
 				break;
 
 			if (incrStm)
@@ -902,7 +902,7 @@ namespace imq
 				}
 			}
 
-			if (subContext->isContextBroken())
+			if (subContext->isContextBroken() || subContext->isContextReturnedFrom())
 				break;
 
 			res = checkExpr->execute(subContext, &value);
@@ -936,7 +936,47 @@ namespace imq
 
 	Result BreakStm::execute(ContextPtr context)
 	{
-		return context->breakContext();
+		Result res = context->breakContext();
+		if (!res)
+		{
+			return errors::vm_generic_error(getLocation(), res.getErr());
+		}
+
+		return true;
+	}
+
+	ReturnStm::ReturnStm(VExpression* valueExpr, const VLocation& loc)
+		: VStatement(loc), valueExpr(valueExpr)
+	{
+	}
+
+	ReturnStm::~ReturnStm()
+	{
+		delete valueExpr;
+	}
+
+	String ReturnStm::getName() const
+	{
+		return "Return";
+	}
+
+	Result ReturnStm::execute(ContextPtr context)
+	{
+		QValue value;
+		if (valueExpr)
+		{
+			Result res = valueExpr->execute(context, &value);
+			if (!res)
+				return res;
+		}
+
+		Result res = context->returnContext(value);
+		if (!res)
+		{
+			return errors::vm_generic_error(getLocation(), res.getErr());
+		}
+
+		return true;
 	}
 
 	NoOpStm::NoOpStm(const VLocation& loc)

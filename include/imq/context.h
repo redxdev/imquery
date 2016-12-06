@@ -24,9 +24,14 @@ namespace imq
 
 		virtual Result setBreakable(bool bValue) = 0;
 		virtual bool isBreakable() const = 0;
-
 		virtual Result breakContext() = 0;
 		virtual bool isContextBroken() const = 0;
+
+		virtual Result setReturnable(bool bValue) = 0;
+		virtual bool isReturnable() const = 0;
+		virtual Result returnContext(const QValue& value) = 0;
+		virtual bool getReturnValue(QValue* result) const = 0;
+		bool isContextReturnedFrom() const;
 	};
 
 	typedef std::shared_ptr<Context> ContextPtr;
@@ -48,11 +53,18 @@ namespace imq
 		virtual bool isBreakable() const override;
 		virtual Result breakContext() override;
 		virtual bool isContextBroken() const override;
+		virtual Result setReturnable(bool bValue) override;
+		virtual bool isReturnable() const override;
+		virtual Result returnContext(const QValue& value) override;
+		virtual bool getReturnValue(QValue* result) const override;
 
 	protected:
 		std::unordered_map<String, QValue> values;
 		bool bBreakable = false;
 		bool bBroken = false;
+		bool bReturnable = false;
+		bool bReturned = false;
+		QValue returnValue;
 	};
 
 	class RootContext : public Context
@@ -68,6 +80,10 @@ namespace imq
 		virtual bool isBreakable() const override;
 		virtual Result breakContext() override;
 		virtual bool isContextBroken() const override;
+		virtual Result setReturnable(bool bValue) override;
+		virtual bool isReturnable() const override;
+		virtual Result returnContext(const QValue& value) override;
+		virtual bool getReturnValue(QValue* result) const override;
 
 		void setInput(const String& key, const QValue& value);
 		void setOutput(const String& key, const QValue& value);
@@ -100,12 +116,19 @@ namespace imq
 		virtual bool isBreakable() const override;
 		virtual Result breakContext() override;
 		virtual bool isContextBroken() const override;
+		virtual Result setReturnable(bool bValue) override;
+		virtual bool isReturnable() const override;
+		virtual Result returnContext(const QValue& value) override;
+		virtual bool getReturnValue(QValue* result) const override;
 
 	protected:
 		ContextPtr parent;
 		std::unordered_map<String, QValue> values;
 		bool bBreakable = false;
 		bool bBroken = false;
+		bool bReturnable = false;
+		bool bReturned = false;
+		QValue returnValue;
 	};
 
 	class RestrictedSubContext : public SubContext

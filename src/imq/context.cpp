@@ -9,6 +9,12 @@ namespace imq
 	{
 	}
 
+	bool Context::isContextReturnedFrom() const
+	{
+		QValue rv;
+		return getReturnValue(&rv);
+	}
+
 	SimpleContext::~SimpleContext()
 	{
 
@@ -87,6 +93,45 @@ namespace imq
 	bool SimpleContext::isContextBroken() const
 	{
 		return bBreakable && bBroken;
+	}
+
+	Result SimpleContext::setReturnable(bool bValue)
+	{
+		bReturnable = bValue;
+		if (!bReturnable)
+			bReturned = false;
+
+		return true;
+	}
+
+	bool SimpleContext::isReturnable() const
+	{
+		return bReturnable;
+	}
+
+	Result SimpleContext::returnContext(const QValue& value)
+	{
+		if (bReturnable)
+		{
+			bReturned = true;
+			returnValue = value;
+			return true;
+		}
+		else
+		{
+			return errors::context_not_returnable();
+		}
+	}
+
+	bool SimpleContext::getReturnValue(QValue* result) const
+	{
+		if (bReturnable && bReturned)
+		{
+			*result = returnValue;
+			return true;
+		}
+
+		return false;
 	}
 
 	bool RootContext::hasValue(const String& key) const
@@ -207,12 +252,32 @@ namespace imq
 		return false;
 	}
 
-	imq::Result RootContext::breakContext()
+	Result RootContext::breakContext()
+	{
+		return errors::context_not_breakable();
+	}
+
+	bool RootContext::isContextBroken() const
 	{
 		return false;
 	}
 
-	bool RootContext::isContextBroken() const
+	Result RootContext::setReturnable(bool bValue)
+	{
+		return errors::context_not_returnable();
+	}
+
+	bool RootContext::isReturnable() const
+	{
+		return false;
+	}
+
+	Result RootContext::returnContext(const QValue& value)
+	{
+		return errors::context_not_returnable();
+	}
+
+	bool RootContext::getReturnValue(QValue* result) const
 	{
 		return false;
 	}
@@ -333,6 +398,43 @@ namespace imq
 	bool SubContext::isContextBroken() const
 	{
 		return (bBreakable && bBroken) || parent->isContextBroken();
+	}
+
+	Result SubContext::setReturnable(bool bValue)
+	{
+		bReturnable = bValue;
+		if (!bReturnable)
+			bReturned = false;
+
+		return true;
+	}
+
+	bool SubContext::isReturnable() const
+	{
+		return bReturned;
+	}
+
+	Result SubContext::returnContext(const QValue& value)
+	{
+		if (bReturnable)
+		{
+			bReturned = true;
+			returnValue = value;
+			return true;
+		}
+
+		return parent->returnContext(value);
+	}
+
+	bool SubContext::getReturnValue(QValue* result) const
+	{
+		if (bReturnable && bReturned)
+		{
+			*result = returnValue;
+			return true;
+		}
+
+		return parent->getReturnValue(result);
 	}
 
 	RestrictedSubContext::RestrictedSubContext(ContextPtr parent)

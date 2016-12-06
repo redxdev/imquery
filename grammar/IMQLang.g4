@@ -3,6 +3,7 @@ grammar IMQLang;
 @parser::header {
     #include "expressions.h"
     #include "mathexpr.h"
+    #include "scriptfunction.h"
     #include "value.h"
     #include "object.h"
     #include "image.h"
@@ -43,10 +44,12 @@ statement returns [VStatement* stm]
     |   set_field_stm SEMICOLON         {$stm = $set_field_stm.stm;}
     |   delete_variable_stm SEMICOLON   {$stm = $delete_variable_stm.stm;}
     |   select_stm SEMICOLON            {$stm = $select_stm.stm;}
-    |   break_stm SEMICOLON             {$stm = $break_stm.stm; }
+    |   break_stm SEMICOLON             {$stm = $break_stm.stm;}
+    |   return_stm SEMICOLON            {$stm = $return_stm.stm;}
     |   branch_stm                      {$stm = $branch_stm.stm;} // no semicolon, uses block syntax
     |   for_loop_stm                    {$stm = $for_loop_stm.stm;} // ^^
     |   while_loop_stm                  {$stm = $while_loop_stm.stm;} // ^^
+    |   define_function_stm             {$stm = $define_function_stm.stm;} // ^^
     |   expression SEMICOLON            {$stm = createNodeFromToken<VExpressionAsStatement>($expression.start, $expression.expr);}
     |   SEMICOLON                       {$stm = nullptr;} //{$stm = createNodeFromToken<NoOpStm>($SEMICOLON);}
     ;
@@ -116,7 +119,30 @@ while_loop_stm returns [VStatement* stm]
     ;
 
 break_stm returns [VStatement* stm]
-    : BREAK {$stm = createNodeFromToken<BreakStm>($BREAK);}
+    :   BREAK {$stm = createNodeFromToken<BreakStm>($BREAK);}
+    ;
+
+return_stm returns [VStatement* stm]
+    locals [VExpression* retExpr = nullptr]
+    :   RETURN
+    (
+        expression {$retExpr = $expression.expr;}
+    )?
+        {$stm = createNodeFromToken<ReturnStm>($RETURN, $retExpr);}
+    ;
+
+define_function_stm returns [VStatement* stm]
+    locals [VBlock* block = nullptr]
+    :   FUNCTION IDENT func_parameters_def L_BRACE
+        (statements {$block = createNodeFromToken<VBlock>($statements.start, $statements.count, $statements.stmArr);})?
+        R_BRACE
+        {
+            $stm = createNodeFromToken<SetVariableStm>(
+                $FUNCTION,
+                $IDENT.text,
+                createNodeFromToken<DefineFunctionExpr>($FUNCTION, $IDENT.text, $block, $func_parameters_def.argNames)
+            );
+        }
     ;
 
 expression returns [VExpression* expr]
@@ -200,8 +226,9 @@ atom returns [VExpression* expr]
     ;
 
 value returns [VExpression* expr]
-    :   const_value {$expr = createNodeFromToken<ConstantExpr>($const_value.start, $const_value.val);}
-    |   color       {$expr = $color.expr;}
+    :   const_value     {$expr = createNodeFromToken<ConstantExpr>($const_value.start, $const_value.val);}
+    |   color           {$expr = $color.expr;}
+    |   function_expr   {$expr = $function_expr.expr;}
     ;
 
 const_value returns [QValue val]
@@ -227,6 +254,30 @@ color returns [VExpression* expr]
         COMMA a=expression {$aExpr = $a.expr;}
     )?
         R_BRACE {$expr = createNodeFromToken<ColorExpr>($L_BRACE, $rExpr, $gExpr, $bExpr, $aExpr);}
+    ;
+
+function_expr returns [VExpression* expr]
+    locals [VBlock* block = nullptr]
+    :   func_parameters_def ARROW
+    (
+        L_BRACE
+        (statements {$block = createNodeFromToken<VBlock>($statements.start, $statements.count, $statements.stmArr);})?
+        R_BRACE
+    |   expression
+        {
+            $block = createNodeFromToken<VBlock>(
+                $expression.start,
+                1,
+                new VStatement*[1] {
+                    createNodeFromToken<ReturnStm>(
+                        $expression.start,
+                        $expression.expr
+                    )
+                }
+            );
+        }
+    )
+        {$expr = createNodeFromToken<DefineFunctionExpr>($func_parameters_def.start, $block, $func_parameters_def.argNames);}
     ;
 
 variable returns [VExpression* expr]
@@ -260,6 +311,15 @@ index_parameters returns [VExpression* expr]
     :   L_BRACKET expression R_BRACKET {$expr = $expression.expr;}
     ;
 
+func_parameters_def returns [std::vector<std::string> argNames]
+    :   L_PAREN
+    (   first=IDENT         {$argNames.push_back($first.text);}
+        (
+            COMMA n=IDENT   {$argNames.push_back($n.text);}
+        )*
+    )?   R_PAREN
+    ;
+
 ////
 // Lexer
 ////
@@ -268,12 +328,20 @@ SEMICOLON
     :   ';'
     ;
 
+FUNCTION
+    :   'func'
+    ;
+
 DELETE
     :   'delete'
     ;
 
 BREAK
     :   'break'
+    ;
+
+RETURN
+    :   'return'
     ;
 
 INPUT
@@ -306,6 +374,10 @@ WHILE
 
 DO
     :   'do'
+    ;
+
+ARROW
+    :   '=>'
     ;
 
 L_PAREN

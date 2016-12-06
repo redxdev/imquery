@@ -81,6 +81,7 @@ namespace imq
 	{
 	public:
 		VMachine();
+		~VMachine();
 
 		std::shared_ptr<RootContext> getRootContext() const;
 

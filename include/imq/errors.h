@@ -45,7 +45,8 @@ namespace imq
 		IMQ_ERROR_DEF(context_input_overwrite, "Inputs may not be defined on top of a variable.");
 		IMQ_ERROR_DEF(context_output_overwrite, "Outputs may not be defined on top of a variable.");
 		IMQ_ERROR_DEF(context_input_invalid_type, "Input " << key << " has the wrong type.", const String& key);
-		IMQ_ERROR_DEF(context_not_breakable, "The current context cannot be broken.");
+		IMQ_ERROR_DEF(context_not_breakable, "The current context cannot be broken from.");
+		IMQ_ERROR_DEF(context_not_returnable, "THe current context cannot be returned from.");
 
 		IMQ_ERROR_DEF(image_load_error, "Image load error - " << reason, const String& reason);
 		IMQ_ERROR_DEF(image_save_error, "Image save error - unable to save image file " << filename, const String& filename);

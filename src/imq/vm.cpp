@@ -93,7 +93,7 @@ namespace imq
 
 		for (int32_t i = 0; i < count; ++i)
 		{
-			if (context->isContextBroken())
+			if (context->isContextBroken() || context->isContextReturnedFrom())
 				break;
 
 			if (!statements[i])
@@ -138,6 +138,12 @@ namespace imq
 	VMachine::VMachine()
 	{
 		rootContext = std::shared_ptr<RootContext>(new RootContext());
+	}
+
+	VMachine::~VMachine()
+	{
+		// TODO: is this unsafe?
+		delete rootContext.get();
 	}
 
 	std::shared_ptr<RootContext> VMachine::getRootContext() const

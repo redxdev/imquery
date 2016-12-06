@@ -245,6 +245,19 @@ namespace imq
 		virtual Result execute(ContextPtr context) override;
 	};
 
+	class ReturnStm : public VStatement
+	{
+	public:
+		ReturnStm(VExpression* valueExpr, const VLocation& loc);
+		virtual ~ReturnStm();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context) override;
+
+	private:
+		VExpression* valueExpr;
+	};
+
 	class NoOpStm : public VStatement
 	{
 	public:
