@@ -67,7 +67,7 @@ namespace imq
 	}
 
 	VBlock::VBlock(int32_t count, VStatement** statements, const VLocation loc)
-		: VStatement(loc), count(count), statements(statements)
+		: VStatement(loc), count(count), statements(statements), lastResult(nullptr)
 	{
 	}
 
@@ -93,6 +93,9 @@ namespace imq
 
 		for (int32_t i = 0; i < count; ++i)
 		{
+			if (context->isContextBroken())
+				break;
+
 			if (!statements[i])
 				continue;
 

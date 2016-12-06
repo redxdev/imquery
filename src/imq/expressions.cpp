@@ -612,7 +612,7 @@ namespace imq
 		}
 
 		QValue value;
-		while (selection->isValid())
+		while (selection->isValid() && !selection->getContext()->isContextBroken())
 		{
 			res = calcExpr->execute(selection->getContext(), &value);
 			if (!res)
@@ -787,6 +787,7 @@ namespace imq
 		}
 
 		ContextPtr subContext(new SubContext(context));
+		subContext->setBreakable(true);
 		Result res;
 
 		if (initStm)
@@ -822,6 +823,9 @@ namespace imq
 					return res;
 				}
 			}
+
+			if (subContext->isContextBroken())
+				break;
 
 			if (incrStm)
 			{
@@ -871,6 +875,7 @@ namespace imq
 		}
 
 		ContextPtr subContext(new SubContext(context));
+		subContext->setBreakable(true);
 		Result res;
 
 		QValue value;
@@ -897,6 +902,9 @@ namespace imq
 				}
 			}
 
+			if (subContext->isContextBroken())
+				break;
+
 			res = checkExpr->execute(subContext, &value);
 			if (!res)
 			{
@@ -909,6 +917,44 @@ namespace imq
 			}
 		}
 
+		return true;
+	}
+
+	BreakStm::BreakStm(const VLocation& loc)
+		: VStatement(loc)
+	{
+	}
+
+	BreakStm::~BreakStm()
+	{
+	}
+
+	String BreakStm::getName() const
+	{
+		return "Break";
+	}
+
+	Result BreakStm::execute(ContextPtr context)
+	{
+		return context->breakContext();
+	}
+
+	NoOpStm::NoOpStm(const VLocation& loc)
+		: VStatement(loc)
+	{
+	}
+
+	NoOpStm::~NoOpStm()
+	{
+	}
+
+	String NoOpStm::getName() const
+	{
+		return "NoOp";
+	}
+
+	Result NoOpStm::execute(ContextPtr context)
+	{
 		return true;
 	}
 }

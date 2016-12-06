@@ -234,4 +234,24 @@ namespace imq
 		VExpression* checkExpr;
 		VStatement* execStm;
 	};
+
+	class BreakStm : public VStatement
+	{
+	public:
+		BreakStm(const VLocation& loc);
+		virtual ~BreakStm();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context) override;
+	};
+
+	class NoOpStm : public VStatement
+	{
+	public:
+		NoOpStm(const VLocation& loc);
+		virtual ~NoOpStm();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context) override;
+	};
 }

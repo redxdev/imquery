@@ -551,6 +551,7 @@ namespace imq
 		: source(source), dest(dest), index(0)
 	{
 		context = std::shared_ptr<RestrictedSubContext>(new RestrictedSubContext(parent));
+		context->setBreakable(true);
 		color = std::shared_ptr<QColor>(new QColor());
 		context->setRawValue("color", QValue::Object(color));
 		updateContext();

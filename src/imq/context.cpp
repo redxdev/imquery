@@ -57,6 +57,38 @@ namespace imq
 		return errors::context_root_flags();
 	}
 
+	Result SimpleContext::setBreakable(bool bValue)
+	{
+		bBreakable = bValue;
+		if (!bBreakable)
+			bBroken = false;
+
+		return true;
+	}
+
+	bool SimpleContext::isBreakable() const
+	{
+		return bBreakable;
+	}
+
+	Result SimpleContext::breakContext()
+	{
+		if (bBreakable)
+		{
+			bBroken = true;
+			return true;
+		}
+		else
+		{
+			return errors::context_not_breakable();
+		}
+	}
+
+	bool SimpleContext::isContextBroken() const
+	{
+		return bBreakable && bBroken;
+	}
+
 	bool RootContext::hasValue(const String& key) const
 	{
 		return values.find(key) != values.end() || inputs.find(key) != inputs.end() || outputs.find(key) != outputs.end();
@@ -165,6 +197,26 @@ namespace imq
 		return true;
 	}
 
+	imq::Result RootContext::setBreakable(bool bValue)
+	{
+		return errors::context_not_breakable();
+	}
+
+	bool RootContext::isBreakable() const
+	{
+		return false;
+	}
+
+	imq::Result RootContext::breakContext()
+	{
+		return false;
+	}
+
+	bool RootContext::isContextBroken() const
+	{
+		return false;
+	}
+
 	void RootContext::setInput(const String& key, const QValue& value)
 	{
 		inputs[key] = value;
@@ -251,6 +303,36 @@ namespace imq
 	Result SubContext::registerOutput(const String& key, const QValue& value)
 	{
 		return errors::context_root_flags();
+	}
+
+	imq::Result SubContext::setBreakable(bool bValue)
+	{
+		bBreakable = bValue;
+		if (!bBreakable)
+			bBroken = false;
+
+		return true;
+	}
+
+	bool SubContext::isBreakable() const
+	{
+		return bBreakable || parent->isBreakable();
+	}
+
+	imq::Result SubContext::breakContext()
+	{
+		if (bBreakable)
+		{
+			bBroken = true;
+			return true;
+		}
+
+		return parent->breakContext();
+	}
+
+	bool SubContext::isContextBroken() const
+	{
+		return (bBreakable && bBroken) || parent->isContextBroken();
 	}
 
 	RestrictedSubContext::RestrictedSubContext(ContextPtr parent)

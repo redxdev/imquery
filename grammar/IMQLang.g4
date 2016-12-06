@@ -37,17 +37,18 @@ statements returns [int32_t count, VStatement** stmArr]
     ;
 
 statement returns [VStatement* stm]
-    :   define_input_stm SEMICOLON {$stm = $define_input_stm.stm;}
-    |   define_output_stm SEMICOLON {$stm = $define_output_stm.stm;}
-    |   set_variable_stm SEMICOLON {$stm = $set_variable_stm.stm;}
-    |   set_field_stm SEMICOLON {$stm = $set_field_stm.stm;}
-    |   delete_variable_stm SEMICOLON {$stm = $delete_variable_stm.stm;}
-    |   select_stm SEMICOLON {$stm = $select_stm.stm;}
-    |   branch_stm {$stm = $branch_stm.stm;} // no semicolon, uses block syntax
-    |   for_loop_stm {$stm = $for_loop_stm.stm;} // ^^
-    |   while_loop_stm {$stm = $while_loop_stm.stm;} // ^^
-    |   expression SEMICOLON {$stm = createNodeFromToken<VExpressionAsStatement>($expression.start, $expression.expr);}
-    |   SEMICOLON {$stm = nullptr;}
+    :   define_input_stm SEMICOLON      {$stm = $define_input_stm.stm;}
+    |   define_output_stm SEMICOLON     {$stm = $define_output_stm.stm;}
+    |   set_variable_stm SEMICOLON      {$stm = $set_variable_stm.stm;}
+    |   set_field_stm SEMICOLON         {$stm = $set_field_stm.stm;}
+    |   delete_variable_stm SEMICOLON   {$stm = $delete_variable_stm.stm;}
+    |   select_stm SEMICOLON            {$stm = $select_stm.stm;}
+    |   break_stm SEMICOLON             {$stm = $break_stm.stm; }
+    |   branch_stm                      {$stm = $branch_stm.stm;} // no semicolon, uses block syntax
+    |   for_loop_stm                    {$stm = $for_loop_stm.stm;} // ^^
+    |   while_loop_stm                  {$stm = $while_loop_stm.stm;} // ^^
+    |   expression SEMICOLON            {$stm = createNodeFromToken<VExpressionAsStatement>($expression.start, $expression.expr);}
+    |   SEMICOLON                       {$stm = nullptr;} //{$stm = createNodeFromToken<NoOpStm>($SEMICOLON);}
     ;
 
 define_input_stm returns [VStatement* stm]
@@ -79,13 +80,19 @@ select_stm returns [VStatement* stm]
 
 branch_stm returns [VStatement* stm]
     locals [VBlock* trueBlock = nullptr, VStatement* falseBlock = nullptr]
-    :   IF expression L_BRACE statements? R_BRACE
-    (
-        ELSE elif=branch_stm                {$falseBlock = $branch_stm.stm;}
-    |   ELSE L_BRACE
-        (statements {$falseBlock = createNodeFromToken<VBlock>($statements.start, $statements.count, $statements.stmArr);})?
+    :   IF check=expression L_BRACE
+        (statements {$trueBlock = createNodeFromToken<VBlock>($statements.start, $statements.count, $statements.stmArr);})?
         R_BRACE
+    (
+        ELSE
+        (
+            elif=branch_stm     {$falseBlock = $elif.stm;}
+        |   L_BRACE
+            (el=statements {$falseBlock = createNodeFromToken<VBlock>($el.start, $el.count, $el.stmArr);})?
+            R_BRACE
+        )
     )?
+        {$stm = createNodeFromToken<BranchStm>($IF, $check.expr, $trueBlock, $falseBlock);}
     ;
 
 for_loop_stm returns [VStatement* stm]
@@ -106,6 +113,10 @@ while_loop_stm returns [VStatement* stm]
         {
             $stm = createNodeFromToken<WhileLoopStm>($WHILE, $expression.expr, $block);
         }
+    ;
+
+break_stm returns [VStatement* stm]
+    : BREAK {$stm = createNodeFromToken<BreakStm>($BREAK);}
     ;
 
 expression returns [VExpression* expr]
@@ -259,6 +270,10 @@ SEMICOLON
 
 DELETE
     :   'delete'
+    ;
+
+BREAK
+    :   'break'
     ;
 
 INPUT
