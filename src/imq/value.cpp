@@ -360,7 +360,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "+");
 
 			case Type::Object:
-				return errors::math_object_order("+");
+				return rhs.obj->opAdd(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "+");
 
@@ -385,7 +385,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "+");
 
 			case Type::Object:
-				return errors::math_object_order("+");
+				return rhs.obj->opAdd(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "+");
 
@@ -393,7 +393,7 @@ namespace imq
 			return errors::math_operator_invalid("Function", "+");
 
 		case Type::Object:
-			return obj->opAdd(rhs, result);
+			return obj->opAdd(OperationOrder::LHS, rhs, result);
 		}
 
 		return errors::math_operator_invalid("<???>", "+");
@@ -430,7 +430,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "-");
 
 			case Type::Object:
-				return errors::math_object_order("-");
+				return rhs.obj->opSub(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "-");
 
@@ -455,7 +455,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "-");
 
 			case Type::Object:
-				return errors::math_object_order("-");
+				return rhs.obj->opSub(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "-");
 
@@ -463,7 +463,7 @@ namespace imq
 			return errors::math_operator_invalid("Function", "-");
 
 		case Type::Object:
-			return obj->opSub(rhs, result);
+			return obj->opSub(OperationOrder::LHS, rhs, result);
 		}
 
 		return errors::math_operator_invalid("<???>", "-");
@@ -500,7 +500,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "*");
 
 			case Type::Object:
-				return errors::math_object_order("*");
+				return rhs.obj->opMul(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "*");
 
@@ -525,7 +525,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "*");
 
 			case Type::Object:
-				return errors::math_object_order("*");
+				return rhs.obj->opMul(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "*");
 
@@ -533,7 +533,7 @@ namespace imq
 			return errors::math_operator_invalid("Function", "*");
 
 		case Type::Object:
-			return obj->opMul(rhs, result);
+			return obj->opMul(OperationOrder::LHS, rhs, result);
 		}
 
 		return errors::math_operator_invalid("<???>", "*");
@@ -576,7 +576,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "/");
 
 			case Type::Object:
-				return errors::math_object_order("/");
+				return rhs.obj->opDiv(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "/");
 
@@ -607,7 +607,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "/");
 
 			case Type::Object:
-				return errors::math_object_order("/");
+				return rhs.obj->opDiv(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "/");
 
@@ -615,7 +615,7 @@ namespace imq
 			return errors::math_operator_invalid("Function", "/");
 
 		case Type::Object:
-			return obj->opDiv(rhs, result);
+			return obj->opDiv(OperationOrder::LHS, rhs, result);
 		}
 
 		return errors::math_operator_invalid("<???>", "/");
@@ -657,7 +657,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "%");
 
 			case Type::Object:
-				return errors::math_object_order("%");
+				return rhs.obj->opMod(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "%");
 
@@ -688,7 +688,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "%");
 
 			case Type::Object:
-				return errors::math_object_order("%");
+				return rhs.obj->opMod(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "%");
 
@@ -696,7 +696,7 @@ namespace imq
 			return errors::math_operator_invalid("Function", "%");
 
 		case Type::Object:
-			return obj->opMod(rhs, result);
+			return obj->opMod(OperationOrder::LHS, rhs, result);
 		}
 
 		return errors::math_operator_invalid("<???>", "%");
@@ -784,7 +784,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "and");
 
 			case Type::Object:
-				return errors::math_object_order("and");
+				return rhs.obj->opAnd(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "and");
 
@@ -798,7 +798,7 @@ namespace imq
 			return errors::math_operator_invalid("Function", "and");
 
 		case Type::Object:
-			return obj->opAnd(rhs, result);
+			return obj->opAnd(OperationOrder::LHS, rhs, result);
 		}
 
 		return errors::math_operator_invalid("<???>", "and");
@@ -831,7 +831,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "or");
 
 			case Type::Object:
-				return errors::math_object_order("or");
+				return rhs.obj->opOr(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "or");
 
@@ -845,7 +845,7 @@ namespace imq
 			return errors::math_operator_invalid("Function", "or");
 
 		case Type::Object:
-			return obj->opOr(rhs, result);
+			return obj->opOr(OperationOrder::LHS, rhs, result);
 		}
 
 		return errors::math_operator_invalid("<???>", "or");
@@ -882,7 +882,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "less");
 
 			case Type::Object:
-				return errors::math_object_order("less");
+				return rhs.obj->opLess(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "less");
 
@@ -907,7 +907,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "less");
 
 			case Type::Object:
-				return errors::math_object_order("less");
+				return rhs.obj->opLess(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "less");
 
@@ -915,7 +915,7 @@ namespace imq
 			return errors::math_operator_invalid("Function", "less");
 
 		case Type::Object:
-			return obj->opLess(rhs, result);
+			return obj->opLess(OperationOrder::LHS, rhs, result);
 		}
 
 		return errors::math_operator_invalid("<???>", "less");
@@ -952,7 +952,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "lesseq");
 
 			case Type::Object:
-				return errors::math_object_order("lesseq");
+				return rhs.obj->opLessEq(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "lesseq");
 
@@ -977,7 +977,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "lesseq");
 
 			case Type::Object:
-				return errors::math_object_order("lesseq");
+				return rhs.obj->opLessEq(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "lesseq");
 
@@ -985,7 +985,7 @@ namespace imq
 			return errors::math_operator_invalid("Function", "lesseq");
 
 		case Type::Object:
-			return obj->opLessEq(rhs, result);
+			return obj->opLessEq(OperationOrder::LHS, rhs, result);
 		}
 
 		return errors::math_operator_invalid("<???>", "lesseq");
@@ -1022,7 +1022,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "greater");
 
 			case Type::Object:
-				return errors::math_object_order("greater");
+				return rhs.obj->opGreater(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "greater");
 
@@ -1047,7 +1047,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "greater");
 
 			case Type::Object:
-				return errors::math_object_order("greater");
+				return rhs.obj->opGreater(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "greater");
 
@@ -1055,7 +1055,7 @@ namespace imq
 			return errors::math_operator_invalid("Function", "greater");
 
 		case Type::Object:
-			return obj->opGreater(rhs, result);
+			return obj->opGreater(OperationOrder::LHS, rhs, result);
 		}
 
 		return errors::math_operator_invalid("<???>", "greater");
@@ -1092,7 +1092,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "greatereq");
 
 			case Type::Object:
-				return errors::math_object_order("greatereq");
+				return rhs.obj->opGreaterEq(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "greatereq");
 
@@ -1117,7 +1117,7 @@ namespace imq
 				return errors::math_operator_invalid("Function", "greatereq");
 
 			case Type::Object:
-				return errors::math_object_order("greatereq");
+				return rhs.obj->opGreaterEq(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "greatereq");
 
@@ -1125,7 +1125,7 @@ namespace imq
 			return errors::math_operator_invalid("Function", "greatereq");
 
 		case Type::Object:
-			return obj->opGreaterEq(rhs, result);
+			return obj->opGreaterEq(OperationOrder::LHS, rhs, result);
 		}
 
 		return errors::math_operator_invalid("<???>", "greatereq");

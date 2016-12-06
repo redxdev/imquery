@@ -57,6 +57,8 @@ namespace imq
 		IMQ_ERROR_DEF(selection_create_error, "Unable to create selection - " << msg, const String& msg);
 
 		IMQ_ERROR_DEF(math_operator_invalid, "Operator " << op << " is not valid for type " << t, const String& t, const String& op);
+		IMQ_ERROR_DEF(math_operator_obj_invalid, "Operator " << op << " is not valid for types " << objType << " and " << QValue::getTypeString(val.getType()), const String& op, const String& objType, const QValue& val);
+		IMQ_ERROR_DEF(math_operator_obj_invalid, "Operator " << op << " is not valid for types " << objType << " and " << valType, const String& op, const String& objType, const String& valType);
 		IMQ_ERROR_DEF(math_object_order, "Operator " << op << " cannot operate on objects unless they are on the left-hand side.", const String& op);
 		IMQ_ERROR_DEF(math_divide_by_zero, "Divide by zero error");
 		IMQ_ERROR_DEF(math_mod_by_zero, "Mod by zero error");

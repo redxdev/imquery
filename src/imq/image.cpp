@@ -1,6 +1,7 @@
 #include "image.h"
 
 #include <string>
+#include <cmath>
 
 #include "thirdparty/stb_image.h"
 #include "thirdparty/stb_image_write.h"
@@ -243,6 +244,287 @@ namespace imq
 		*/
 
 		return errors::immutable_obj(getTypeString());
+	}
+
+	Result QColor::opAdd(OperationOrder order, const QValue& other, QValue* result) const
+	{
+		switch (other.getType())
+		{
+		default:
+			return errors::math_operator_obj_invalid("+", getTypeString(), other);
+
+		case QValue::Type::Integer:
+		{
+			int32_t i;
+			other.getInteger(&i);
+			*result = QValue::Object(new QColor(red + i, green + i, blue + i, alpha + i));
+			return true;
+		}
+
+		case QValue::Type::Float:
+		{
+			float f;
+			other.getFloat(&f);
+			*result = QValue::Object(new QColor(red + f, green + f, blue + f, alpha + f));
+			return true;
+		}
+
+		case QValue::Type::Object:
+		{
+			QObjectPtr obj;
+			other.getObject(&obj);
+			QColor* col = objectCast<QColor>(obj.get());
+			if (!col)
+				return errors::math_operator_obj_invalid("+", getTypeString(), obj->getTypeString());
+
+			*result = QValue::Object(new QColor(red + col->red, green + col->green, blue + col->blue, alpha + col->alpha));
+			return true;
+		}
+		}
+	}
+
+	Result QColor::opSub(OperationOrder order, const QValue& other, QValue* result) const
+	{
+		QColor* res = nullptr;
+		switch (other.getType())
+		{
+		default:
+			return errors::math_operator_obj_invalid("-", getTypeString(), other);
+
+		case QValue::Type::Integer:
+		{
+			int32_t i;
+			other.getInteger(&i);
+			res = new QColor(red - i, green - i, blue - i, alpha - i);
+			break;
+		}
+
+		case QValue::Type::Float:
+		{
+			float f;
+			other.getFloat(&f);
+			res = new QColor(red - f, green - f, blue - f, alpha - f);
+			break;
+		}
+
+		case QValue::Type::Object:
+		{
+			QObjectPtr obj;
+			other.getObject(&obj);
+			QColor* col = objectCast<QColor>(obj.get());
+			if (!col)
+				return errors::math_operator_obj_invalid("-", getTypeString(), obj->getTypeString());
+
+			res = new QColor(red - col->red, green - col->green, blue - col->blue, alpha - col->alpha);
+			break;
+		}
+		}
+
+		if (order == OperationOrder::RHS)
+		{
+			res->red *= -1;
+			res->green *= -1;
+			res->blue *= -1;
+			res->alpha *= -1;
+		}
+
+		*result = QValue::Object(res);
+		return true;
+	}
+
+	Result QColor::opMul(OperationOrder order, const QValue& other, QValue* result) const
+	{
+		switch (other.getType())
+		{
+		default:
+			return errors::math_operator_obj_invalid("*", getTypeString(), other);
+
+		case QValue::Type::Integer:
+		{
+			int32_t i;
+			other.getInteger(&i);
+			*result = QValue::Object(new QColor(red * i, green * i, blue * i, alpha * i));
+			return true;
+		}
+
+		case QValue::Type::Float:
+		{
+			float f;
+			other.getFloat(&f);
+			*result = QValue::Object(new QColor(red * f, green * f, blue * f, alpha * f));
+			return true;
+		}
+
+		case QValue::Type::Object:
+		{
+			QObjectPtr obj;
+			other.getObject(&obj);
+			QColor* col = objectCast<QColor>(obj.get());
+			if (!col)
+				return errors::math_operator_obj_invalid("/", getTypeString(), obj->getTypeString());
+
+			*result = QValue::Object(new QColor(red * col->red, green * col->green, blue * col->blue, alpha * col->alpha));
+			return true;
+		}
+		}
+	}
+
+	Result QColor::opDiv(OperationOrder order, const QValue& other, QValue* result) const
+	{
+		switch (other.getType())
+		{
+		default:
+			return errors::math_operator_obj_invalid("/", getTypeString(), other);
+
+		case QValue::Type::Integer:
+		{
+			int32_t i;
+			other.getInteger(&i);
+			if (order == OperationOrder::LHS)
+			{
+				if (i == 0)
+					return errors::math_divide_by_zero();
+
+				*result = QValue::Object(new QColor(red / i, green / i, blue / i, alpha / i));
+			}
+			else
+			{
+				if (red == 0.f || green == 0.f || blue == 0.f || alpha == 0.f)
+					return errors::math_divide_by_zero();
+
+				*result = QValue::Object(new QColor(i / red, i / green, i / blue, i / alpha));
+			}
+			return true;
+		}
+
+		case QValue::Type::Float:
+		{
+			float f;
+			other.getFloat(&f);
+			if (order == OperationOrder::LHS)
+			{
+				if (f == 0.f)
+					return errors::math_divide_by_zero();
+
+				*result = QValue::Object(new QColor(red / f, green / f, blue / f, alpha / f));
+			}
+			else
+			{
+				if (red == 0.f || green == 0.f || blue == 0.f || alpha == 0.f)
+					return errors::math_divide_by_zero();
+
+				*result = QValue::Object(new QColor(f / red, f / green, f / blue, f / alpha));
+			}
+			return true;
+		}
+
+		case QValue::Type::Object:
+		{
+			QObjectPtr obj;
+			other.getObject(&obj);
+			QColor* col = objectCast<QColor>(obj.get());
+			if (!col)
+				return errors::math_operator_obj_invalid("/", getTypeString(), obj->getTypeString());
+
+			if (order == OperationOrder::LHS)
+			{
+				if (col->red == 0.f || col->green == 0.f || col->blue == 0.f || col->alpha == 0.f)
+					return errors::math_divide_by_zero();
+
+				*result = QValue::Object(new QColor(red / col->red, green / col->green, blue / col->blue, alpha / col->alpha));
+			}
+			else
+			{
+				if (red == 0.f || green == 0.f || blue == 0.f || alpha == 0.f)
+					return errors::math_divide_by_zero();
+
+				*result = QValue::Object(new QColor(col->red / red, col->green / green, col->blue / blue, col->alpha / alpha));
+			}
+			return true;
+		}
+		}
+	}
+
+	Result QColor::opMod(OperationOrder order, const QValue& other, QValue* result) const
+	{
+		switch (other.getType())
+		{
+		default:
+			return errors::math_operator_obj_invalid("%", getTypeString(), other);
+
+		case QValue::Type::Integer:
+		{
+			int32_t i;
+			other.getInteger(&i);
+			if (order == OperationOrder::LHS)
+			{
+				if (i == 0)
+					return errors::math_mod_by_zero();
+
+				*result = QValue::Object(new QColor((float)std::fmod<float>(red, i), (float)std::fmod<float>(green, i), (float)std::fmod<float>(blue, i), (float)std::fmod<float>(alpha, i)));
+			}
+			else
+			{
+				if (red == 0.f || green == 0.f || blue == 0.f || alpha == 0.f)
+					return errors::math_mod_by_zero();
+
+				*result = QValue::Object(new QColor(std::fmod<float>((float)i, red), std::fmod<float>((float)i, green), std::fmod<float>((float)i, blue), std::fmod<float>((float)i, alpha)));
+			}
+			return true;
+		}
+
+		case QValue::Type::Float:
+		{
+			float f;
+			other.getFloat(&f);
+			if (order == OperationOrder::LHS)
+			{
+				if (f == 0.f)
+					return errors::math_mod_by_zero();
+
+				*result = QValue::Object(new QColor(std::fmod(red, f), std::fmod(green, f), std::fmod(blue, f), std::fmod(alpha, f)));
+			}
+			else
+			{
+				if (red == 0.f || green == 0.f || blue == 0.f || alpha == 0.f)
+					return errors::math_mod_by_zero();
+
+				*result = QValue::Object(new QColor(std::fmod(f, red), std::fmod(f, green), std::fmod(f, blue), std::fmod(f, alpha)));
+			}
+			return true;
+		}
+
+		case QValue::Type::Object:
+		{
+			QObjectPtr obj;
+			other.getObject(&obj);
+			QColor* col = objectCast<QColor>(obj.get());
+			if (!col)
+				return errors::math_operator_obj_invalid("%", getTypeString(), obj->getTypeString());
+
+			if (order == OperationOrder::LHS)
+			{
+				if (col->red == 0.f || col->green == 0.f || col->blue == 0.f || col->alpha == 0.f)
+					return errors::math_mod_by_zero();
+
+				*result = QValue::Object(new QColor(std::fmod(red, col->red), std::fmod(green, col->green), std::fmod(blue, col->blue), std::fmod(alpha, col->alpha)));
+			}
+			else
+			{
+				if (red == 0.f || green == 0.f || blue == 0.f || alpha == 0.f)
+					return errors::math_mod_by_zero();
+
+				*result = QValue::Object(new QColor(std::fmod(col->red, red), std::fmod(col->green, green), std::fmod(col->blue, blue), std::fmod(col->alpha, alpha)));
+			}
+			return true;
+		}
+		}
+	}
+
+	Result QColor::opNegate(QValue* result) const
+	{
+		*result = QValue::Object(new QColor(-red, -green, -blue, -alpha));
+		return true;
 	}
 
 	// QImage

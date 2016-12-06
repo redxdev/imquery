@@ -20,6 +20,12 @@ namespace imq
 		virtual Result apply(const QValue& value) = 0;
 	};
 
+	enum class OperationOrder
+	{
+		LHS, // object is on the left-hand side
+		RHS // object is on the right-hand side
+	};
+
 	class QObject
 	{
 	public:
@@ -41,20 +47,20 @@ namespace imq
 
 		virtual Result selection(ContextPtr context, const QValue& value, QSelection** result);
 
-		// Operators
-		virtual Result opAdd(const QValue& rhs, QValue* result) const;
-		virtual Result opSub(const QValue& rhs, QValue* result) const;
-		virtual Result opMul(const QValue& rhs, QValue* result) const;
-		virtual Result opDiv(const QValue& rhs, QValue* result) const;
-		virtual Result opMod(const QValue& rhs, QValue* result) const;
+		// Operators - order is the position this object is in (RHS for right-hand, LHS for left-hand).
+		virtual Result opAdd(OperationOrder order, const QValue& other, QValue* result) const;
+		virtual Result opSub(OperationOrder order, const QValue& other, QValue* result) const;
+		virtual Result opMul(OperationOrder order, const QValue& other, QValue* result) const;
+		virtual Result opDiv(OperationOrder order, const QValue& other, QValue* result) const;
+		virtual Result opMod(OperationOrder order, const QValue& other, QValue* result) const;
 		virtual Result opNegate(QValue* result) const;
 		virtual Result opNot(QValue* result) const;
-		virtual Result opAnd(const QValue& rhs, QValue* result) const;
-		virtual Result opOr(const QValue& rhs, QValue* result) const;
-		virtual Result opLess(const QValue& rhs, QValue* result) const;
-		virtual Result opLessEq(const QValue& rhs, QValue* result) const;
-		virtual Result opGreater(const QValue& rhs, QValue* result) const;
-		virtual Result opGreaterEq(const QValue& rhs, QValue* result) const;
+		virtual Result opAnd(OperationOrder order, const QValue& other, QValue* result) const;
+		virtual Result opOr(OperationOrder order, const QValue& other, QValue* result) const;
+		virtual Result opLess(OperationOrder order, const QValue& other, QValue* result) const;
+		virtual Result opLessEq(OperationOrder order, const QValue& other, QValue* result) const;
+		virtual Result opGreater(OperationOrder order, const QValue& other, QValue* result) const;
+		virtual Result opGreaterEq(OperationOrder order, const QValue& other, QValue* result) const;
 
 		void updateSelfPointer(const std::shared_ptr<QObject> ptr);
 		const std::weak_ptr<QObject>& getSelfPointer() const;

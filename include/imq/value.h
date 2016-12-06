@@ -73,7 +73,6 @@ namespace imq
 		friend bool operator==(const QValue& a, const QValue& b);
 		friend bool operator!=(const QValue& a, const QValue& b);
 
-		// TODO: Support rhs objects
 		Result opAdd(const QValue& rhs, QValue* result) const;
 		Result opSub(const QValue& rhs, QValue* result) const;
 		Result opMul(const QValue& rhs, QValue* result) const;

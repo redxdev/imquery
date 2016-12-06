@@ -44,6 +44,13 @@ namespace imq
 		virtual Result getIndex(const QValue& index, QValue* result) override;
 		virtual Result setIndex(const QValue& index, const QValue& value) override;
 
+		virtual Result opAdd(OperationOrder order, const QValue& other, QValue* result) const override;
+		virtual Result opSub(OperationOrder order, const QValue& other, QValue* result) const override;
+		virtual Result opMul(OperationOrder order, const QValue& other, QValue* result) const override;
+		virtual Result opDiv(OperationOrder order, const QValue& other, QValue* result) const override;
+		virtual Result opMod(OperationOrder order, const QValue& other, QValue* result) const override;
+		virtual Result opNegate(QValue* result) const override;
+
 	private:
 		float red;
 		float green;
