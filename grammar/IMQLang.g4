@@ -42,6 +42,7 @@ statement returns [VStatement* stm]
     |   define_output_stm SEMICOLON     {$stm = $define_output_stm.stm;}
     |   set_variable_stm SEMICOLON      {$stm = $set_variable_stm.stm;}
     |   set_field_stm SEMICOLON         {$stm = $set_field_stm.stm;}
+    |   set_index_stm SEMICOLON         {$stm = $set_index_stm.stm;}
     |   delete_variable_stm SEMICOLON   {$stm = $delete_variable_stm.stm;}
     |   select_stm SEMICOLON            {$stm = $select_stm.stm;}
     |   break_stm SEMICOLON             {$stm = $break_stm.stm;}
@@ -71,6 +72,10 @@ set_variable_stm returns [VStatement* stm]
 
 set_field_stm returns [VStatement* stm]
     :   variable DOT IDENT EQUAL expression {$stm = createNodeFromToken<SetFieldStm>($variable.start, $variable.expr, $IDENT.text, $expression.expr);}
+    ;
+
+set_index_stm returns [VStatement* stm]
+    :   variable L_BRACKET index=expression R_BRACKET EQUAL val=expression {$stm = createNodeFromToken<SetIndexStm>($variable.start, $variable.expr, $index.expr, $val.expr);}
     ;
 
 delete_variable_stm returns [VStatement* stm]
