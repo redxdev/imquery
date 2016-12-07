@@ -959,6 +959,45 @@ namespace imq
 		return true;
 	}
 
+	InfiniteLoopStm::InfiniteLoopStm(VStatement* execStm, const VLocation& loc)
+		: VStatement(loc), execStm(execStm)
+	{
+	}
+
+	InfiniteLoopStm::~InfiniteLoopStm()
+	{
+		delete execStm;
+	}
+
+	String InfiniteLoopStm::getName() const
+	{
+		return "Loop";
+	}
+
+	Result InfiniteLoopStm::execute(ContextPtr context)
+	{
+		ContextPtr subContext(new SubContext(context));
+		subContext->setBreakable(true);
+		Result res;
+
+		while (true)
+		{
+			if (execStm)
+			{
+				res = execStm->execute(subContext);
+				if (!res)
+				{
+					return res;
+				}
+			}
+
+			if (subContext->isContextBroken() || subContext->isContextReturnedFrom())
+				break;
+		}
+
+		return true;
+	}
+
 	BreakStm::BreakStm(const VLocation& loc)
 		: VStatement(loc)
 	{

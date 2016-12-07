@@ -237,6 +237,19 @@ namespace imq
 		VStatement* execStm;
 	};
 
+	class InfiniteLoopStm : public VStatement
+	{
+	public:
+		InfiniteLoopStm(VStatement* execStm, const VLocation& loc);
+		virtual ~InfiniteLoopStm();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context) override;
+		
+	private:
+		VStatement* execStm;
+	};
+
 	class BreakStm : public VStatement
 	{
 	public:
