@@ -256,24 +256,7 @@ namespace imq
 
 	Result QColor::setField(const String& name, const QValue& value)
 	{
-		if (name == "red" || name == "r")
-		{
-			return value.getFloat(&red);
-		}
-		else if (name == "green" || name == "g")
-		{
-			return value.getFloat(&green);
-		}
-		else if (name == "blue" || name == "b")
-		{
-			return value.getFloat(&blue);
-		}
-		else if (name == "alpha" || name == "a")
-		{
-			return value.getFloat(&alpha);
-		}
-
-		return errors::undefined_field(getTypeString(), name);
+		return errors::immutable_obj(getTypeString());
 	}
 
 	Result QColor::getIndex(const QValue& index, QValue* result)
