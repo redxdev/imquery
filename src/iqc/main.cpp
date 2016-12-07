@@ -160,6 +160,9 @@ bool execute(VMachine* vm, VBlock* block, const std::vector<IOPair>& outputs, bo
 			continue;
 		}
 
+		if (!block)
+			continue;
+
 		block->setEmitLastResult(&lastResult);
 
 		res = vm->execute(block);
