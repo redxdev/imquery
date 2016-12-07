@@ -545,8 +545,8 @@ namespace imq
 		return true;
 	}
 
-	SelectStm::SelectStm(VExpression* destExpr, VExpression* srcExpr, VExpression* calcExpr, const VLocation& loc)
-		: VStatement(loc), destExpr(destExpr), srcExpr(srcExpr), calcExpr(calcExpr)
+	SelectStm::SelectStm(VExpression* destExpr, VExpression* srcExpr, VExpression* calcExpr, VExpression* whereExpr, VExpression* elseExpr, const VLocation& loc)
+		: VStatement(loc), destExpr(destExpr), srcExpr(srcExpr), calcExpr(calcExpr), whereExpr(whereExpr), elseExpr(elseExpr)
 	{
 	}
 
@@ -555,6 +555,8 @@ namespace imq
 		delete destExpr;
 		delete srcExpr;
 		delete calcExpr;
+		delete whereExpr;
+		delete elseExpr;
 	}
 
 	String SelectStm::getName() const
@@ -614,17 +616,54 @@ namespace imq
 		QValue value;
 		while (selection->isValid() && !selection->getContext()->isContextBroken() && !selection->getContext()->isContextReturnedFrom())
 		{
-			res = calcExpr->execute(selection->getContext(), &value);
-			if (!res)
+			bool bShouldExecute = true;
+			if (whereExpr)
 			{
-				return res;
+				res = whereExpr->execute(selection->getContext(), &value);
+				if (!res)
+				{
+					delete selection;
+					return res;
+				}
+
+				if (!value.getBool(&bShouldExecute))
+				{
+					delete selection;
+					return errors::vm_generic_error(getLocation(), "Selection \"where\" expression must return a Bool.");
+				}
 			}
 
-			res = selection->apply(value);
-			if (!res)
+			if (bShouldExecute)
 			{
-				delete selection;
-				return errors::vm_generic_error(getLocation(), res.getErr());
+				res = calcExpr->execute(selection->getContext(), &value);
+				if (!res)
+				{
+					delete selection;
+					return res;
+				}
+
+				res = selection->apply(value);
+				if (!res)
+				{
+					delete selection;
+					return errors::vm_generic_error(getLocation(), res.getErr());
+				}
+			}
+			else if (elseExpr)
+			{
+				res = elseExpr->execute(selection->getContext(), &value);
+				if (!res)
+				{
+					delete selection;
+					return res;
+				}
+
+				res = selection->apply(value);
+				if (!res)
+				{
+					delete selection;
+					return errors::vm_generic_error(getLocation(), res.getErr());
+				}
 			}
 
 			selection->next();
@@ -995,6 +1034,64 @@ namespace imq
 
 	Result NoOpStm::execute(ContextPtr context)
 	{
+		return true;
+	}
+
+	TernaryExpr::TernaryExpr(VExpression* checkExpr, VExpression* trueExpr, VExpression* falseExpr, const VLocation& loc)
+		: VExpression(loc), checkExpr(checkExpr), trueExpr(trueExpr), falseExpr(falseExpr)
+	{
+	}
+
+	TernaryExpr::~TernaryExpr()
+	{
+		delete checkExpr;
+		delete trueExpr;
+		delete falseExpr;
+	}
+
+	String TernaryExpr::getName() const
+	{
+		return "Ternary";
+	}
+
+	Result TernaryExpr::execute(ContextPtr context, QValue* result)
+	{
+		if (!checkExpr)
+		{
+			return errors::vm_generic_error(getLocation(), "Invalid check subexpression for Ternary");
+		}
+
+		if (!trueExpr)
+		{
+			return errors::vm_generic_error(getLocation(), "Invalid true subexpression for Ternary");
+		}
+
+		if (!falseExpr)
+		{
+			return errors::vm_generic_error(getLocation(), "Invalid false subexpression for Ternary");
+		}
+
+		QValue value;
+		bool bCheckResult;
+
+		Result res = checkExpr->execute(context, &value);
+		if (!res)
+		{
+			return res;
+		}
+
+		if (!value.getBool(&bCheckResult))
+		{
+			return errors::vm_generic_error(getLocation(), "Check subexpression must return a Bool for Ternary");
+		}
+
+		VExpression* expr = bCheckResult ? trueExpr : falseExpr;
+		res = expr->execute(context, result);
+		if (!res)
+		{
+			return res;
+		}
+
 		return true;
 	}
 }

@@ -150,7 +150,7 @@ namespace imq
 	class SelectStm : public VStatement
 	{
 	public:
-		SelectStm(VExpression* destExpr, VExpression* srcExpr, VExpression* calcExpr, const VLocation& loc);
+		SelectStm(VExpression* destExpr, VExpression* srcExpr, VExpression* calcExpr, VExpression* whereExpr, VExpression* elseExpr, const VLocation& loc);
 		virtual ~SelectStm();
 
 		virtual String getName() const override;
@@ -160,6 +160,8 @@ namespace imq
 		VExpression* destExpr;
 		VExpression* srcExpr;
 		VExpression* calcExpr;
+		VExpression* whereExpr;
+		VExpression* elseExpr;
 	};
 
 	class DefineInputStm : public VStatement
@@ -266,5 +268,20 @@ namespace imq
 
 		virtual String getName() const override;
 		virtual Result execute(ContextPtr context) override;
+	};
+
+	class TernaryExpr : public VExpression
+	{
+	public:
+		TernaryExpr(VExpression* checkExpr, VExpression* trueExpr, VExpression* falseExpr, const VLocation& loc);
+		virtual ~TernaryExpr();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context, QValue* result) override;
+
+	private:
+		VExpression* checkExpr;
+		VExpression* trueExpr;
+		VExpression* falseExpr;
 	};
 }

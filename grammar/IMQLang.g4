@@ -78,7 +78,15 @@ delete_variable_stm returns [VStatement* stm]
     ;
 
 select_stm returns [VStatement* stm]
-    :   dest=expression COLON calc=expression FROM src=expression {$stm = createNodeFromToken<SelectStm>($dest.start, $dest.expr, $src.expr, $calc.expr);}
+    locals [VExpression* whereExpr = nullptr, VExpression* elseExpr = nullptr]
+    :   dest=expression COLON calc=expression FROM src=expression
+    (
+        WHERE where=expression {$whereExpr = $where.expr;}
+        (
+            ELSE el=expression {$elseExpr = $el.expr;}
+        )?
+    )?
+        {$stm = createNodeFromToken<SelectStm>($dest.start, $dest.expr, $src.expr, $calc.expr, $whereExpr, $elseExpr);}
     ;
 
 branch_stm returns [VStatement* stm]
@@ -146,7 +154,14 @@ define_function_stm returns [VStatement* stm]
     ;
 
 expression returns [VExpression* expr]
-    :   orExpr {$expr = $orExpr.expr;}
+    :   ternaryExpr {$expr = $ternaryExpr.expr;}
+    ;
+
+ternaryExpr returns [VExpression* expr]
+    :   orExpr                                          {$expr = $orExpr.expr;}
+        (
+            QUESTION t=expression COLON f=expression    {$expr = createNodeFromToken<TernaryExpr>($orExpr.start, $expr, $t.expr, $f.expr);}
+        )?
     ;
 
 orExpr returns [VExpression* expr]
@@ -348,6 +363,10 @@ INPUT
     :   'in'
     ;
 
+WHERE
+    :   'where'
+    ;
+
 OUTPUT
     :   'out'
     ;
@@ -410,6 +429,10 @@ COMMA
 
 COLON
     :   ':'
+    ;
+
+QUESTION
+    :   '?'
     ;
 
 DOT

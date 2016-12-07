@@ -134,6 +134,8 @@ TEST(VMachine, Select)
 		new ConstantExpr(QValue::Object(imageB), { 0, 0 }),
 		new ConstantExpr(QValue::Object(imageA), { 0, 0 }),
 		new RetrieveVariableExpr("color", { 0, 0 }),
+		nullptr,
+		nullptr,
 		{ 0, 0 }
 	);
 	ASSERT_TRUE(stm->execute(ctx));
