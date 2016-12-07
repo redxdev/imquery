@@ -162,6 +162,94 @@ namespace imq
 
 			return true;
 		}
+		else if (name == "each")
+		{
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 1)
+				{
+					return errors::args_count("QColor.each", 1, argCount);
+				}
+
+				QFunction func;
+				if (!args[0].getFunction(&func))
+				{
+					return errors::args_type("QColor.each", 0, "QFunction", args[0]);
+				}
+
+				float r;
+				float g;
+				float b;
+				float a;
+
+				QValue* funcArgs = new QValue[1]{ QValue::Float(red) };
+				QValue value;
+
+				Result res = func(1, funcArgs, &value);
+				if (!res)
+				{
+					delete[] funcArgs;
+					return res;
+				}
+
+				if (!value.getFloat(&r))
+				{
+					delete[] funcArgs;
+					return errors::return_type("Float", value);
+				}
+
+				value = QValue::Nil();
+				funcArgs[0] = QValue::Float(green);
+				res = func(1, funcArgs, &value);
+				if (!res)
+				{
+					delete[] funcArgs;
+					return res;
+				}
+
+				if (!value.getFloat(&g))
+				{
+					delete[] funcArgs;
+					return errors::return_type("Float", value);
+				}
+
+				value = QValue::Nil();
+				funcArgs[0] = QValue::Float(blue);
+				res = func(1, funcArgs, &value);
+				if (!res)
+				{
+					delete[] funcArgs;
+					return res;
+				}
+
+				if (!value.getFloat(&b))
+				{
+					delete[] funcArgs;
+					return errors::return_type("Float", value);
+				}
+
+				value = QValue::Nil();
+				funcArgs[0] = QValue::Float(alpha);
+				res = func(1, funcArgs, &value);
+				if (!res)
+				{
+					delete[] funcArgs;
+					return res;
+				}
+
+				if (!value.getFloat(&a))
+				{
+					delete[] funcArgs;
+					return errors::return_type("Float", value);
+				}
+
+				delete[] funcArgs;
+
+				*result = QValue::Object(new QColor(r, g, b, a));
+				return true;
+			});
+			return true;
+		}
 
 		return errors::undefined_field(getTypeString(), name);
 	}

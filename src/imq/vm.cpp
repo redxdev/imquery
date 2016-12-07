@@ -142,8 +142,6 @@ namespace imq
 
 	VMachine::~VMachine()
 	{
-		// TODO: is this unsafe?
-		delete rootContext.get();
 	}
 
 	std::shared_ptr<RootContext> VMachine::getRootContext() const
