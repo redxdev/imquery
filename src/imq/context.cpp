@@ -341,7 +341,7 @@ namespace imq
 
 	Result SubContext::setValue(const String& key, const QValue& value)
 	{
-		if (parent->hasValue(key))
+		if (parent && parent->hasValue(key))
 		{
 			return parent->setValue(key, value);
 		}

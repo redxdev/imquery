@@ -132,25 +132,25 @@ TEST(QColor, SetField)
 {
 	QColor color(0.f, 0.f, 0.f, 0.f);
 	
-	ASSERT_TRUE(color.setField("r", QValue::Float(0.1f)));
-	ASSERT_TRUE(color.setField("g", QValue::Float(0.3f)));
-	ASSERT_TRUE(color.setField("b", QValue::Float(0.25f)));
-	ASSERT_TRUE(color.setField("a", QValue::Float(0.56f)));
+	ASSERT_FALSE(color.setField("r", QValue::Float(0.1f)));
+	ASSERT_FALSE(color.setField("g", QValue::Float(0.3f)));
+	ASSERT_FALSE(color.setField("b", QValue::Float(0.25f)));
+	ASSERT_FALSE(color.setField("a", QValue::Float(0.56f)));
 
-	EXPECT_FLOAT_EQ(color.getRed(), 0.1f);
-	EXPECT_FLOAT_EQ(color.getGreen(), 0.3f);
-	EXPECT_FLOAT_EQ(color.getBlue(), 0.25f);
-	EXPECT_FLOAT_EQ(color.getAlpha(), 0.56f);
+	EXPECT_FLOAT_EQ(color.getRed(), 0.f);
+	EXPECT_FLOAT_EQ(color.getGreen(), 0.f);
+	EXPECT_FLOAT_EQ(color.getBlue(), 0.f);
+	EXPECT_FLOAT_EQ(color.getAlpha(), 0.f);
 
-	ASSERT_TRUE(color.setField("red", QValue::Float(0.12f)));
-	ASSERT_TRUE(color.setField("green", QValue::Float(0.33f)));
-	ASSERT_TRUE(color.setField("blue", QValue::Float(0.256f)));
-	ASSERT_TRUE(color.setField("alpha", QValue::Float(0.561f)));
+	ASSERT_FALSE(color.setField("red", QValue::Float(0.12f)));
+	ASSERT_FALSE(color.setField("green", QValue::Float(0.33f)));
+	ASSERT_FALSE(color.setField("blue", QValue::Float(0.256f)));
+	ASSERT_FALSE(color.setField("alpha", QValue::Float(0.561f)));
 
-	EXPECT_FLOAT_EQ(color.getRed(), 0.12f);
-	EXPECT_FLOAT_EQ(color.getGreen(), 0.33f);
-	EXPECT_FLOAT_EQ(color.getBlue(), 0.256f);
-	EXPECT_FLOAT_EQ(color.getAlpha(), 0.561f);
+	EXPECT_FLOAT_EQ(color.getRed(), 0.f);
+	EXPECT_FLOAT_EQ(color.getGreen(), 0.f);
+	EXPECT_FLOAT_EQ(color.getBlue(), 0.f);
+	EXPECT_FLOAT_EQ(color.getAlpha(), 0.f);
 }
 
 TEST(QColor, SetIndex)

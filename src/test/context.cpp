@@ -64,13 +64,14 @@ TEST(SubContext, Values)
 
 	EXPECT_TRUE(ctx.setValue("baz", QValue::Integer(123)));
 	EXPECT_TRUE(parent->getValue("baz", &value));
-	EXPECT_EQ(value, QValue::Integer(321));
+	EXPECT_EQ(value, QValue::Integer(123));
 	EXPECT_TRUE(ctx.getValue("baz", &value));
 	EXPECT_EQ(value, QValue::Integer(123));
 
 	EXPECT_TRUE(ctx.deleteValue("baz"));
-	EXPECT_TRUE(ctx.hasValue("baz"));
-	EXPECT_TRUE(ctx.deleteValue("baz"));
+	EXPECT_FALSE(ctx.hasValue("baz"));
+	EXPECT_FALSE(parent->hasValue("baz"));
+	EXPECT_FALSE(ctx.deleteValue("baz"));
 	EXPECT_FALSE(ctx.hasValue("baz"));
 	EXPECT_FALSE(parent->hasValue("baz"));
 }

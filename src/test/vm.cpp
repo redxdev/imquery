@@ -65,7 +65,7 @@ TEST(VMachine, Variables)
 	VExpression* expr = new RetrieveVariableExpr("foo", { 1, 2 });
 	Result result = expr->execute(ctx, &value);
 	ASSERT_FALSE(result);
-	ASSERT_EQ(result.getErr(), "1:2: Unknown variable \"foo\"");
+	ASSERT_EQ(result.getErr(), "line 1:2: Unknown variable \"foo\"");
 
 	VStatement* stm = new SetVariableStm("foo", new ConstantExpr(QValue::Integer(345), { 0, 0 }), { 0, 0 });
 	ASSERT_TRUE(stm->execute(ctx));
@@ -92,9 +92,9 @@ TEST(VMachine, Fields)
 	ASSERT_EQ(value, QValue::Float(0.3f));
 
 	VStatement* stm = new SetFieldStm(new ConstantExpr(obj, { 0, 0 }), "green", new ConstantExpr(QValue::Float(0.89f), { 0,0 }), { 0, 0 });
-	ASSERT_TRUE(stm->execute(ctx));
+	ASSERT_FALSE(stm->execute(ctx));
 	ASSERT_TRUE(expr->execute(ctx, &value));
-	ASSERT_EQ(value, QValue::Float(0.89f));
+	ASSERT_EQ(value, QValue::Float(0.3f));
 
 	delete expr;
 	delete stm;
@@ -228,7 +228,7 @@ TEST(VMachine, DefineInput)
 	VStatement* stm = new DefineInputStm("foo", new ConstantExpr(QValue::Nil(), { 0,0 }), { 0,0 });
 	Result res = stm->execute(ctx);
 	ASSERT_FALSE(res);
-	ASSERT_EQ(res.getErr(), "0:0: Inputs/outputs must be defined in the root context.");
+	ASSERT_EQ(res.getErr(), "line 0:0: Inputs/outputs must be defined in the root context.");
 
 	delete stm;
 	std::shared_ptr<RootContext> rootCtx(new RootContext());
@@ -247,7 +247,7 @@ TEST(VMachine, DefineInput)
 
 	res = stm->execute(rootCtx);
 	ASSERT_FALSE(res);
-	ASSERT_EQ(res.getErr(), "0:0: Input foo has the wrong type.");
+	ASSERT_EQ(res.getErr(), "line 0:0: Input foo has the wrong type.");
 
 	delete stm;
 	
@@ -267,7 +267,7 @@ TEST(VMachine, DefineOutput)
 	VStatement* stm = new DefineOutputStm("foo", nullptr, { 0,0 });
 	Result res = stm->execute(ctx);
 	ASSERT_FALSE(res);
-	ASSERT_EQ(res.getErr(), "0:0: Inputs/outputs must be defined in the root context.");
+	ASSERT_EQ(res.getErr(), "line 0:0: Inputs/outputs must be defined in the root context.");
 
 	delete stm;
 	std::shared_ptr<RootContext> rootCtx(new RootContext());
@@ -286,7 +286,7 @@ TEST(VMachine, DefineOutput)
 
 	res = stm->execute(rootCtx);
 	ASSERT_FALSE(res);
-	ASSERT_EQ(res.getErr(), "0:0: Outputs may not be redefined.");
+	ASSERT_EQ(res.getErr(), "line 0:0: Outputs may not be redefined.");
 
 	delete stm;
 
@@ -319,7 +319,7 @@ TEST(VMachine, Branch)
 	VStatement* stm = new BranchStm(new ConstantExpr(QValue::Integer(123), { 0,0 }), nullptr, nullptr, { 0,0 });
 	Result res = stm->execute(ctx);
 	ASSERT_FALSE(res);
-	ASSERT_EQ(res.getErr(), "0:0: Subexpression must return a boolean within a Branch");
+	ASSERT_EQ(res.getErr(), "line 0:0: Subexpression must return a boolean within a Branch");
 
 	delete stm;
 
