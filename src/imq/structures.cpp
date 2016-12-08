@@ -50,6 +50,40 @@ namespace imq
 		return true;
 	}
 
+	Result QTable::getField(const String& name, QValue* result)
+	{
+		if (name == "has")
+		{
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 1)
+					return errors::args_count("QTable.has", 1, argCount);
+
+				*result = QValue::Bool(map.find(args[0]) != map.end());
+				return true;
+			});
+			return true;
+		}
+		else if (name == "erase")
+		{
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 1)
+					return errors::args_count("QTable.erase", 1, argCount);
+
+				auto found = map.find(args[0]);
+				if (found == map.end())
+					return errors::undefined_index(getTypeString(), args[0]);
+
+				map.erase(found);
+				return true;
+			});
+			return true;
+		}
+
+		return errors::undefined_field(getTypeString(), name);
+	}
+
 	Result QTable::getIndex(const QValue& index, QValue* result)
 	{
 		auto found = map.find(index);

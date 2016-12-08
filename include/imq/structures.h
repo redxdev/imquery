@@ -26,6 +26,8 @@ namespace imq
 
 		virtual Result copyObject(QValue* result) const override;
 
+		virtual Result getField(const String& name, QValue* result) override;
+
 		virtual Result getIndex(const QValue& index, QValue* result) override;
 		virtual Result setIndex(const QValue& index, const QValue& value) override;
 
