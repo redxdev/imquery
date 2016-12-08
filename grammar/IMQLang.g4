@@ -50,6 +50,7 @@ statement returns [VStatement* stm]
     |   branch_stm                      {$stm = $branch_stm.stm;} // no semicolon, uses block syntax
     |   for_loop_stm                    {$stm = $for_loop_stm.stm;} // ^^
     |   while_loop_stm                  {$stm = $while_loop_stm.stm;} // ^^
+    |   loop_stm                        {$stm = $loop_stm.stm;} // ^^
     |   define_function_stm             {$stm = $define_function_stm.stm;} // ^^
     |   expression SEMICOLON            {$stm = createNodeFromToken<VExpressionAsStatement>($expression.start, $expression.expr);}
     |   SEMICOLON                       {$stm = nullptr;} //{$stm = createNodeFromToken<NoOpStm>($SEMICOLON);}
@@ -129,6 +130,14 @@ while_loop_stm returns [VStatement* stm]
         {
             $stm = createNodeFromToken<WhileLoopStm>($WHILE, $expression.expr, $block);
         }
+    ;
+
+loop_stm returns [VStatement* stm]
+    locals [VBlock* block = nullptr]
+    :   LOOP L_BRACE
+        (statements {$block = createNodeFromToken<VBlock>($statements.start, $statements.count, $statements.stmArr);})?
+        R_BRACE
+        {$stm = createNodeFromToken<InfiniteLoopStm>($LOOP, $block);}
     ;
 
 break_stm returns [VStatement* stm]
@@ -398,6 +407,10 @@ WHILE
 
 DO
     :   'do'
+    ;
+
+LOOP
+    :   'loop'
     ;
 
 ARROW
