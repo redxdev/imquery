@@ -7,6 +7,7 @@
 
 #include "errors.h"
 #include "image.h"
+#include "structures.h"
 #include "cast.h"
 #include "value.h"
 
@@ -15,6 +16,7 @@ namespace imq
 	IMQ_LIB(register_stdlib)
 	{
 		IMQ_LIB_SUB(register_image);
+		IMQ_LIB_SUB(register_structures);
 		IMQ_LIB_SUB(register_io);
 		IMQ_LIB_SUB(register_math);
 		IMQ_LIB_SUB(register_conversion);
@@ -109,6 +111,22 @@ namespace imq
 	IMQ_LIB(register_image)
 	{
 		IMQ_LIB_FUNC("image", image_construct);
+
+		return true;
+	}
+
+	static Result structures_table(int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 0)
+			return errors::args_count("table", 0, argCount);
+
+		*result = QValue::Object(new QTable());
+		return true;
+	}
+
+	IMQ_LIB(register_structures)
+	{
+		IMQ_LIB_FUNC("table", structures_table);
 
 		return true;
 	}
