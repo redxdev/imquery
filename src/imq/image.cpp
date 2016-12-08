@@ -65,6 +65,12 @@ namespace imq
 		return red == color->red && green == color->green && blue == color->blue && alpha == color->alpha;
 	}
 
+	Result QColor::copyObject(QValue* result) const
+	{
+		*result = QValue::Object(new QColor(*this));
+		return true;
+	}
+
 	bool QColor::operator==(const QColor& other) const
 	{
 		return red == other.red && green == other.green && blue == other.blue && alpha == other.alpha;
@@ -710,6 +716,12 @@ namespace imq
 		{
 			return false;
 		}
+	}
+
+	Result QImage::copyObject(QValue* result) const
+	{
+		*result = QValue::Object(new QImage(*this));
+		return true;
 	}
 
 	int32_t QImage::getWidth() const

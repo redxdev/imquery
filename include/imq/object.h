@@ -35,6 +35,8 @@ namespace imq
 
 		virtual bool equals(const QObject* other) const = 0;
 
+		virtual Result copyObject(QValue* result) const;
+
 		virtual std::size_t getHash() const;
 
 		// Do not implement yourself - use the IMQ_DECLARE_TYPE and IMQ_DEFINE_TYPE macros.

@@ -23,6 +23,8 @@ namespace imq
 		
 		virtual bool equals(const QObject* other) const override;
 
+		virtual Result copyObject(QValue* result) const override;
+
 		bool operator==(const QColor& other) const;
 		bool operator!=(const QColor& other) const;
 
@@ -80,6 +82,8 @@ namespace imq
 
 		// warning - slow operation. This is a pixel-by-pixel equivalence check.
 		virtual bool equals(const QObject* other) const override;
+
+		virtual Result copyObject(QValue* result) const override;
 
 		int32_t getWidth() const;
 		int32_t getHeight() const;

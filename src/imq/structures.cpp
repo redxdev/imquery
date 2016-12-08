@@ -44,6 +44,12 @@ namespace imq
 		return map == table->map;
 	}
 
+	Result QTable::copyObject(QValue* result) const
+	{
+		*result = QValue::Object(new QTable(*this));
+		return true;
+	}
+
 	Result QTable::getIndex(const QValue& index, QValue* result)
 	{
 		auto found = map.find(index);

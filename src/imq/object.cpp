@@ -20,6 +20,11 @@ namespace imq
 		return ss.str();
 	}
 
+	Result QObject::copyObject(QValue* result) const
+	{
+		return errors::uncopyable_obj(getTypeString());
+	}
+
 	std::size_t QObject::getHash() const
 	{
 		return std::hash<void*>()((void*)this);

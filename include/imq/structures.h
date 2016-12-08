@@ -24,6 +24,8 @@ namespace imq
 
 		virtual bool equals(const QObject* other) const override;
 
+		virtual Result copyObject(QValue* result) const override;
+
 		virtual Result getIndex(const QValue& index, QValue* result) override;
 		virtual Result setIndex(const QValue& index, const QValue& value) override;
 

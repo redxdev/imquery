@@ -15,6 +15,7 @@ namespace imq
 {
 	IMQ_LIB(register_stdlib)
 	{
+		IMQ_LIB_SUB(register_system);
 		IMQ_LIB_SUB(register_image);
 		IMQ_LIB_SUB(register_structures);
 		IMQ_LIB_SUB(register_io);
@@ -24,34 +25,37 @@ namespace imq
 		return true;
 	}
 
+	static Result system_copy(int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("copy", 1, argCount);
+
+		QObjectPtr obj;
+		if (!args[0].getObject(&obj))
+		{
+			return errors::args_type("copy", 0, "Object", args[0]);
+		}
+
+		return obj->copyObject(result);
+	}
+
+	IMQ_LIB(register_system)
+	{
+		IMQ_LIB_FUNC("copy", system_copy);
+
+		return true;
+	}
+
 	static Result image_construct(int32_t argCount, QValue* args, QValue* result)
 	{
 		switch (argCount)
 		{
 		default:
-			return errors::args_count("image", 0, 3, argCount);
+			return errors::args_count("image", "0, 2, or 3", argCount);
 
 		case 0:
 			*result = QValue::Object(new QImage());
 			return true;
-
-		case 1:
-		{
-			QObjectPtr obj;
-			if (!args[0].getObject(&obj))
-			{
-				return errors::args_type("image", 0, "Object", args[0]);
-			}
-
-			QImage* img = objectCast<QImage>(obj.get());
-			if (!img)
-			{
-				return errors::args_type("image", 0, "Image", args[0]);
-			}
-
-			*result = QValue::Object(new QImage(*img));
-			return true;
-		}
 
 		case 2:
 		{
@@ -138,29 +142,11 @@ namespace imq
 		switch (argCount)
 		{
 		default:
-			return errors::args_count("table", 0, 1, argCount);
+			return errors::args_count("table", 0, argCount);
 
 		case 0:
 			*result = QValue::Object(new QTable());
 			return true;
-
-		case 1:
-		{
-			QObjectPtr obj;
-			if (!args[0].getObject(&obj))
-			{
-				return errors::args_type("table", 0, "Object", args[0]);
-			}
-
-			QTable* table = objectCast<QTable>(obj.get());
-			if (!table)
-			{
-				return errors::args_type("table", 0, "Table", args[0]);
-			}
-
-			*result = QValue::Object(new QTable(*table));
-			return true;
-		}
 		}
 	}
 
