@@ -29,11 +29,29 @@ namespace imq
 		switch (argCount)
 		{
 		default:
-			return errors::args_count("image", "0, 2, or 3", argCount);
+			return errors::args_count("image", 0, 3, argCount);
 
 		case 0:
 			*result = QValue::Object(new QImage());
 			return true;
+
+		case 1:
+		{
+			QObjectPtr obj;
+			if (!args[0].getObject(&obj))
+			{
+				return errors::args_type("image", 0, "Object", args[0]);
+			}
+
+			QImage* img = objectCast<QImage>(obj.get());
+			if (!img)
+			{
+				return errors::args_type("image", 0, "Image", args[0]);
+			}
+
+			*result = QValue::Object(new QImage(*img));
+			return true;
+		}
 
 		case 2:
 		{
@@ -117,11 +135,33 @@ namespace imq
 
 	static Result structures_table(int32_t argCount, QValue* args, QValue* result)
 	{
-		if (argCount != 0)
-			return errors::args_count("table", 0, argCount);
+		switch (argCount)
+		{
+		default:
+			return errors::args_count("table", 0, 1, argCount);
 
-		*result = QValue::Object(new QTable());
-		return true;
+		case 0:
+			*result = QValue::Object(new QTable());
+			return true;
+
+		case 1:
+		{
+			QObjectPtr obj;
+			if (!args[0].getObject(&obj))
+			{
+				return errors::args_type("table", 0, "Object", args[0]);
+			}
+
+			QTable* table = objectCast<QTable>(obj.get());
+			if (!table)
+			{
+				return errors::args_type("table", 0, "Table", args[0]);
+			}
+
+			*result = QValue::Object(new QTable(*table));
+			return true;
+		}
+		}
 	}
 
 	IMQ_LIB(register_structures)
