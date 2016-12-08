@@ -142,6 +142,7 @@ namespace imq
 
 	VMachine::~VMachine()
 	{
+		rootContext->reset();
 	}
 
 	std::shared_ptr<RootContext> VMachine::getRootContext() const

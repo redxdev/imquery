@@ -17,7 +17,6 @@ namespace imq
 
 	SimpleContext::~SimpleContext()
 	{
-
 	}
 
 	bool SimpleContext::hasValue(const String& key) const
@@ -300,6 +299,13 @@ namespace imq
 	const std::unordered_map<String, QValue>& RootContext::getOutputs() const
 	{
 		return outputs;
+	}
+
+	void RootContext::reset()
+	{
+		inputs.clear();
+		outputs.clear();
+		values.clear();
 	}
 
 	SubContext::SubContext(ContextPtr parent)

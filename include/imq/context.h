@@ -91,6 +91,9 @@ namespace imq
 		const std::unordered_map<String, QValue>& getInputs() const;
 		const std::unordered_map<String, QValue>& getOutputs() const;
 
+		// resets this context's internal state
+		void reset();
+
 	protected:
 		std::unordered_map<String, QValue> values;
 		std::unordered_map<String, QValue> inputs;
