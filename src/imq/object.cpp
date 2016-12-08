@@ -1,6 +1,7 @@
 #include "object.h"
 
 #include <cassert>
+#include <functional>
 
 #include "value.h"
 #include "errors.h"
@@ -17,6 +18,11 @@ namespace imq
 		std::stringstream ss;
 		ss << "<" << getTypeString() << ">";
 		return ss.str();
+	}
+
+	std::size_t QObject::getHash() const
+	{
+		return std::hash<void*>()((void*)this);
 	}
 
 	Result QObject::getField(const String& name, QValue* result)

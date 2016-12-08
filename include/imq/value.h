@@ -20,6 +20,8 @@ namespace imq
     class QValue
     {
     public:
+		friend struct std::hash<imq::QValue>;
+
         enum class Type
         {
             Nil,
