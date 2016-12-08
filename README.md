@@ -2,6 +2,19 @@
 
 imquery is a simple scripting language designed around image manipulation.
 
+Quick example:
+
+    in input = image();
+    out output = image(input.w, input.h);
+    output: ((color.each((v) => sin(v * 2 * pi)) + 1) / 2 + {0.,1.}).clamp() from input;
+
+Turns this
+![flowers](https://github.com/redxdev/imquery/raw/master/images/flowers.png)
+
+into this
+
+![filtered flowers](https://github.com/redxdev/imquery/raw/master/images/readme-output.png)
+
 ## Dependencies
 
 imquery depends on [ANTLR](http://www.antlr.org/) for parsing. Download or build the ANTLR 4.6
