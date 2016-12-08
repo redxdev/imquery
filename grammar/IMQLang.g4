@@ -243,9 +243,9 @@ fieldExpr returns [VExpression* expr]
 callExpr returns [VExpression* expr]
     :   atom                {$expr = $atom.expr;}
     (
-        func_parameters     {$expr = createNodeFromToken<CallFunctionExpr>($atom.start, $atom.expr, $func_parameters.count, $func_parameters.args);}
-    |   index_parameters    {$expr = createNodeFromToken<RetrieveIndexExpr>($atom.start, $atom.expr, $index_parameters.expr);}
-    )?
+        func_parameters     {$expr = createNodeFromToken<CallFunctionExpr>($atom.start, $expr, $func_parameters.count, $func_parameters.args);}
+    |   index_parameters    {$expr = createNodeFromToken<RetrieveIndexExpr>($atom.start, $expr, $index_parameters.expr);}
+    )*
     ;
 
 atom returns [VExpression* expr]
