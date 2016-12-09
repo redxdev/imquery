@@ -7,6 +7,8 @@
 
 #include <unordered_map>
 
+#define IMQ_STRUCTURE_STRING_LIMIT (5)
+
 namespace imq
 {
 	class QTable : public QObject
@@ -30,6 +32,8 @@ namespace imq
 
 		virtual Result getIndex(const QValue& index, QValue* result) override;
 		virtual Result setIndex(const QValue& index, const QValue& value) override;
+
+		const std::unordered_map<QValue, QValue>& getMap() const;
 
 	private:
 		std::unordered_map<QValue, QValue> map;
@@ -56,6 +60,8 @@ namespace imq
 
 		virtual Result getIndex(const QValue& index, QValue* result) override;
 		virtual Result setIndex(const QValue& index, const QValue& value) override;
+
+		const std::vector<QValue>& getVector() const;
 
 	private:
 		std::vector<QValue> vec;
