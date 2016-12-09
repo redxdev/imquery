@@ -150,9 +150,23 @@ namespace imq
 		}
 	}
 
+	static Result structures_list(int32_t argCount, QValue* args, QValue* result)
+	{
+		switch (argCount)
+		{
+		default:
+			return errors::args_count("list", 0, argCount);
+
+		case 0:
+			*result = QValue::Object(new QList());
+			return true;
+		}
+	}
+
 	IMQ_LIB(register_structures)
 	{
 		IMQ_LIB_FUNC("table", structures_table);
+		IMQ_LIB_FUNC("list", structures_list);
 
 		return true;
 	}

@@ -80,6 +80,18 @@ namespace imq
 			});
 			return true;
 		}
+		else if (name == "length")
+		{
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 0)
+					return errors::args_count("QTable.length", 0, argCount);
+
+				*result = QValue::Integer((int32_t)map.size());
+				return true;
+			});
+			return true;
+		}
 
 		return errors::undefined_field(getTypeString(), name);
 	}
@@ -97,6 +109,93 @@ namespace imq
 	Result QTable::setIndex(const QValue& index, const QValue& value)
 	{
 		map[index] = value;
+		return true;
+	}
+
+	IMQ_DEFINE_TYPE(QList);
+
+	QList::QList()
+	{
+	}
+
+	QList::QList(const QList& other)
+	{
+		vec = other.vec;
+	}
+
+	QList::~QList()
+	{
+	}
+
+	QList& QList::operator=(const QList& other)
+	{
+		vec = other.vec;
+		return *this;
+	}
+
+	String QList::toString() const
+	{
+		std::stringstream ss;
+		ss << "QList[" << vec.size() << "]";
+		return ss.str();
+	}
+
+	bool QList::equals(const QObject* other) const
+	{
+		const QList* list = objectCast<QList>(other);
+		if (!list)
+			return false;
+
+		return vec == list->vec;
+	}
+
+	Result QList::copyObject(QValue* result) const
+	{
+		*result = QValue::Object(new QList(*this));
+		return true;
+	}
+
+	Result QList::getField(const String& name, QValue* result)
+	{
+		if (name == "length")
+		{
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 0)
+					return errors::args_count("QList.length", 0, argCount);
+
+				*result = QValue::Integer((int32_t)vec.size());
+				return true;
+			});
+			return true;
+		}
+
+		return errors::undefined_field(getTypeString(), name);
+	}
+
+	Result QList::getIndex(const QValue& index, QValue* result)
+	{
+		int32_t i;
+		if (!index.getInteger(&i))
+			return errors::invalid_index_type("Integer", index);
+
+		if (i < 0 || i > (int32_t)vec.size())
+			return errors::index_out_of_range(index);
+
+		*result = vec[i];
+		return true;
+	}
+
+	Result QList::setIndex(const QValue& index, const QValue& value)
+	{
+		int32_t i;
+		if (!index.getInteger(&i))
+			return errors::invalid_index_type("Integer", index);
+
+		if (i < 0 || i > vec.size())
+			return errors::index_out_of_range(index);
+
+		vec[i] = value;
 		return true;
 	}
 }
