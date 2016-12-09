@@ -20,10 +20,10 @@ namespace imq
 {
 	namespace errors
 	{
-		IMQ_ERROR_DEF(undefined_get_field, typeName << " does not have get_field defined.", const String& typeName);
-		IMQ_ERROR_DEF(undefined_set_field, typeName << " does not have set_field defined.", const String& typeName);
-		IMQ_ERROR_DEF(undefined_get_index, typeName << " does not have get_index defined.", const String& typeName);
-		IMQ_ERROR_DEF(undefined_set_index, typeName << " does not have set_index defined.", const String& typeName);
+		IMQ_ERROR_DEF(undefined_get_field, typeName << " does not have getField defined.", const String& typeName);
+		IMQ_ERROR_DEF(undefined_set_field, typeName << " does not have setField defined.", const String& typeName);
+		IMQ_ERROR_DEF(undefined_get_index, typeName << " does not have getIndex defined.", const String& typeName);
+		IMQ_ERROR_DEF(undefined_set_index, typeName << " does not have setIndex defined.", const String& typeName);
 		IMQ_ERROR_DEF(undefined_selection, typeName << " does not implement selection.", const String& typeName);
 		IMQ_ERROR_DEF(undefined_operator, typeName << " does not implement operator " << op, const String& typeName, const String& op);
 

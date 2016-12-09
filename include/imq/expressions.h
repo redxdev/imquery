@@ -3,6 +3,8 @@
 #include "platform.h"
 #include "vm.h"
 
+#include <tuple>
+
 namespace imq
 {
 	class ConstantExpr : public VExpression
@@ -32,6 +34,32 @@ namespace imq
 		VExpression* gExpr;
 		VExpression* bExpr;
 		VExpression* aExpr;
+	};
+
+	class ListExpr : public VExpression
+	{
+	public:
+		ListExpr(const std::vector<VExpression*> values, const VLocation& loc);
+		virtual ~ListExpr();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context, QValue* result) override;
+
+	private:
+		std::vector<VExpression*> values;
+	};
+
+	class TableExpr : public VExpression
+	{
+	public:
+		TableExpr(const std::vector<std::tuple<VExpression*, VExpression*>> values, const VLocation& loc);
+		virtual ~TableExpr();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context, QValue* result) override;
+
+	private:
+		std::vector<std::tuple<VExpression*, VExpression*>> values;
 	};
 
 	class RetrieveVariableExpr : public VExpression

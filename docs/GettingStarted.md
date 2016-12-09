@@ -485,3 +485,98 @@ there fore we aren't defining a new variable called `foo` inside the `if` statem
 we are setting an existing one. Therefore, the function `myFunc` will find that `foo` doesn't
 exist in the `if` statement's context, and instead check the context above that which contains
 our global `foo` definition.
+
+## Data Structures
+
+### Lists
+
+The "array" type in imq is called a list, and is a dynamically sized array. You define lists
+like so:
+
+    [1, 2, 3, 4]
+    
+Lists can hold any type, including other lists. Accessing a list is done with the index
+operator:
+
+    > myList = [1, 2, 3, 4];
+    > myList[2];
+    3
+
+You can retrieve the size of a list with `length`:
+
+    > myList.length;
+    4
+
+You can insert elements:
+
+    > myList.insert(123);
+    > myList;
+    [1, 2, 3, 4, 123]
+    > myList.insert(42, 2);
+    > myList;
+    [1, 2, 42, 3, 4, 123]
+
+You can erase elements:
+
+    > myList.erase(3);
+    > myList;
+    [1, 2, 42, 4, 123]
+
+You can clear the list:
+
+    > myList.clear();
+    > myList;
+    [empty list]
+
+### Tables
+
+A table in imq is a hashmap or associative array. You define tables like so:
+
+    [! 1 = 42, 89 = 30.3, nil = [1,2,3]]
+
+Note the `!` after the first bracket. This denotes a table rather than a list.
+
+Tables can have any type as a key or value, though some _Object_ types may not act how you
+expect when used as keys.
+
+Tables allow element access and insertion through the index operator:
+
+    > myTable = [! 23 = 42];
+    > myTable;
+    [!23 = 42]
+    > myTable[23];
+    42
+    > myTable[55] = 123;
+    > myTable;
+    [!55 = 123, 23 = 42]
+
+Element order is not guaranteed with tables.
+
+You can retrieve the number of elements with `length`:
+
+    > myTable.length;
+    2
+
+You can check that a key exists with `has`:
+
+    > myTable.has(1);
+    false
+    > myTable.has(23);
+    true
+
+You can erase keys with `erase`:
+
+    > myTable.erase(23);
+    > myTable;
+    [!55 = 123]
+    
+You can get the list of keys or values with `keys` and `values`:
+
+    > myTable.keys;
+    [55]
+    > myTable.values;
+    [123]
+
+You can clear the table:
+
+    > myTable.clear();

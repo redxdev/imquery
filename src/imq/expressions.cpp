@@ -3,6 +3,7 @@
 #include "object.h"
 #include "image.h"
 #include "errors.h"
+#include "structures.h"
 
 namespace imq
 {
@@ -131,6 +132,95 @@ namespace imq
 		}
 
 		*result = QValue::Object(new QColor(red, green, blue, alpha));
+		return true;
+	}
+
+	ListExpr::ListExpr(const std::vector<VExpression *> values, const VLocation& loc)
+		: VExpression(loc), values(values)
+	{
+	}
+
+	ListExpr::~ListExpr()
+	{
+		for (auto expr : values)
+		{
+			delete expr;
+		}
+	}
+
+	String ListExpr::getName() const
+	{
+		return "List";
+	}
+
+	Result ListExpr::execute(ContextPtr context, QValue* result)
+	{
+		std::vector<QValue> results;
+		for (auto expr : values)
+		{
+			if (!expr)
+				return errors::vm_generic_error(getLocation(), "Invalid subexpression for List");
+
+			QValue value;
+			Result res = expr->execute(context, &value);
+			if (!res)
+				return res;
+
+			results.push_back(value);
+		}
+
+		*result = QValue::Object(new QList(results));
+		return true;
+	}
+
+	TableExpr::TableExpr(const std::vector<std::tuple<VExpression *, VExpression *>> values, const VLocation& loc)
+		: VExpression(loc), values(values)
+	{
+	}
+
+	TableExpr::~TableExpr()
+	{
+		for (auto val : values)
+		{
+			delete std::get<0>(val);
+			delete std::get<1>(val);
+		}
+	}
+
+	String TableExpr::getName() const
+	{
+		return "Table";
+	}
+
+	Result TableExpr::execute(ContextPtr context, QValue* result)
+	{
+		std::unordered_map<QValue, QValue> results;
+		for (auto val : values)
+		{
+			VExpression* keyExpr = std::get<0>(val);
+			VExpression* valueExpr = std::get<1>(val);
+
+			if (!keyExpr)
+				return errors::vm_generic_error(getLocation(), "Invalid key subexpression for Table");
+
+			if (!valueExpr)
+				return errors::vm_generic_error(getLocation(), "Invalid value subexpression for Table");
+
+			QValue key;
+			QValue value;
+
+			Result res = keyExpr->execute(context, &key);
+			if (!res)
+				return res;
+
+			res = valueExpr->execute(context, &value);
+			if (!res)
+				return res;
+
+			results.insert({ key, value });
+		}
+
+		*result = QValue::Object(new QTable(results));
 		return true;
 	}
 

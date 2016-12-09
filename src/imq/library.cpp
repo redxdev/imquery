@@ -17,7 +17,6 @@ namespace imq
 	{
 		IMQ_LIB_SUB(register_system);
 		IMQ_LIB_SUB(register_image);
-		IMQ_LIB_SUB(register_structures);
 		IMQ_LIB_SUB(register_io);
 		IMQ_LIB_SUB(register_math);
 		IMQ_LIB_SUB(register_conversion);
@@ -133,40 +132,6 @@ namespace imq
 	IMQ_LIB(register_image)
 	{
 		IMQ_LIB_FUNC("image", image_construct);
-
-		return true;
-	}
-
-	static Result structures_table(int32_t argCount, QValue* args, QValue* result)
-	{
-		switch (argCount)
-		{
-		default:
-			return errors::args_count("table", 0, argCount);
-
-		case 0:
-			*result = QValue::Object(new QTable());
-			return true;
-		}
-	}
-
-	static Result structures_list(int32_t argCount, QValue* args, QValue* result)
-	{
-		switch (argCount)
-		{
-		default:
-			return errors::args_count("list", 0, argCount);
-
-		case 0:
-			*result = QValue::Object(new QList());
-			return true;
-		}
-	}
-
-	IMQ_LIB(register_structures)
-	{
-		IMQ_LIB_FUNC("table", structures_table);
-		IMQ_LIB_FUNC("list", structures_list);
 
 		return true;
 	}

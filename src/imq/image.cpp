@@ -8,6 +8,7 @@
 #include "cast.h"
 #include "utility.h"
 #include "errors.h"
+#include "hash.h"
 
 namespace imq
 {
@@ -63,6 +64,17 @@ namespace imq
 			return false;
 
 		return red == color->red && green == color->green && blue == color->blue && alpha == color->alpha;
+	}
+
+	std::size_t QColor::getHash() const
+	{
+		std::size_t seed;
+		hash_combine(seed, red);
+		hash_combine(seed, green);
+		hash_combine(seed, blue);
+		hash_combine(seed, alpha);
+
+		return seed;
 	}
 
 	Result QColor::copyObject(QValue* result) const

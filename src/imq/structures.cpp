@@ -18,6 +18,11 @@ namespace imq
 		map = other.map;
 	}
 
+	QTable::QTable(const std::unordered_map<QValue, QValue>& map)
+		: map(map)
+	{
+	}
+
 	QTable::~QTable()
 	{
 	}
@@ -32,7 +37,7 @@ namespace imq
 	{
 		int32_t count = 0;
 		std::stringstream ss;
-		ss << "[";
+		ss << "[!";
 		for (auto entry : map)
 		{
 			++count;
@@ -102,14 +107,41 @@ namespace imq
 		}
 		else if (name == "length")
 		{
+			*result = QValue::Integer((int32_t)map.size());
+			return true;
+		}
+		else if (name == "clear")
+		{
 			QObjectPtr sptr = getSelfPointer().lock();
 			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
 				if (argCount != 0)
-					return errors::args_count("QTable.length", 0, argCount);
+					return errors::args_count("QList.clear", 0, argCount);
 
-				*result = QValue::Integer((int32_t)map.size());
+				map.clear();
 				return true;
 			});
+			return true;
+		}
+		else if (name == "keys")
+		{
+			std::vector<QValue> keys;
+			for (auto entry : map)
+			{
+				keys.push_back(entry.first);
+			}
+
+			*result = QValue::Object(new QList(keys));
+			return true;
+		}
+		else if (name == "values")
+		{
+			std::vector<QValue> values;
+			for (auto entry : map)
+			{
+				values.push_back(entry.second);
+			}
+
+			*result = QValue::Object(new QList(values));
 			return true;
 		}
 
@@ -146,6 +178,11 @@ namespace imq
 	QList::QList(const QList& other)
 	{
 		vec = other.vec;
+	}
+
+	QList::QList(const std::vector<QValue>& vec)
+		: vec(vec)
+	{
 	}
 
 	QList::~QList()
@@ -204,14 +241,7 @@ namespace imq
 	{
 		if (name == "length")
 		{
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
-				if (argCount != 0)
-					return errors::args_count("QList.length", 0, argCount);
-
-				*result = QValue::Integer((int32_t)vec.size());
-				return true;
-			});
+			*result = QValue::Integer((int32_t)vec.size());
 			return true;
 		}
 		else if (name == "insert")
@@ -255,6 +285,18 @@ namespace imq
 					return errors::index_out_of_range(args[0]);
 
 				vec.erase(vec.begin() + index);
+				return true;
+			});
+			return true;
+		}
+		else if (name == "clear")
+		{
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 0)
+					return errors::args_count("QList.clear", 0, argCount);
+
+				vec.clear();
 				return true;
 			});
 			return true;

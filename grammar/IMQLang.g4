@@ -257,6 +257,8 @@ atom returns [VExpression* expr]
 value returns [VExpression* expr]
     :   const_value     {$expr = createNodeFromToken<ConstantExpr>($const_value.start, $const_value.val);}
     |   color           {$expr = $color.expr;}
+    |   list            {$expr = $list.expr;}
+    |   table           {$expr = $table.expr;}
     |   function_expr   {$expr = $function_expr.expr;}
     ;
 
@@ -283,6 +285,34 @@ color returns [VExpression* expr]
         COMMA a=expression {$aExpr = $a.expr;}
     )?
         R_BRACE {$expr = createNodeFromToken<ColorExpr>($L_BRACE, $rExpr, $gExpr, $bExpr, $aExpr);}
+    ;
+
+list returns [VExpression* expr]
+    locals [std::vector<VExpression*> values]
+    :
+        L_BRACKET
+    (
+        first=expression        {$values.push_back($first.expr);}
+        (
+            COMMA n=expression  {$values.push_back($n.expr);}
+        )*
+    )?
+        R_BRACKET
+        {$expr = createNodeFromToken<ListExpr>($L_BRACKET, $values);}
+    ;
+
+table returns [VExpression* expr]
+    locals [std::vector<std::tuple<VExpression*, VExpression*>> values]
+    :
+        L_BRACKET BANG
+    (
+        firstKey=expression EQUAL firstVal=expression   {$values.push_back({$firstKey.expr, $firstVal.expr});}
+        (
+            COMMA key=expression EQUAL val=expression   {$values.push_back({$key.expr, $val.expr});}
+        )*
+    )?
+        R_BRACKET
+        {$expr = createNodeFromToken<TableExpr>($L_BRACKET, $values);}
     ;
 
 function_expr returns [VExpression* expr]

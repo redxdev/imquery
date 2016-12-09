@@ -23,6 +23,8 @@ namespace imq
 		
 		virtual bool equals(const QObject* other) const override;
 
+		virtual std::size_t getHash() const override;
+
 		virtual Result copyObject(QValue* result) const override;
 
 		bool operator==(const QColor& other) const;

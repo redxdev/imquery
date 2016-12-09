@@ -7,7 +7,7 @@
 
 #include <unordered_map>
 
-#define IMQ_STRUCTURE_STRING_LIMIT (5)
+#define IMQ_STRUCTURE_STRING_LIMIT (10)
 
 namespace imq
 {
@@ -17,6 +17,7 @@ namespace imq
 
 	public:
 		QTable();
+		QTable(const std::unordered_map<QValue, QValue>& map);
 		QTable(const QTable& other);
 		virtual ~QTable();
 
@@ -36,7 +37,7 @@ namespace imq
 		const std::unordered_map<QValue, QValue>& getMap() const;
 
 	private:
-		std::unordered_map<QValue, QValue> map;
+		std::unordered_map<QValue, QValue, std::hash<QValue>> map;
 	};
 
 	class QList : public QObject
@@ -45,6 +46,7 @@ namespace imq
 
 	public:
 		QList();
+		QList(const std::vector<QValue>& vec);
 		QList(const QList& other);
 		virtual ~QList();
 

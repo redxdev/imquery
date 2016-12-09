@@ -27,7 +27,6 @@ namespace imq
 	IMQ_LIB(register_stdlib);
 	IMQ_LIB(register_system);
 	IMQ_LIB(register_image);
-	IMQ_LIB(register_structures);
 	IMQ_LIB(register_io);
 	IMQ_LIB(register_math);
 	IMQ_LIB(register_conversion);
