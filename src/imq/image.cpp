@@ -1,6 +1,7 @@
 #include "image.h"
 
 #include <string>
+#include <cstring>
 #include <cmath>
 
 #include "thirdparty/stb_image.h"
