@@ -136,6 +136,8 @@ TEST(VMachine, Select)
 		new RetrieveVariableExpr("color", { 0, 0 }),
 		nullptr,
 		nullptr,
+		0,
+		nullptr,
 		{ 0, 0 }
 	);
 	ASSERT_TRUE(stm->execute(ctx));

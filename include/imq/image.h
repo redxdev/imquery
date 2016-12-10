@@ -127,7 +127,7 @@ namespace imq
 		virtual ContextPtr getContext() const override;
 		virtual bool isValid() const override;
 		virtual void next() override;
-		virtual Result apply(const QValue& value) override;
+		virtual Result apply(const QValue& value, int32_t coordCount, QValue* coords) override;
 
 	private:
 		void updateContext();

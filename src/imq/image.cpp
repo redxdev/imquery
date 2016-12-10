@@ -894,11 +894,6 @@ namespace imq
 			return errors::selection_create_error("expected QImage destination");
 		}
 
-		if (width != dest->width || height != dest->height)
-		{
-			return errors::selection_create_error("destination dimensions do not match source dimensions");
-		}
-
 		*result = new QImageSelection(context, this, dest);
 		return true;
 	}
@@ -933,7 +928,7 @@ namespace imq
 		updateContext();
 	}
 
-	Result QImageSelection::apply(const QValue& value)
+	Result QImageSelection::apply(const QValue& value, int32_t coordCount, QValue* coords)
 	{
 		QObjectPtr obj;
 		if (!value.getObject(&obj))
@@ -947,7 +942,33 @@ namespace imq
 			return errors::selection_apply_error("expected a QColor");
 		}
 
-		size_t idx = index * 4;
+		int32_t rewrite = index;
+		switch (coordCount)
+		{
+		default:
+			return errors::selection_apply_error("expected 0 or 2 coordinate rewrites");
+
+		case 0:
+			break;
+
+		case 2:
+		{
+			int32_t x;
+			int32_t y;
+			if (!coords[0].getInteger(&x))
+				return errors::selection_apply_error("x coordinate must be an Integer");
+			if (!coords[1].getInteger(&y))
+				return errors::selection_apply_error("y coordinate must be an Integer");
+			if (x < 0 || x >= dest->width)
+				return errors::selection_apply_error("x coordinate rewrite is out of range at " + std::to_string(x));
+			if (y < 0 || y >= dest->height)
+				return errors::selection_apply_error("y coordinate rewrite is out of range at " + std::to_string(y));
+			rewrite = y * dest->width + x;
+			break;
+		}
+		}
+
+		size_t idx = rewrite * 4;
 		dest->data[idx] = color->getRed();
 		dest->data[idx + 1] = color->getGreen();
 		dest->data[idx + 2] = color->getBlue();

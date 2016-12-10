@@ -84,15 +84,34 @@ delete_variable_stm returns [VStatement* stm]
     ;
 
 select_stm returns [VStatement* stm]
-    locals [VExpression* whereExpr = nullptr, VExpression* elseExpr = nullptr]
-    :   dest=expression COLON calc=expression FROM src=expression
+    locals [VExpression* whereExpr = nullptr, VExpression* elseExpr = nullptr, int32_t coordsCount = 0, VExpression** coordsExpr = nullptr]
+    :   dest=expression
+        (rewrite_coords {$coordsCount = $rewrite_coords.count; $coordsExpr = $rewrite_coords.coords;})?
+        COLON calc=expression FROM src=expression
     (
         WHERE where=expression {$whereExpr = $where.expr;}
         (
             ELSE el=expression {$elseExpr = $el.expr;}
         )?
     )?
-        {$stm = createNodeFromToken<SelectStm>($dest.start, $dest.expr, $src.expr, $calc.expr, $whereExpr, $elseExpr);}
+        {$stm = createNodeFromToken<SelectStm>($dest.start, $dest.expr, $src.expr, $calc.expr, $whereExpr, $elseExpr, $coordsCount, $coordsExpr);}
+    ;
+
+rewrite_coords returns [int32_t count, VExpression** coords]
+    locals [std::vector<VExpression*> coordsList]
+    :   LESS
+    (
+        first=expression    {$coordsList.push_back($first.expr);}
+        (
+            COMMA n=expression    {$coordsList.push_back($n.expr);}
+        )*
+    )?
+        GREATER
+        {
+            $count = $coordsList.size();
+            $coords = new VExpression*[$coordsList.size()];
+            std::copy($coordsList.begin(), $coordsList.end(), $coords);
+        }
     ;
 
 branch_stm returns [VStatement* stm]
@@ -179,52 +198,52 @@ ternaryExpr returns [VExpression* expr]
     ;
 
 orExpr returns [VExpression* expr]
-    :   andExpr             {$expr = $andExpr.expr;}
+    :   first=andExpr   {$expr = $first.expr;}
     (
-        OR orExpr           {$expr = createNodeFromToken<OrExpr>($andExpr.start, $andExpr.expr, $orExpr.expr);}
-    )?
+        OR n=andExpr    {$expr = createNodeFromToken<OrExpr>($first.start, $expr, $n.expr);}
+    )*
     ;
 
 andExpr returns [VExpression* expr]
-    :   equalityExpr                {$expr = $equalityExpr.expr;}
+    :   first=equalityExpr  {$expr = $first.expr;}
     (
-        AND andExpr                 {$expr = createNodeFromToken<AndExpr>($equalityExpr.start, $equalityExpr.expr, $andExpr.expr);}
-    )?
+        AND n=equalityExpr  {$expr = createNodeFromToken<AndExpr>($first.start, $expr, $n.expr);}
+    )*
     ;
 
 equalityExpr returns [VExpression* expr]
-    :   addExpr                             {$expr = $addExpr.expr;}
+    :   first=addExpr           {$expr = $first.expr;}
     (
-        EQUAL EQUAL equalityExpr            {$expr = createNodeFromToken<EqualExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
-    |   BANG EQUAL equalityExpr             {$expr = createNodeFromToken<NotEqualExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
+        EQUAL EQUAL n=addExpr   {$expr = createNodeFromToken<EqualExpr>($first.start, $expr, $n.expr);}
+    |   BANG EQUAL n=addExpr    {$expr = createNodeFromToken<NotEqualExpr>($first.start, $expr, $n.expr);}
     |   LESS
         (
-            EQUAL equalityExpr              {$expr = createNodeFromToken<LessEqExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
-        |   equalityExpr                    {$expr = createNodeFromToken<LessExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
+            EQUAL n=addExpr     {$expr = createNodeFromToken<LessEqExpr>($first.start, $expr, $n.expr);}
+        |   n=addExpr           {$expr = createNodeFromToken<LessExpr>($first.start, $expr, $n.expr);}
         )
     |   GREATER
         (
-            EQUAL equalityExpr              {$expr = createNodeFromToken<GreaterEqExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
-        |   equalityExpr                    {$expr = createNodeFromToken<GreaterExpr>($addExpr.start, $addExpr.expr, $equalityExpr.expr);}
+            EQUAL n=addExpr     {$expr = createNodeFromToken<GreaterEqExpr>($first.start, $expr, $n.expr);}
+        |   n=addExpr           {$expr = createNodeFromToken<GreaterExpr>($first.start, $expr, $n.expr);}
         )
-    )?
+    )*
     ;
 
 addExpr returns [VExpression* expr]
-    :   mulExpr                 {$expr = $mulExpr.expr;}
+    :   first=mulExpr   {$expr = $first.expr;}
     (
-        PLUS addExpr            {$expr = createNodeFromToken<AddExpr>($mulExpr.start, $mulExpr.expr, $addExpr.expr);}
-    |   MINUS addExpr           {$expr = createNodeFromToken<SubExpr>($mulExpr.start, $mulExpr.expr, $addExpr.expr);}
-    )?
+        PLUS n=mulExpr  {$expr = createNodeFromToken<AddExpr>($first.start, $expr, $n.expr);}
+    |   MINUS n=mulExpr {$expr = createNodeFromToken<SubExpr>($first.start, $expr, $n.expr);}
+    )*
     ;
 
 mulExpr returns [VExpression* expr]
-    :   notExpr                     {$expr = $notExpr.expr;}
+    :   first=notExpr       {$expr = $first.expr;}
     (
-        MULTIPLY mulExpr            {$expr = createNodeFromToken<MulExpr>($notExpr.start, $notExpr.expr, $mulExpr.expr);}
-    |   DIVIDE mulExpr              {$expr = createNodeFromToken<DivExpr>($notExpr.start, $notExpr.expr, $mulExpr.expr);}
-    |   MODULUS mulExpr             {$expr = createNodeFromToken<ModExpr>($notExpr.start, $notExpr.expr, $mulExpr.expr);}
-    )?
+        MULTIPLY b=notExpr  {$expr = createNodeFromToken<MulExpr>($first.start, $expr, $n.expr);}
+    |   DIVIDE n=notExpr    {$expr = createNodeFromToken<DivExpr>($first.start, $expr, $n.expr);}
+    |   MODULUS n=notExpr   {$expr = createNodeFromToken<ModExpr>($first.start, $expr, $n.expr);}
+    )*
     ;
 
 notExpr returns [VExpression* expr]
@@ -548,11 +567,11 @@ NIL
     ;
 
 FLOAT
-    :   '-'? [0-9]+ '.' [0-9]*
+    :   [0-9]+ '.' [0-9]*
     ;
 
 INTEGER
-    :   '-'? [0-9]+
+    :   [0-9]+
     ;
 
 IDENT

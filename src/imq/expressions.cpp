@@ -635,8 +635,8 @@ namespace imq
 		return true;
 	}
 
-	SelectStm::SelectStm(VExpression* destExpr, VExpression* srcExpr, VExpression* calcExpr, VExpression* whereExpr, VExpression* elseExpr, const VLocation& loc)
-		: VStatement(loc), destExpr(destExpr), srcExpr(srcExpr), calcExpr(calcExpr), whereExpr(whereExpr), elseExpr(elseExpr)
+	SelectStm::SelectStm(VExpression* destExpr, VExpression* srcExpr, VExpression* calcExpr, VExpression* whereExpr, VExpression* elseExpr, int32_t coordCount, VExpression** coordsExpr, const VLocation& loc)
+		: VStatement(loc), destExpr(destExpr), srcExpr(srcExpr), calcExpr(calcExpr), whereExpr(whereExpr), elseExpr(elseExpr), coordCount(coordCount), coordsExpr(coordsExpr)
 	{
 	}
 
@@ -647,6 +647,13 @@ namespace imq
 		delete calcExpr;
 		delete whereExpr;
 		delete elseExpr;
+
+		for (int32_t i = 0; i < coordCount; ++i)
+		{
+			delete coordsExpr[i];
+		}
+
+		delete coordsExpr;
 	}
 
 	String SelectStm::getName() const
@@ -669,6 +676,11 @@ namespace imq
 		if (!calcExpr)
 		{
 			return errors::vm_generic_error(getLocation(), "Invalid calc subexpression for Select");
+		}
+
+		if (coordCount < 0)
+		{
+			return errors::vm_generic_error(getLocation(), "Invalid coordinate rewrite subexpressions for Select");
 		}
 
 		QValue sourceVal;
@@ -723,6 +735,20 @@ namespace imq
 				}
 			}
 
+			std::vector<QValue> coords;
+			coords.reserve(coordCount);
+			if (bShouldExecute || elseExpr)
+			{
+				for (int32_t i = 0; i < coordCount; ++i)
+				{
+					Result res = coordsExpr[i]->execute(selection->getContext(), &value);
+					if (!res)
+						return res;
+
+					coords.push_back(value);
+				}
+			}
+
 			if (bShouldExecute)
 			{
 				res = calcExpr->execute(selection->getContext(), &value);
@@ -732,7 +758,7 @@ namespace imq
 					return res;
 				}
 
-				res = selection->apply(value);
+				res = selection->apply(value, coordCount, coords.data());
 				if (!res)
 				{
 					delete selection;
@@ -748,7 +774,7 @@ namespace imq
 					return res;
 				}
 
-				res = selection->apply(value);
+				res = selection->apply(value, coordCount, coords.data());
 				if (!res)
 				{
 					delete selection;

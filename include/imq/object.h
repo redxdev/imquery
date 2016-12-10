@@ -19,7 +19,7 @@ namespace imq
 		virtual ContextPtr getContext() const = 0;
 		virtual bool isValid() const = 0;
 		virtual void next() = 0;
-		virtual Result apply(const QValue& value) = 0;
+		virtual Result apply(const QValue& value, int32_t coordCount, QValue* coords) = 0;
 	};
 
 	enum class OperationOrder

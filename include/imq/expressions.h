@@ -178,7 +178,7 @@ namespace imq
 	class SelectStm : public VStatement
 	{
 	public:
-		SelectStm(VExpression* destExpr, VExpression* srcExpr, VExpression* calcExpr, VExpression* whereExpr, VExpression* elseExpr, const VLocation& loc);
+		SelectStm(VExpression* destExpr, VExpression* srcExpr, VExpression* calcExpr, VExpression* whereExpr, VExpression* elseExpr, int32_t coordCount, VExpression** coordsExpr, const VLocation& loc);
 		virtual ~SelectStm();
 
 		virtual String getName() const override;
@@ -190,6 +190,9 @@ namespace imq
 		VExpression* calcExpr;
 		VExpression* whereExpr;
 		VExpression* elseExpr;
+
+		VExpression** coordsExpr;
+		int32_t coordCount;
 	};
 
 	class DefineInputStm : public VStatement
