@@ -10,21 +10,94 @@ namespace imq
 	IMQ_DEFINE_TYPE(QTable);
 
 	QTable::QTable()
+		: QObject()
 	{
+		initializeObject();
 	}
 
 	QTable::QTable(const QTable& other)
+		: QObject()
 	{
 		map = other.map;
+
+		initializeObject();
 	}
 
 	QTable::QTable(const std::unordered_map<QValue, QValue>& map)
-		: map(map)
+		: QObject(), map(map)
 	{
+		initializeObject();
 	}
 
 	QTable::~QTable()
 	{
+	}
+
+	void QTable::initializeObject()
+	{
+		fields.getter("has", [&](QValue* result) {
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 1)
+					return errors::args_count("QTable.has", 1, argCount);
+
+				*result = QValue::Bool(map.find(args[0]) != map.end());
+				return true;
+			});
+			return true;
+		});
+
+		fields.getter("erase", [&](QValue* result) {
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 1)
+					return errors::args_count("QTable.erase", 1, argCount);
+
+				auto found = map.find(args[0]);
+				if (found == map.end())
+					return errors::undefined_index(getTypeString(), args[0]);
+
+				map.erase(found);
+				return true;
+			});
+			return true;
+		});
+
+		fields.getter("clear", [&](QValue* result) {
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 0)
+					return errors::args_count("QList.clear", 0, argCount);
+
+				map.clear();
+				return true;
+			});
+			return true;
+		});
+
+		fields.getter("length", [&](QValue* result) { *result = QValue::Integer((int32_t)map.size()); return true; });
+
+		fields.getter("keys", [&](QValue* result) {
+			std::vector<QValue> keys;
+			for (auto entry : map)
+			{
+				keys.push_back(entry.first);
+			}
+
+			*result = QValue::Object(new QList(keys));
+			return true;
+		});
+
+		fields.getter("values", [&](QValue* result) {
+			std::vector<QValue> values;
+			for (auto entry : map)
+			{
+				values.push_back(entry.second);
+			}
+
+			*result = QValue::Object(new QList(values));
+			return true;
+		});
 	}
 
 	QTable& QTable::operator=(const QTable& other)
@@ -77,75 +150,7 @@ namespace imq
 
 	Result QTable::getField(const String& name, QValue* result)
 	{
-		if (name == "has")
-		{
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
-				if (argCount != 1)
-					return errors::args_count("QTable.has", 1, argCount);
-
-				*result = QValue::Bool(map.find(args[0]) != map.end());
-				return true;
-			});
-			return true;
-		}
-		else if (name == "erase")
-		{
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
-				if (argCount != 1)
-					return errors::args_count("QTable.erase", 1, argCount);
-
-				auto found = map.find(args[0]);
-				if (found == map.end())
-					return errors::undefined_index(getTypeString(), args[0]);
-
-				map.erase(found);
-				return true;
-			});
-			return true;
-		}
-		else if (name == "length")
-		{
-			*result = QValue::Integer((int32_t)map.size());
-			return true;
-		}
-		else if (name == "clear")
-		{
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
-				if (argCount != 0)
-					return errors::args_count("QList.clear", 0, argCount);
-
-				map.clear();
-				return true;
-			});
-			return true;
-		}
-		else if (name == "keys")
-		{
-			std::vector<QValue> keys;
-			for (auto entry : map)
-			{
-				keys.push_back(entry.first);
-			}
-
-			*result = QValue::Object(new QList(keys));
-			return true;
-		}
-		else if (name == "values")
-		{
-			std::vector<QValue> values;
-			for (auto entry : map)
-			{
-				values.push_back(entry.second);
-			}
-
-			*result = QValue::Object(new QList(values));
-			return true;
-		}
-
-		return errors::undefined_field(getTypeString(), name);
+		return fields.handleGet(this, name, result);
 	}
 
 	Result QTable::getIndex(const QValue& index, QValue* result)
@@ -172,17 +177,23 @@ namespace imq
 	IMQ_DEFINE_TYPE(QList);
 
 	QList::QList()
+		: QObject()
 	{
+		initializeObject();
 	}
 
 	QList::QList(const QList& other)
+		: QObject()
 	{
 		vec = other.vec;
+
+		initializeObject();
 	}
 
 	QList::QList(const std::vector<QValue>& vec)
-		: vec(vec)
+		: QObject(), vec(vec)
 	{
+		initializeObject();
 	}
 
 	QList::~QList()
@@ -193,6 +204,71 @@ namespace imq
 	{
 		vec = other.vec;
 		return *this;
+	}
+
+	void QList::initializeObject()
+	{
+		fields.getter("length", [&](QValue* result) {
+			*result = QValue::Integer((int32_t)vec.size());
+			return true;
+		});
+
+		fields.getter("insert", [&](QValue* result) {
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+				switch (argCount)
+				{
+				default:
+					return errors::args_count("QList.insert", 1, 2, argCount);
+
+				case 1:
+					vec.push_back(args[0]);
+					return true;
+
+				case 2:
+				{
+					int32_t index;
+					if (!args[1].getInteger(&index))
+						return errors::args_type("QList.insert", 1, "Integer", args[1]);
+
+					vec.insert(vec.begin() + (size_t)index, args[0]);
+					return true;
+				}
+				}
+			});
+			return true;
+		});
+
+		fields.getter("erase", [&](QValue* result) {
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 1)
+					return errors::args_count("QList.erase", 1, argCount);
+
+				int32_t index;
+				if (!args[0].getInteger(&index))
+					return errors::args_type("QList.erase", 0, "Integer", args[0]);
+
+				if (index < 0 || index >= (int32_t)vec.size())
+					return errors::index_out_of_range(args[0]);
+
+				vec.erase(vec.begin() + index);
+				return true;
+			});
+			return true;
+		});
+
+		fields.getter("clear", [&](QValue* result) {
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 0)
+					return errors::args_count("QList.clear", 0, argCount);
+
+				vec.clear();
+				return true;
+			});
+			return true;
+		});
 	}
 
 	String QList::toString() const
@@ -239,70 +315,7 @@ namespace imq
 
 	Result QList::getField(const String& name, QValue* result)
 	{
-		if (name == "length")
-		{
-			*result = QValue::Integer((int32_t)vec.size());
-			return true;
-		}
-		else if (name == "insert")
-		{
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
-				switch (argCount)
-				{
-				default:
-					return errors::args_count("QList.insert", 1, 2, argCount);
-
-				case 1:
-					vec.push_back(args[0]);
-					return true;
-
-				case 2:
-				{
-					int32_t index;
-					if (!args[1].getInteger(&index))
-						return errors::args_type("QList.insert", 1, "Integer", args[1]);
-
-					vec.insert(vec.begin() + (size_t)index, args[0]);
-					return true;
-				}
-				}
-			});
-			return true;
-		}
-		else if (name == "erase")
-		{
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
-				if (argCount != 1)
-					return errors::args_count("QList.erase", 1, argCount);
-
-				int32_t index;
-				if (!args[0].getInteger(&index))
-					return errors::args_type("QList.erase", 0, "Integer", args[0]);
-
-				if (index < 0 || index >= (int32_t)vec.size())
-					return errors::index_out_of_range(args[0]);
-
-				vec.erase(vec.begin() + index);
-				return true;
-			});
-			return true;
-		}
-		else if (name == "clear")
-		{
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
-				if (argCount != 0)
-					return errors::args_count("QList.clear", 0, argCount);
-
-				vec.clear();
-				return true;
-			});
-			return true;
-		}
-
-		return errors::undefined_field(getTypeString(), name);
+		return fields.handleGet(this, name, result);
 	}
 
 	Result QList::getIndex(const QValue& index, QValue* result)

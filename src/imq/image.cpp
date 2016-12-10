@@ -20,21 +20,26 @@ namespace imq
 		: QObject(),
 		red(0.f), green(0.f), blue(0.f), alpha(1.f)
 	{
+		initializeObject();
 	}
 
 	QColor::QColor(float r, float g, float b, float a)
 		: QObject(),
 		red(r), green(g), blue(b), alpha(a)
 	{
+		initializeObject();
 	}
 
 
 	QColor::QColor(const QColor& other)
+		: QObject()
 	{
 		this->red = other.red;
 		this->green = other.green;
 		this->blue = other.blue;
 		this->alpha = other.alpha;
+
+		initializeObject();
 	}
 
 	QColor& QColor::operator=(const QColor& other)
@@ -50,7 +55,124 @@ namespace imq
 	{
 	}
 
-	imq::String QColor::toString() const
+	void QColor::initializeObject()
+	{
+		fields.getter("red", [&](QValue* result) { *result = QValue::Float(red); return true; });
+		fields.getter("r", [&](QValue* result) { *result = QValue::Float(red); return true; });
+
+		fields.getter("green", [&](QValue* result) { *result = QValue::Float(green); return true; });
+		fields.getter("g", [&](QValue* result) { *result = QValue::Float(green); return true; });
+
+		fields.getter("blue", [&](QValue* result) { *result = QValue::Float(blue); return true; });
+		fields.getter("b", [&](QValue* result) { *result = QValue::Float(blue); return true; });
+
+		fields.getter("alpha", [&](QValue* result) { *result = QValue::Float(alpha); return true; });
+		fields.getter("a", [&](QValue* result) { *result = QValue::Float(alpha); return true; });
+
+		fields.getter("clamp", [&](QValue* result) {
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 0)
+				{
+					return errors::args_count("QColor.clamp", 0, argCount);
+				}
+
+				*result = QValue::Object(new QColor(this->clamp()));
+				return true;
+			});
+			return true;
+		});
+
+		fields.getter("each", [&](QValue* result) {
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 1)
+				{
+					return errors::args_count("QColor.each", 1, argCount);
+				}
+
+				QFunction func;
+				if (!args[0].getFunction(&func))
+				{
+					return errors::args_type("QColor.each", 0, "QFunction", args[0]);
+				}
+
+				float r;
+				float g;
+				float b;
+				float a;
+
+				QValue* funcArgs = new QValue[1]{ QValue::Float(red) };
+				QValue value;
+
+				Result res = func(1, funcArgs, &value);
+				if (!res)
+				{
+					delete[] funcArgs;
+					return res;
+				}
+
+				if (!value.getFloat(&r))
+				{
+					delete[] funcArgs;
+					return errors::return_type("Float", value);
+				}
+
+				value = QValue::Nil();
+				funcArgs[0] = QValue::Float(green);
+				res = func(1, funcArgs, &value);
+				if (!res)
+				{
+					delete[] funcArgs;
+					return res;
+				}
+
+				if (!value.getFloat(&g))
+				{
+					delete[] funcArgs;
+					return errors::return_type("Float", value);
+				}
+
+				value = QValue::Nil();
+				funcArgs[0] = QValue::Float(blue);
+				res = func(1, funcArgs, &value);
+				if (!res)
+				{
+					delete[] funcArgs;
+					return res;
+				}
+
+				if (!value.getFloat(&b))
+				{
+					delete[] funcArgs;
+					return errors::return_type("Float", value);
+				}
+
+				value = QValue::Nil();
+				funcArgs[0] = QValue::Float(alpha);
+				res = func(1, funcArgs, &value);
+				if (!res)
+				{
+					delete[] funcArgs;
+					return res;
+				}
+
+				if (!value.getFloat(&a))
+				{
+					delete[] funcArgs;
+					return errors::return_type("Float", value);
+				}
+
+				delete[] funcArgs;
+
+				*result = QValue::Object(new QColor(r, g, b, a));
+				return true;
+			});
+			return true;
+		});
+	}
+
+	String QColor::toString() const
 	{
 		std::stringstream ss;
 		ss << "{" << red << "," << green << "," << blue << "," << alpha << "}";
@@ -145,131 +267,7 @@ namespace imq
 
 	Result QColor::getField(const String& name, QValue* result)
 	{
-		if (name == "red" || name == "r")
-		{
-			*result = QValue::Float(red);
-			return true;
-		}
-		else if (name == "green" || name == "g")
-		{
-			*result = QValue::Float(green);
-			return true;
-		}
-		else if (name == "blue" || name == "b")
-		{
-			*result = QValue::Float(blue);
-			return true;
-		}
-		else if (name == "alpha" || name == "a")
-		{
-			*result = QValue::Float(alpha);
-			return true;
-		}
-		else if (name == "clamp")
-		{
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
-				if (argCount != 0)
-				{
-					return errors::args_count("QColor.clamp", 0, argCount);
-				}
-
-				*result = QValue::Object(new QColor(this->clamp()));
-				return true;
-			});
-
-			return true;
-		}
-		else if (name == "each")
-		{
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
-				if (argCount != 1)
-				{
-					return errors::args_count("QColor.each", 1, argCount);
-				}
-
-				QFunction func;
-				if (!args[0].getFunction(&func))
-				{
-					return errors::args_type("QColor.each", 0, "QFunction", args[0]);
-				}
-
-				float r;
-				float g;
-				float b;
-				float a;
-
-				QValue* funcArgs = new QValue[1]{ QValue::Float(red) };
-				QValue value;
-
-				Result res = func(1, funcArgs, &value);
-				if (!res)
-				{
-					delete[] funcArgs;
-					return res;
-				}
-
-				if (!value.getFloat(&r))
-				{
-					delete[] funcArgs;
-					return errors::return_type("Float", value);
-				}
-
-				value = QValue::Nil();
-				funcArgs[0] = QValue::Float(green);
-				res = func(1, funcArgs, &value);
-				if (!res)
-				{
-					delete[] funcArgs;
-					return res;
-				}
-
-				if (!value.getFloat(&g))
-				{
-					delete[] funcArgs;
-					return errors::return_type("Float", value);
-				}
-
-				value = QValue::Nil();
-				funcArgs[0] = QValue::Float(blue);
-				res = func(1, funcArgs, &value);
-				if (!res)
-				{
-					delete[] funcArgs;
-					return res;
-				}
-
-				if (!value.getFloat(&b))
-				{
-					delete[] funcArgs;
-					return errors::return_type("Float", value);
-				}
-
-				value = QValue::Nil();
-				funcArgs[0] = QValue::Float(alpha);
-				res = func(1, funcArgs, &value);
-				if (!res)
-				{
-					delete[] funcArgs;
-					return res;
-				}
-
-				if (!value.getFloat(&a))
-				{
-					delete[] funcArgs;
-					return errors::return_type("Float", value);
-				}
-
-				delete[] funcArgs;
-
-				*result = QValue::Object(new QColor(r, g, b, a));
-				return true;
-			});
-			return true;
-		}
-
-		return errors::undefined_field(getTypeString(), name);
+		return fields.handleGet(this, name, result);
 	}
 
 	Result QColor::setField(const String& name, const QValue& value)
@@ -308,30 +306,6 @@ namespace imq
 
 	Result QColor::setIndex(const QValue& index, const QValue& value)
 	{
-		/*
-		int32_t idx;
-		if (!index.getInteger(&idx))
-			return errors::invalid_index_type(getTypeString(), index);
-
-		switch (idx)
-		{
-		default:
-			return errors::undefined_index(getTypeString(), index);
-
-		case 0:
-			return value.getFloat(&red);
-
-		case 1:
-			return value.getFloat(&green);
-
-		case 2:
-			return value.getFloat(&blue);
-
-		case 3:
-			return value.getFloat(&alpha);
-		}
-		*/
-
 		return errors::immutable_obj(getTypeString());
 	}
 
@@ -648,6 +622,8 @@ namespace imq
 		width = 0;
 		height = 0;
 		data = nullptr;
+
+		initializeObject();
 	}
 
 	QImage::QImage(int32_t width, int32_t height)
@@ -662,14 +638,19 @@ namespace imq
 		this->height = height;
 		data = new float[4 * width * height];
 		clear(color);
+
+		initializeObject();
 	}
 
 	QImage::QImage(const QImage& other)
+		: QObject()
 	{
 		this->width = other.width;
 		this->height = other.height;
 		data = new float[4 * width * height];
 		memcpy(data, other.data, sizeof(float) * 4 * width * height);
+
+		initializeObject();
 	}
 
 	QImage& QImage::operator=(const QImage& other)
@@ -688,6 +669,75 @@ namespace imq
 	{
 		delete[] data;
 		data = nullptr;
+	}
+
+	void QImage::initializeObject()
+	{
+		fields.getter("width", [&](QValue* result) { *result = QValue::Integer(width); return true; });
+		fields.getter("w", [&](QValue* result) { *result = QValue::Integer(width); return true; });
+
+		fields.getter("height", [&](QValue* result) { *result = QValue::Integer(height); return true; });
+		fields.getter("h", [&](QValue* result) { *result = QValue::Integer(height); return true; });
+
+		fields.getter("pixel", [&](QValue* result) {
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 2 && argCount != 3)
+					return errors::args_count("pixel", 2, 3, argCount);
+
+				int32_t x;
+				int32_t y;
+
+				if (!args[0].getInteger(&x))
+					return errors::args_type("pixel", 0, "Integer", args[0]);
+
+				if (!args[1].getInteger(&y))
+					return errors::args_type("pixel", 1, "Integer", args[1]);
+
+				if (argCount == 2)
+				{
+					QColor col;
+					bool res = getPixel(x, y, &col);
+					if (!res)
+						return errors::func_generic_error("Unable to get pixel");
+
+					*result = QValue::Object(new QColor(col));
+					return true;
+				}
+				else
+				{
+					QObjectPtr obj;
+					if (!args[2].getObject(&obj))
+						return errors::args_type("pixel", 2, "Object", args[2]);
+
+					QColor* col = objectCast<QColor>(obj.get());
+					if (!col)
+						return errors::args_type("pixel", 2, "Color", args[2]);
+
+					bool res = setPixel(x, y, *col);
+					if (!res)
+						return errors::func_generic_error("Unable to set pixel");
+
+					*result = QValue::Nil();
+					return true;
+				}
+			});
+			return true;
+		});
+
+		fields.getter("clamp", [&](QValue* result) {
+			QObjectPtr sptr = getSelfPointer().lock();
+			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 0)
+					return errors::args_count("clamp", 0, argCount);
+
+				clamp();
+
+				*result = QValue::Nil();
+				return true;
+			});
+			return true;
+		});
 	}
 
 	imq::String QImage::toString() const
@@ -827,78 +877,7 @@ namespace imq
 
 	imq::Result QImage::getField(const String& name, QValue* result)
 	{
-		if (name == "width" || name == "w")
-		{
-			*result = QValue::Integer(width);
-			return true;
-		}
-		else if (name == "height" || name == "h")
-		{
-			*result = QValue::Integer(height);
-			return true;
-		}
-		else if (name == "pixel")
-		{
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
-				if (argCount != 2 && argCount != 3)
-					return errors::args_count("pixel", 2, 3, argCount);
-
-				int32_t x;
-				int32_t y;
-
-				if (!args[0].getInteger(&x))
-					return errors::args_type("pixel", 0, "Integer", args[0]);
-
-				if (!args[1].getInteger(&y))
-					return errors::args_type("pixel", 1, "Integer", args[1]);
-
-				if (argCount == 2)
-				{
-					QColor col;
-					bool res = getPixel(x, y, &col);
-					if (!res)
-						return errors::func_generic_error("Unable to get pixel");
-
-					*result = QValue::Object(new QColor(col));
-					return true;
-				}
-				else
-				{
-					QObjectPtr obj;
-					if (!args[2].getObject(&obj))
-						return errors::args_type("pixel", 2, "Object", args[2]);
-
-					QColor* col = objectCast<QColor>(obj.get());
-					if (!col)
-						return errors::args_type("pixel", 2, "Color", args[2]);
-
-					bool res = setPixel(x, y, *col);
-					if (!res)
-						return errors::func_generic_error("Unable to set pixel");
-
-					*result = QValue::Nil();
-					return true;
-				}
-			});
-			return true;
-		}
-		else if (name == "clamp")
-		{
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
-				if (argCount != 0)
-					return errors::args_count("clamp", 0, argCount);
-
-				clamp();
-
-				*result = QValue::Nil();
-				return true;
-			});
-			return true;
-		}
-
-		return errors::undefined_field(getTypeString(), name);
+		return fields.handleGet(this, name, result);
 	}
 
 	Result QImage::selection(ContextPtr context, const QValue& value, QSelection** result)

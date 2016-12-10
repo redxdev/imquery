@@ -3,6 +3,8 @@
 #include "platform.h"
 #include "context.h"
 
+#include <unordered_map>
+
 namespace imq
 {
 	typedef uint32_t TypeIndex;
@@ -29,6 +31,7 @@ namespace imq
 	class QObject
 	{
 	public:
+		QObject();
 		virtual ~QObject();
 
 		virtual String toString() const;
@@ -97,4 +100,18 @@ namespace imq
 #define IMQ_DEFINE_TYPE(name) \
 	static_assert(std::is_base_of<imq::QObject, name>::value, "IMQ_DEFINE_TYPE is only valid for QObject types."); \
 	imq::ObjectRegistry name::__objreg_##name;
+
+	class ObjectFieldHelper
+	{
+	public:
+		void getter(const String& name, std::function<Result(QValue*)> getFunc);
+		void setter(const String& name, std::function<Result(const QValue&)> setFunc);
+
+		Result handleGet(QObject* obj, const String& name, QValue* result);
+		Result handleSet(QObject* obj, const String& name, const QValue& value);
+
+	private:
+		std::unordered_map<String, std::function<Result(QValue*)>> getters;
+		std::unordered_map<String, std::function<Result(const QValue&)>> setters;
+	};
 }

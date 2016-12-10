@@ -19,6 +19,8 @@ namespace imq
 
 		virtual ~QColor();
 
+		void initializeObject();
+
 		virtual String toString() const override;
 		
 		virtual bool equals(const QObject* other) const override;
@@ -56,6 +58,8 @@ namespace imq
 		virtual Result opNegate(QValue* result) const override;
 
 	private:
+		ObjectFieldHelper fields;
+
 		float red;
 		float green;
 		float blue;
@@ -75,10 +79,11 @@ namespace imq
 		QImage(int32_t width, int32_t height);
 		QImage(int32_t width, int32_t height, const QColor& color);
 		QImage(const QImage& other);
+		virtual ~QImage();
+
+		void initializeObject();
 
 		QImage& operator=(const QImage& other);
-
-		virtual ~QImage();
 
 		virtual String toString() const override;
 
@@ -106,6 +111,8 @@ namespace imq
 		virtual Result selection(ContextPtr context, const QValue& value, QSelection** result) override;
 
 	private:
+		ObjectFieldHelper fields;
+
 		int32_t width;
 		int32_t height;
 		float* data = nullptr;

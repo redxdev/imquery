@@ -21,6 +21,8 @@ namespace imq
 		QTable(const QTable& other);
 		virtual ~QTable();
 
+		void initializeObject();
+
 		QTable& operator=(const QTable& other);
 
 		virtual String toString() const override;
@@ -37,6 +39,8 @@ namespace imq
 		const std::unordered_map<QValue, QValue>& getMap() const;
 
 	private:
+		ObjectFieldHelper fields;
+
 		std::unordered_map<QValue, QValue, std::hash<QValue>> map;
 	};
 
@@ -52,6 +56,8 @@ namespace imq
 
 		QList& operator=(const QList& other);
 
+		void initializeObject();
+
 		virtual String toString() const override;
 
 		virtual bool equals(const QObject* other) const override;
@@ -66,6 +72,8 @@ namespace imq
 		const std::vector<QValue>& getVector() const;
 
 	private:
+		ObjectFieldHelper fields;
+
 		std::vector<QValue> vec;
 	};
 }
