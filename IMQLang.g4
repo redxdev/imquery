@@ -325,9 +325,9 @@ table returns [VExpression* expr]
     :
         L_BRACKET BANG
     (
-        firstKey=expression EQUAL firstVal=expression   {$values.push_back({$firstKey.expr, $firstVal.expr});}
+        firstKey=expression EQUAL firstVal=expression   {$values.push_back(std::make_tuple($firstKey.expr, $firstVal.expr));}
         (
-            COMMA key=expression EQUAL val=expression   {$values.push_back({$key.expr, $val.expr});}
+            COMMA key=expression EQUAL val=expression   {$values.push_back(std::make_tuple($key.expr, $val.expr));}
         )*
     )?
         R_BRACKET
