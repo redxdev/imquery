@@ -326,13 +326,31 @@ We can also do other things with the where clause:
 
 The where clause has access to the same variables that the main expression does.
 
-Finally, we have the `else` clause. If a pixel fails to match the `where` clause, then the
+Next we have the `else` clause. If a pixel fails to match the `where` clause, then the
 `else` clause will be used in place of the main expression:
 
     > output: color from image where color.r < 0.5 else {1., 0., 0.};
     
 Here, we write any pixels with a red value of < 0.5 normally, but otherwise we use a pixel color
 of pure red.
+
+### Coordinate Rewriting
+
+Selections also support what is called coordinate rewriting. This can be used to allow selections
+on images of differing size, or just to transform pixel coordinates.
+
+For example, what if we want to take an image and turn it sideways?
+
+    in input = image;
+    out output = image(input.h, input.w); # note that we've flipped h and w here
+    output<y,x>: color from image;
+
+Notice the `output<y,x>` bit in the selection statement. Between the angle brackets are two
+expressions (which can access everything the main selection expression can) which return
+integers. These are used to define what coordinates the result of the selection will be
+written to - here, we're swapping the x and y axes.
+
+Note that you will get an error if the coordinates are out of the bounds of the output image.
 
 ## If Statements
 
