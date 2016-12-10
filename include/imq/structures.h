@@ -6,6 +6,7 @@
 #include "hash.h"
 
 #include <unordered_map>
+#include <vector>
 
 #define IMQ_STRUCTURE_STRING_LIMIT (10)
 
