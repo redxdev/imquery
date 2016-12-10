@@ -30,7 +30,7 @@ project "libimq"
 		"{ECHO} Cleaning grammar",
 		"{RMDIR} grammar/imq/grammar",
 		"{ECHO} Building grammar",
-		environment.ANTLR_CMD .. " -o grammar/imq/grammar -package imq -Dlanguage=Cpp grammar/IMQLang.g4"
+		environment.ANTLR_CMD .. " -o grammar/imq/grammar -package imq -Dlanguage=Cpp IMQLang.g4"
 	}
 
     filter "configurations:Debug"
