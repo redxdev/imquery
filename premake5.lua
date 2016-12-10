@@ -3,6 +3,8 @@ local environment = require "environment"
 workspace "imquery"
     configurations{ "Debug", "Release" }
 	startproject "testimq"
+    filter "system:not windows"
+        buildoptions "-std=c++11"
 
 project "libimq"
     kind "StaticLib"

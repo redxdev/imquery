@@ -94,8 +94,8 @@ namespace imq
 
 #define IMQ_DECLARE_TYPE(name) \
 	private: static imq::ObjectRegistry __objreg_##name; \
-	public: virtual imq::TypeIndex getTypeIndex() const override {return __objreg_##name##.getTypeIndex();} \
-	static imq::TypeIndex getStaticTypeIndex() {return __objreg_##name##.getTypeIndex();} \
+	public: virtual imq::TypeIndex getTypeIndex() const override {return __objreg_##name.getTypeIndex();} \
+	static imq::TypeIndex getStaticTypeIndex() {return __objreg_##name.getTypeIndex();} \
 	virtual imq::String getTypeString() const override {return #name;}
 #define IMQ_DEFINE_TYPE(name) \
 	static_assert(std::is_base_of<imq::QObject, name>::value, "IMQ_DEFINE_TYPE is only valid for QObject types."); \
