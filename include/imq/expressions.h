@@ -4,6 +4,7 @@
 #include "vm.h"
 
 #include <tuple>
+#include <vector>
 
 namespace imq
 {

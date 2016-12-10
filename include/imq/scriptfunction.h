@@ -6,6 +6,7 @@
 #include "result.h"
 
 #include <memory>
+#include <vector>
 
 namespace imq
 {
