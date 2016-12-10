@@ -80,3 +80,6 @@ project "testimq"
 		libdirs {environment.GTEST_PATH .. "/" .. environment.GTEST_RELEASE_LIB_DIR, environment.ANTLR_RELEASE_LIB_DIR}
         defines {"NDEBUG"}
         optimize "On"
+
+    filter "system:linux"
+        links {"pthread"}
