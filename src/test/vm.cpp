@@ -151,6 +151,8 @@ TEST(VMachine, Select)
 			ASSERT_EQ(color, QColor(1.f, 1.f, 1.f, 1.f));
 		}
 	}
+
+	delete stm;
 }
 
 TEST(VMachine, MathExpressions)
