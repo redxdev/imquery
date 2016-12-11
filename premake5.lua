@@ -6,7 +6,7 @@ workspace "imquery"
     filter "system:not windows"
         buildoptions "-std=c++11"
 
-project "libimq"
+project "imq"
     kind "StaticLib"
     language "C++"
     targetdir "bin/%{cfg.buildcfg}"
