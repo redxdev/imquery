@@ -5,7 +5,8 @@ transformations by using imquery's scripting language, imq. This tutorial assume
 some familiarity with existing scripting languages such as Python or Lua.
 
 This tutorial assumes you have already built imquery and iqc. It is suggested you build in
-release mode, as debug mode slows down imquery quite a bit.
+release mode, as debug mode slows down imquery quite a bit. If you don't want to build iqc yourself,
+you can download a prebuilt binary for your platform [here](https://github.com/redxdev/imquery/releases)
 
 You may either run examples by running `iqc` and then entering commands interactively,
 or you may save commands in a file and run them with `iqc -f filename.imq`.
