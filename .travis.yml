@@ -20,7 +20,6 @@ matrix:
         - CONFIG=debug
         - CONFDIR=Debug
         - COMPILER=gcc
-        - VALGRIND=valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes
     - compiler: gcc
       addons:
         apt:
@@ -33,7 +32,6 @@ matrix:
         - CONFIG=release
         - CONFDIR=Release
         - COMPILER=gcc
-        - VALGRIND=""
 
 before_install:
   - export CC=gcc-5
@@ -48,4 +46,4 @@ before_script:
   - make config=$CONFIG all
 
 script:
-  - LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$(pwd)/deps/antlr4/runtime/Cpp/dist" $VALGRIND ./bin/$CONFDIR/testimq
+  - LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$(pwd)/deps/antlr4/runtime/Cpp/dist" valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ./bin/$CONFDIR/testimq

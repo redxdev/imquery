@@ -67,7 +67,7 @@ then
     echo "Building antlr4 cpp runtime..."
     cd runtime/Cpp
     cmake .
-    make
+    make antlr4_static
     cd ../../..
 else
     echo "Using cached antlr4 build..."
