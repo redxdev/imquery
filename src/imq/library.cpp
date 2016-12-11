@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <algorithm>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -228,12 +229,181 @@ namespace imq
 		return true;
 	}
 
+	static Result math_min(int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 2)
+			return errors::args_count("min", 2, argCount);
+
+		switch (args[0].getType())
+		{
+		default:
+			return errors::args_type("min", 0, "Integer or Float", args[0]);
+
+		case QValue::Type::Integer:
+		{
+			int32_t a;
+			int32_t b;
+			args[0].getInteger(&a);
+			if (!args[1].getInteger(&b))
+			{
+				return errors::args_type("min", 1, "Integer", args[1]);
+			}
+
+			*result = QValue::Integer(std::min<int32_t>(a, b));
+			return true;
+		}
+
+		case QValue::Type::Float:
+		{
+			float a;
+			float b;
+			args[0].getFloat(&a);
+			if (!args[1].getFloat(&b))
+			{
+				return errors::args_type("min", 1, "Float", args[1]);
+			}
+
+			*result = QValue::Float(std::min<float>(a, b));
+			return true;
+		}
+		}
+	}
+
+	static Result math_max(int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 2)
+			return errors::args_count("max", 2, argCount);
+
+		switch (args[0].getType())
+		{
+		default:
+			return errors::args_type("max", 0, "Integer or Float", args[0]);
+
+		case QValue::Type::Integer:
+		{
+			int32_t a;
+			int32_t b;
+			args[0].getInteger(&a);
+			if (!args[1].getInteger(&b))
+			{
+				return errors::args_type("max", 1, "Integer", args[1]);
+			}
+
+			*result = QValue::Integer(std::max<int32_t>(a, b));
+			return true;
+		}
+
+		case QValue::Type::Float:
+		{
+			float a;
+			float b;
+			args[0].getFloat(&a);
+			if (!args[1].getFloat(&b))
+			{
+				return errors::args_type("max", 1, "Float", args[1]);
+			}
+
+			*result = QValue::Float(std::max<float>(a, b));
+			return true;
+		}
+		}
+	}
+
+	static Result math_clamp(int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 3)
+			return errors::args_count("clamp", 2, argCount);
+
+		switch (args[0].getType())
+		{
+		default:
+			return errors::args_type("clamp", 0, "Integer or Float", args[0]);
+
+		case QValue::Type::Integer:
+		{
+			int32_t v;
+			int32_t low;
+			int32_t high;
+			args[0].getInteger(&v);
+			if (!args[1].getInteger(&low))
+			{
+				return errors::args_type("clamp", 1, "Integer", args[1]);
+			}
+
+			if (!args[2].getInteger(&high))
+			{
+				return errors::args_type("clamp", 2, "Integer", args[2]);
+			}
+
+			if (low >= high)
+			{
+				return errors::func_generic_error("low >= high in clamp");
+			}
+
+			if (v < low)
+			{
+				*result = QValue::Integer(low);
+			}
+			else if (v > high)
+			{
+				*result = QValue::Integer(high);
+			}
+			else
+			{
+				*result = QValue::Integer(v);
+			}
+
+			return true;
+		}
+
+		case QValue::Type::Float:
+		{
+			float v;
+			float low;
+			float high;
+			args[0].getFloat(&v);
+			if (!args[1].getFloat(&low))
+			{
+				return errors::args_type("clamp", 1, "Float", args[1]);
+			}
+
+			if (!args[2].getFloat(&high))
+			{
+				return errors::args_type("clamp", 2, "Float", args[2]);
+			}
+
+			if (low >= high)
+			{
+				return errors::func_generic_error("low >= high in clamp");
+			}
+
+			if (v < low)
+			{
+				*result = QValue::Float(low);
+			}
+			else if (v > high)
+			{
+				*result = QValue::Float(high);
+			}
+			else
+			{
+				*result = QValue::Float(v);
+			}
+
+			return true;
+		}
+		}
+	}
+
 	IMQ_LIB(register_math)
 	{
-		IMQ_LIB_FUNC("abs", math_abs);
-		IMQ_LIB_FUNC("sin", math_sin);
-		IMQ_LIB_FUNC("cos", math_cos);
-		IMQ_LIB_FUNC("tan", math_tan);
+		IMQ_LIB_FUNC("abs",		math_abs);
+		IMQ_LIB_FUNC("sin",		math_sin);
+		IMQ_LIB_FUNC("cos",		math_cos);
+		IMQ_LIB_FUNC("tan",		math_tan);
+		IMQ_LIB_FUNC("min",		math_min);
+		IMQ_LIB_FUNC("max",		math_max);
+		IMQ_LIB_FUNC("clamp",	math_clamp);
 
 		IMQ_LIB_VAL("pi", QValue::Float((float) M_PI));
 
