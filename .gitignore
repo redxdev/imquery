@@ -12,3 +12,4 @@ images/test.png
 .idea/
 grammar/
 deps/
+dist/
