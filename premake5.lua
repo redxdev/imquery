@@ -50,7 +50,7 @@ project "iqc"
 	files {"include/iqc/**.h", "src/iqc/**.cpp"}
     includedirs {"include", "include/iqc", "include/iqc/thirdparty", "grammar", environment.ANTLR_CPP_PATH}
     libdirs {"bin"}
-    links {"libimq", environment.ANTLR_LIB}
+    links {"imq", environment.ANTLR_LIB}
 	
 	filter "configurations:Debug"
 		libdirs {environment.ANTLR_DEBUG_LIB_DIR}
@@ -69,7 +69,7 @@ project "testimq"
     files {"include/test/**.h", "src/test/**.cpp"}
     includedirs {"include", "include/test", "grammar", environment.GTEST_PATH .. "/" .. environment.GTEST_INCLUDE_DIR, environment.ANTLR_CPP_PATH}
     libdirs {"bin"}
-    links {"libimq", environment.GTEST_LIB, environment.ANTLR_LIB}
+    links {"imq", environment.GTEST_LIB, environment.ANTLR_LIB}
 
     filter "configurations:Debug"
 		libdirs {environment.GTEST_PATH .. "/" .. environment.GTEST_DEBUG_LIB_DIR, environment.ANTLR_DEBUG_LIB_DIR}
