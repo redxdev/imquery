@@ -11,3 +11,4 @@ obj/
 images/test.png
 .idea/
 grammar/
+deps/
