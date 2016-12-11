@@ -393,7 +393,7 @@ func_parameters returns [int32_t count, VExpression** args]
             }
             else
             {
-                $args = nullptr
+                $args = nullptr;
             }
             std::copy($exprList.begin(), $exprList.end(), $args);
         }
