@@ -1,0 +1,57 @@
+sudo: required
+dist: trusty
+language: cpp
+
+cache:
+  directories:
+    - deps
+
+matrix:
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+            - gcc-5
+      env:
+        - CONFIG=debug
+        - CONFDIR=Debug
+        - COMPILER=gcc
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+            - gcc-5
+      env:
+        - CONFIG=release
+        - CONFDIR=Release
+        - COMPILER=gcc
+
+before_install:
+  - export CC=gcc-5
+  - export CXX=g++-5
+  - sudo apt-get update -qq
+  - sudo apt-get install -y unzip openjdk-7-jdk git uuid-dev
+  - bash ./install-travis-deps.sh
+
+before_script:
+  - cmake --version
+  - pwd
+  - ls
+  - ls deps
+  - ls deps/antlr4
+  - ls deps/antlr4/runtime
+  - ls deps/antlr4/runtime/Cpp
+  - ls deps/antlr4/runtime/Cpp/dist
+  - cp environment.travis.lua environment.lua
+  - premake5 gmake
+  - make config=$CONFIG all
+
+script:
+  - LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$(pwd)/deps/antlr4/runtime/Cpp/dist" ./bin/$CONFDIR/testimq

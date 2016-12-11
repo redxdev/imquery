@@ -1,5 +1,7 @@
 # imquery
 
+[![Build Status](https://travis-ci.org/redxdev/imquery.svg?branch=master)](https://travis-ci.org/redxdev/imquery)
+
 imquery is a simple scripting language designed around image manipulation.
 
 Quick example:
