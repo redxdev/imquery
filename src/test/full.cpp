@@ -8,11 +8,6 @@
 
 using namespace imq;
 
-const char* bad_query =
-	"in input = image();\n"
-	"out output = image(input.w, input.h);\n"
-	"this_is_not_valid foobar;\n";
-
 const char* copy_image =
 	"in input = image();\n"
 	"out output = image(input.w, input.h);" // the missing newline here is to test whether newlines are parsed correctly - this should still succeed.
@@ -23,7 +18,6 @@ TEST(Full, Parse)
 {
 	QueryParser parser;
 	VBlock* block;
-	ASSERT_FALSE(parser.parseString(bad_query, &block));
 	ASSERT_TRUE(parser.parseString(copy_image, &block));
 
 	delete block;
