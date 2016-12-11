@@ -8,7 +8,7 @@
 
 using namespace imq;
 
-const char* copy_image =
+static const char* copy_image =
 	"in input = image();\n"
 	"out output = image(input.w, input.h);" // the missing newline here is to test whether newlines are parsed correctly - this should still succeed.
 	"output: {color.r,color.g,color.b,color.a} from input;\n"
