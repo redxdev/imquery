@@ -11,6 +11,7 @@
 #include <imq/image.h>
 #include <imq/errors.h>
 #include <imq/cast.h>
+#include <imq/platform.h>
 
 using namespace imq;
 
@@ -188,7 +189,7 @@ bool execute(VMachine* vm, VBlock* block, const std::vector<IOPair>& outputs, bo
 
 int main(int argc, char** argv)
 {
-	TCLAP::CmdLine cmd("Interactive frontend to imquery", ' ', "1.0");
+	TCLAP::CmdLine cmd("Interactive frontend to imquery", ' ', IMQ_VERSION_STR);
 
 	TCLAP::ValueArg<std::string> fileArg("f", "file", "The script file to load.", false, "", "string", cmd);
 	TCLAP::SwitchArg debugArg("d", "debug", "Enable parser debug mode", cmd, false);
