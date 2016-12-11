@@ -378,7 +378,7 @@ namespace imq
 			delete args[i];
 		}
 
-		delete args;
+		delete[] args;
 	}
 
 	String CallFunctionExpr::getName() const
@@ -653,7 +653,7 @@ namespace imq
 			delete coordsExpr[i];
 		}
 
-		delete coordsExpr;
+		delete[] coordsExpr;
 	}
 
 	String SelectStm::getName() const

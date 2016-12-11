@@ -32,7 +32,14 @@ statements returns [int32_t count, VStatement** stmArr]
     )+
         {
             $count = $stmList.size();
-            $stmArr = new VStatement*[$stmList.size()];
+            if ($count > 0)
+            {
+                $stmArr = new VStatement*[$stmList.size()];
+            }
+            else
+            {
+                $stmArr = nullptr;
+            }
             std::copy($stmList.begin(), $stmList.end(), $stmArr);
         }
     ;
@@ -380,7 +387,14 @@ func_parameters returns [int32_t count, VExpression** args]
     )?  R_PAREN
         {
             $count = $exprList.size();
-            $args = new VExpression*[$count];
+            if ($count > 0)
+            {
+                $args = new VExpression*[$count];
+            }
+            else
+            {
+                $args = nullptr
+            }
             std::copy($exprList.begin(), $exprList.end(), $args);
         }
     ;

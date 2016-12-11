@@ -78,7 +78,7 @@ namespace imq
 			delete statements[i];
 		}
 
-		delete statements;
+		delete[] statements;
 	}
 
 	String VBlock::getName() const
