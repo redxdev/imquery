@@ -568,6 +568,22 @@ namespace imq
 		return true;
 	}
 
+	static Result convert_isnan(int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("isnan", 1, argCount);
+
+		float val;
+		if (!args[0].getFloat(&val))
+		{
+			*result = QValue::Bool(false);
+			return true;
+		}
+
+		*result = QValue::Bool(std::isnan(val));
+		return true;
+	}
+
 	IMQ_LIB(register_conversion)
 	{
 		IMQ_LIB_FUNC("bool",		convert_bool);
@@ -582,6 +598,8 @@ namespace imq
 		IMQ_LIB_FUNC("isfunction",	convert_isfunction);
 
 		IMQ_LIB_FUNC("sametypes",	convert_sametypes);
+
+		IMQ_LIB_FUNC("isnan",		convert_isnan);
 
 		return true;
 	}

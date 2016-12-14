@@ -13,6 +13,7 @@ grammar IMQLang;
     #include <string>
     #include <memory>
     #include <vector>
+    #include <cmath>
 }
 
 ////
@@ -291,6 +292,7 @@ value returns [VExpression* expr]
 const_value returns [QValue val]
     :   INTEGER     {$val = QValue::Integer(std::stoi($INTEGER.text));}
     |   FLOAT       {$val = QValue::Float(std::stof($FLOAT.text));}
+    |   NAN_VALUE   {$val = QValue::Float(std::nanf(""));}
     |   NIL         {$val = QValue::Nil();}
     |   boolean     {$val = QValue::Bool($boolean.val);}
     ;
@@ -474,6 +476,10 @@ DO
 
 LOOP
     :   'loop'
+    ;
+
+NAN_VALUE
+    :   'nan' | 'NaN'
     ;
 
 ARROW
