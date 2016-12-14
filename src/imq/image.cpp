@@ -191,7 +191,7 @@ namespace imq
 
 	std::size_t QColor::getHash() const
 	{
-		std::size_t seed;
+		std::size_t seed = 0;
 		hash_combine(seed, red);
 		hash_combine(seed, green);
 		hash_combine(seed, blue);
