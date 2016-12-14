@@ -69,6 +69,11 @@ namespace imq
 				return res;
 			}
 
+			if (!value.toFloat(&value))
+			{
+				return errors::vm_generic_error(getLocation(), "Expected number for color components");
+			}
+
 			if (!value.getFloat(&red))
 			{
 				return errors::vm_generic_error(getLocation(), "Expected floats for color components");
@@ -83,6 +88,11 @@ namespace imq
 			if (!res)
 			{
 				return res;
+			}
+
+			if (!value.toFloat(&value))
+			{
+				return errors::vm_generic_error(getLocation(), "Expected number for color components");
 			}
 
 			if (!value.getFloat(&green))
@@ -101,6 +111,11 @@ namespace imq
 				return res;
 			}
 
+			if (!value.toFloat(&value))
+			{
+				return errors::vm_generic_error(getLocation(), "Expected number for color components");
+			}
+
 			if (!value.getFloat(&blue))
 			{
 				return errors::vm_generic_error(getLocation(), "Expected floats for color components");
@@ -115,6 +130,11 @@ namespace imq
 			if (!res)
 			{
 				return res;
+			}
+
+			if (!value.toFloat(&value))
+			{
+				return errors::vm_generic_error(getLocation(), "Expected number for color components");
 			}
 
 			if (!value.getFloat(&alpha))

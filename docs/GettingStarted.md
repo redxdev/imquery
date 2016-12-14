@@ -118,10 +118,10 @@ For example:
     > {1., 2., 3., 4.};
     {1,2,3,4}
 
-Color expressions only accept floats.
+Color expressions accept any number.
 
     > {1, 2, 3, 4};
-    runtime error: line 1:0: Expected floats for color components
+    {1,2,3,4}
 
 If you don't specify an alpha value, it defaults to `1.`:
 
