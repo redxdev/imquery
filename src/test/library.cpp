@@ -10,6 +10,8 @@ static const char* trig_test = "a = sin(1.3); b = cos(0.53); c = tan(0.3);";
 static const char* min_test = "a = min(5, 10); b = min(10, 5); c = min(5., 10.); d = min(5., 10.);";
 static const char* max_test = "a = max(5, 10); b = max(10, 5); c = max(5., 10.); d = max(5., 10.);";
 static const char* clamp_test = "a = clamp(1, 0, 5); b = clamp(10, 0, 5); c = clamp(-5, 0, 5); d = clamp(1., 0., 5.); e = clamp(10., 0., 5.); f = clamp(-5., 0., 5.);";
+static const char* pow_test = "a = pow(2, 10); b = pow(2, -10); c = pow(-3, 3); d = pow(-3, -5);";
+static const char* sqrt_test = "a = sqrt(4); b = sqrt(10); c = sqrt(99); d = sqrt(144);";
 
 TEST(Library, Math)
 {
@@ -45,4 +47,16 @@ TEST(Library, Math)
 	EXPECT_TRUE(st.equal("d", QValue::Float(1.f)));
 	EXPECT_TRUE(st.equal("e", QValue::Float(5.f)));
 	EXPECT_TRUE(st.equal("f", QValue::Float(0.f)));
+
+	ASSERT_TRUE(st.run(pow_test));
+	EXPECT_TRUE(st.equal("a", QValue::Float(std::pow(2.f, 10.f))));
+	EXPECT_TRUE(st.equal("b", QValue::Float(std::pow(2.f, -10.f))));
+	EXPECT_TRUE(st.equal("c", QValue::Float(std::pow(-3.f, 3.f))));
+	EXPECT_TRUE(st.equal("d", QValue::Float(std::pow(-3.f, -5.f))));
+
+	ASSERT_TRUE(st.run(sqrt_test));
+	EXPECT_TRUE(st.equal("a", QValue::Float(std::sqrt(4.f))));
+	EXPECT_TRUE(st.equal("b", QValue::Float(std::sqrt(10.f))));
+	EXPECT_TRUE(st.equal("c", QValue::Float(std::sqrt(99.f))));
+	EXPECT_TRUE(st.equal("d", QValue::Float(std::sqrt(144.f))));
 }

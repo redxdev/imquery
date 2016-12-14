@@ -395,6 +395,66 @@ namespace imq
 		}
 	}
 
+	static Result math_pow(int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 2)
+		{
+			return errors::args_count("pow", 2, argCount);
+		}
+
+		QValue value;
+
+		float base;
+		float exp;
+
+		if (!args[0].toFloat(&value))
+		{
+			return errors::args_type("pow", 0, "Float", args[0]);
+		}
+
+		if (!value.getFloat(&base))
+		{
+			return errors::args_type("pow", 0, "Float", value);
+		}
+
+		if (!args[1].toFloat(&value))
+		{
+			return errors::args_type("pow", 1, "Float", args[1]);
+		}
+
+		if (!value.getFloat(&exp))
+		{
+			return errors::args_type("pow", 1, "Float", value);
+		}
+
+		*result = QValue::Float(std::pow(base, exp));
+		return true;
+	}
+
+	static Result math_sqrt(int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+		{
+			return errors::args_count("sqrt", 1, argCount);
+		}
+
+		QValue value;
+		float arg;
+
+		if (!args[0].toFloat(&value))
+		{
+			return errors::args_type("sqrt", 0, "Float", args[0]);
+		}
+
+		if (!value.getFloat(&arg))
+		{
+			return errors::args_type("sqrt", 0, "Float", value);
+		}
+
+		*result = QValue::Float(std::sqrt(arg));
+		return true;
+	}
+
 	IMQ_LIB(register_math)
 	{
 		IMQ_LIB_FUNC("abs",		math_abs);
@@ -404,6 +464,8 @@ namespace imq
 		IMQ_LIB_FUNC("min",		math_min);
 		IMQ_LIB_FUNC("max",		math_max);
 		IMQ_LIB_FUNC("clamp",	math_clamp);
+		IMQ_LIB_FUNC("pow",		math_pow);
+		IMQ_LIB_FUNC("sqrt",	math_sqrt);
 
 		IMQ_LIB_VAL("pi", QValue::Float((float) M_PI));
 
