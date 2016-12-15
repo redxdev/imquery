@@ -81,11 +81,11 @@ set_variable_stm returns [VStatement* stm]
     ;
 
 set_field_stm returns [VStatement* stm]
-    :   variable DOT IDENT EQUAL expression {$stm = createNodeFromToken<SetFieldStm>($variable.start, $variable.expr, $IDENT.text, $expression.expr);}
+    :   fieldExpr DOT IDENT EQUAL expression {$stm = createNodeFromToken<SetFieldStm>($fieldExpr.start, $fieldExpr.expr, $IDENT.text, $expression.expr);}
     ;
 
 set_index_stm returns [VStatement* stm]
-    :   variable L_BRACKET index=expression R_BRACKET EQUAL val=expression {$stm = createNodeFromToken<SetIndexStm>($variable.start, $variable.expr, $index.expr, $val.expr);}
+    :   fieldExpr L_BRACKET index=expression R_BRACKET EQUAL val=expression {$stm = createNodeFromToken<SetIndexStm>($fieldExpr.start, $fieldExpr.expr, $index.expr, $val.expr);}
     ;
 
 delete_variable_stm returns [VStatement* stm]
