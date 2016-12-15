@@ -51,8 +51,8 @@ namespace imq
 		if (a.getType() != QValue::Type::Object)
 			return true;
 
-		QObjectPtr objA;
-		QObjectPtr objB;
+		QObject* objA;
+		QObject* objB;
 
 		if (!a.getObject(&objA) || !b.getObject(&objB))
 			return false;

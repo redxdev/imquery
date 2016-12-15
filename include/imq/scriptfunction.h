@@ -10,13 +10,17 @@
 
 namespace imq
 {
-	class ScriptFunction
+	class ScriptFunction : public QFunction
 	{
 	public:
 		ScriptFunction(const String& funcName, ContextPtr outerCtx, const std::shared_ptr<VBlock> block, const std::vector<String>& argNames);
-		~ScriptFunction();
+		virtual ~ScriptFunction();
 
-		Result execute(int32_t argCount, QValue* args, QValue* result);
+		virtual Result execute(VMachine* vm, int32_t argCount, QValue* args, QValue* result) override;
+
+	protected:
+
+		virtual void GC_markChildren() override;
 
 	private:
 		ScriptFunction(const ScriptFunction& other) = default;
@@ -26,24 +30,6 @@ namespace imq
 		ContextPtr outerCtx;
 		std::shared_ptr<VBlock> block;
 		std::vector<String> argNames;
-	};
-
-	class ScriptFunctor
-	{
-	public:
-		ScriptFunctor();
-		ScriptFunctor(const std::shared_ptr<ScriptFunction> funcPtr);
-		ScriptFunctor(const ScriptFunctor& other);
-		~ScriptFunctor();
-
-		ScriptFunctor& operator=(const ScriptFunctor& other);
-
-		Result operator()(int32_t argCount, QValue* args, QValue* result);
-
-		const std::shared_ptr<ScriptFunction>& getFunctionPointer() const;
-
-	private:
-		std::shared_ptr<ScriptFunction> funcPtr;
 	};
 
 	class DefineFunctionExpr : public VExpression

@@ -51,11 +51,11 @@ Result saveOutputs(VMachine* vm, const std::vector<IOPair> outputs, bool errorOn
 				continue;
 		}
 
-		QObjectPtr obj;
+		QObject* obj;
 		if (!value.getObject(&obj))
 			return Result(false, "Output " + pair.name + " is not a QObject");
 
-		QImage* img = objectCast<QImage>(obj.get());
+		QImage* img = objectCast<QImage>(obj);
 		if (!img)
 			return Result(false, "Output " + pair.name + " is not a QImage");
 
@@ -184,6 +184,8 @@ bool execute(VMachine* vm, VBlock* block, const std::vector<IOPair>& outputs, bo
 		}
 
 		delete block;
+
+		vm->getGC()->collect(true);
 	}
 }
 
@@ -228,7 +230,7 @@ int main(int argc, char** argv)
 		std::cout << "Loading input " << pair.name << " from " << pair.value << std::endl;
 
 		QImage* img;
-		Result res = QImage::loadFromFile(pair.value.data(), &img);
+		Result res = QImage::loadFromFile(&vm, pair.value.data(), &img);
 		if (!res)
 		{
 			std::cerr << "Unable to load input " << pair.name << ": " << res.getErr() << std::endl;

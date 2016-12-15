@@ -8,10 +8,11 @@ using namespace imq;
 
 TEST(VMachine, CallFunctionExpr)
 {
-	ContextPtr ctx(new SimpleContext());
+	VMachine vm;
+	ContextPtr ctx(new SimpleContext(&vm));
 
 	bool functionCalled = false;
-	QValue func = QValue::Function([&](int32_t argCount, QValue* args, QValue* result) -> Result {
+	QValue func = QValue::Function(&vm, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
 		if (argCount == 1)
 		{
 			*result = args[0];
@@ -59,7 +60,8 @@ TEST(VMachine, CallFunctionExpr)
 
 TEST(VMachine, Variables)
 {
-	ContextPtr ctx(new SimpleContext());
+	VMachine vm;
+	ContextPtr ctx(new SimpleContext(&vm));
 	QValue value;
 
 	VExpression* expr = new RetrieveVariableExpr("foo", { 1, 2 });
@@ -79,8 +81,9 @@ TEST(VMachine, Variables)
 
 TEST(VMachine, Fields)
 {
-	ContextPtr ctx(new SimpleContext());
-	QValue obj = QValue::Object(new QColor(1.f, 0.3f, 0.4f, 1.f));
+	VMachine vm;
+	ContextPtr ctx(new SimpleContext(&vm));
+	QValue obj = QValue::Object(new QColor(&vm, 1.f, 0.3f, 0.4f, 1.f));
 	QValue value;
 
 	VExpression* expr = new RetrieveFieldExpr(new ConstantExpr(obj, { 0, 0 }), "foo", { 0, 0 });
@@ -102,8 +105,9 @@ TEST(VMachine, Fields)
 
 TEST(VMachine, Indices)
 {
-	ContextPtr ctx(new SimpleContext());
-	QValue obj = QValue::Object(new QColor(1.f, 0.3f, 0.4f, 1.f));
+	VMachine vm;
+	ContextPtr ctx(new SimpleContext(&vm));
+	QValue obj = QValue::Object(new QColor(&vm, 1.f, 0.3f, 0.4f, 1.f));
 	QValue value;
 
 	VExpression* expr = new RetrieveIndexExpr(new ConstantExpr(obj, { 0,0 }), new ConstantExpr(QValue::Integer(-1), { 0,0 }), { 0, 0 });
@@ -125,10 +129,11 @@ TEST(VMachine, Indices)
 
 TEST(VMachine, Select)
 {
-	ContextPtr ctx(new SimpleContext());
+	VMachine vm;
+	ContextPtr ctx(new SimpleContext(&vm));
 
-	std::shared_ptr<QImage> imageA(new QImage(100, 100, QColor(1.f, 1.f, 1.f, 1.f)));
-	std::shared_ptr<QImage> imageB(new QImage(100, 100, QColor(0.f, 0.f, 0.f, 0.f)));
+	QImage* imageA = new QImage(&vm, 100, 100, QColor(&vm, 1.f, 1.f, 1.f, 1.f));
+	QImage* imageB = new QImage(&vm, 100, 100, QColor(&vm, 0.f, 0.f, 0.f, 0.f));
 
 	VStatement* stm = new SelectStm(
 		new ConstantExpr(QValue::Object(imageB), { 0, 0 }),
@@ -142,13 +147,13 @@ TEST(VMachine, Select)
 	);
 	ASSERT_TRUE(stm->execute(ctx));
 
-	QColor color;
+	QColor color(&vm);
 	for (int32_t y = 0; y < 100; ++y)
 	{
 		for (int32_t x = 0; x < 100; ++x)
 		{
 			ASSERT_TRUE(imageB->getPixel(x, y, &color));
-			ASSERT_EQ(color, QColor(1.f, 1.f, 1.f, 1.f));
+			ASSERT_EQ(color, QColor(&vm, 1.f, 1.f, 1.f, 1.f));
 		}
 	}
 
@@ -157,7 +162,8 @@ TEST(VMachine, Select)
 
 TEST(VMachine, MathExpressions)
 {
-	ContextPtr ctx(new SimpleContext());
+	VMachine vm;
+	ContextPtr ctx(new SimpleContext(&vm));
 
 	// (8 + (5 - 3)) / 2 * 4
 	VExpression* expr = new MulExpr(
@@ -228,14 +234,15 @@ TEST(VMachine, MathExpressions)
 
 TEST(VMachine, DefineInput)
 {
-	ContextPtr ctx(new SimpleContext());
+	VMachine vm;
+	ContextPtr ctx(new SimpleContext(&vm));
 	VStatement* stm = new DefineInputStm("foo", new ConstantExpr(QValue::Nil(), { 0,0 }), { 0,0 });
 	Result res = stm->execute(ctx);
 	ASSERT_FALSE(res);
 	ASSERT_EQ(res.getErr(), "line 0:0: Inputs/outputs must be defined in the root context.");
 
 	delete stm;
-	std::shared_ptr<RootContext> rootCtx(new RootContext());
+	RootContext* rootCtx = new RootContext(&vm);
 
 	stm = new DefineInputStm("foo", new ConstantExpr(QValue::Nil(), { 0,0 }), { 0,0 });
 	ASSERT_TRUE(stm->execute(rootCtx));
@@ -267,14 +274,15 @@ TEST(VMachine, DefineInput)
 
 TEST(VMachine, DefineOutput)
 {
-	ContextPtr ctx(new SimpleContext());
+	VMachine vm;
+	ContextPtr ctx(new SimpleContext(&vm));
 	VStatement* stm = new DefineOutputStm("foo", nullptr, { 0,0 });
 	Result res = stm->execute(ctx);
 	ASSERT_FALSE(res);
 	ASSERT_EQ(res.getErr(), "line 0:0: Inputs/outputs must be defined in the root context.");
 
 	delete stm;
-	std::shared_ptr<RootContext> rootCtx(new RootContext());
+	RootContext* rootCtx = new RootContext(&vm);
 
 	stm = new DefineOutputStm("foo", nullptr, { 0,0 });
 	ASSERT_TRUE(stm->execute(rootCtx));
@@ -306,15 +314,16 @@ TEST(VMachine, DefineOutput)
 
 TEST(VMachine, Branch)
 {
-	ContextPtr ctx(new SimpleContext());
+	VMachine vm;
+	ContextPtr ctx(new SimpleContext(&vm));
 	bool trueCalled = false;
 	bool falseCalled = false;
-	QValue trueFunc = QValue::Function([&](int32_t argCount, QValue* args, QValue* result) -> Result {
+	QValue trueFunc = QValue::Function(&vm, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
 		trueCalled = true;
 		*result = QValue::Nil();
 		return true;
 	});
-	QValue falseFunc = QValue::Function([&](int32_t argCount, QValue* args, QValue* result) -> Result {
+	QValue falseFunc = QValue::Function(&vm, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
 		falseCalled = true;
 		*result = QValue::Nil();
 		return true;

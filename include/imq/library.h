@@ -8,7 +8,7 @@
 #define IMQ_LIB(loadName) imq::Result loadName(imq::VMachine* vm)
 #define IMQ_LIB_FUNC(name, func) \
 	{ \
-		Result res = vm->getRootContext()->setValue(name, QValue::Function(func)); \
+		Result res = vm->getRootContext()->setValue(name, QValue::Function(vm, func)); \
 		if (!res) return res; \
 	}
 #define IMQ_LIB_VAL(name, val) \

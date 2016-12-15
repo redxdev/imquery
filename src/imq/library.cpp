@@ -26,12 +26,12 @@ namespace imq
 		return true;
 	}
 
-	static Result system_copy(int32_t argCount, QValue* args, QValue* result)
+	static Result system_copy(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
 			return errors::args_count("copy", 1, argCount);
 
-		QObjectPtr obj;
+		QObject* obj;
 		if (!args[0].getObject(&obj))
 		{
 			return errors::args_type("copy", 0, "Object", args[0]);
@@ -47,7 +47,7 @@ namespace imq
 		return true;
 	}
 
-	static Result image_construct(int32_t argCount, QValue* args, QValue* result)
+	static Result image_construct(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		switch (argCount)
 		{
@@ -55,7 +55,7 @@ namespace imq
 			return errors::args_count("image", "0, 2, or 3", argCount);
 
 		case 0:
-			*result = QValue::Object(new QImage());
+			*result = QValue::Object(new QImage(vm));
 			return true;
 
 		case 2:
@@ -83,7 +83,7 @@ namespace imq
 				return errors::args_bounds("image", 1, "argument must be >= 0");
 			}
 
-			*result = QValue::Object(new QImage(w, h));
+			*result = QValue::Object(new QImage(vm, w, h));
 			return true;
 		}
 
@@ -91,7 +91,7 @@ namespace imq
 		{
 			int32_t w;
 			int32_t h;
-			QObjectPtr obj;
+			QObject* obj;
 			QColor* color;
 
 			if (!args[0].getInteger(&w))
@@ -109,7 +109,7 @@ namespace imq
 				return errors::args_type("image", 2, "Object", args[2]);
 			}
 
-			color = objectCast<QColor>(obj.get());
+			color = objectCast<QColor>(obj);
 			if (!color)
 			{
 				return errors::args_type("image", 2, "Color", "Object");
@@ -125,7 +125,7 @@ namespace imq
 				return errors::args_bounds("image", 1, "argument must be >= 0");
 			}
 
-			*result = QValue::Object(new QImage(w, h, *color));
+			*result = QValue::Object(new QImage(vm, w, h, *color));
 			return true;
 		}
 		}
@@ -138,7 +138,7 @@ namespace imq
 		return true;
 	}
 
-	static Result io_print(int32_t argCount, QValue* args, QValue* result)
+	static Result io_print(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		for (int32_t i = 0; i < argCount; ++i)
 		{
@@ -158,7 +158,7 @@ namespace imq
 		return true;
 	}
 
-	static Result math_abs(int32_t argCount, QValue* args, QValue* result)
+	static Result math_abs(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
 			return errors::args_count("abs", 1, argCount);
@@ -190,7 +190,7 @@ namespace imq
 		}
 	}
 
-	static Result math_sin(int32_t argCount, QValue* args, QValue* result)
+	static Result math_sin(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
 			return errors::args_count("sin", 1, argCount);
@@ -203,7 +203,7 @@ namespace imq
 		return true;
 	}
 
-	static Result math_cos(int32_t argCount, QValue* args, QValue* result)
+	static Result math_cos(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
 			return errors::args_count("cos", 1, argCount);
@@ -216,7 +216,7 @@ namespace imq
 		return true;
 	}
 
-	static Result math_tan(int32_t argCount, QValue* args, QValue* result)
+	static Result math_tan(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
 			return errors::args_count("tan", 1, argCount);
@@ -229,7 +229,7 @@ namespace imq
 		return true;
 	}
 
-	static Result math_min(int32_t argCount, QValue* args, QValue* result)
+	static Result math_min(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 2)
 			return errors::args_count("min", 2, argCount);
@@ -269,7 +269,7 @@ namespace imq
 		}
 	}
 
-	static Result math_max(int32_t argCount, QValue* args, QValue* result)
+	static Result math_max(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 2)
 			return errors::args_count("max", 2, argCount);
@@ -309,7 +309,7 @@ namespace imq
 		}
 	}
 
-	static Result math_clamp(int32_t argCount, QValue* args, QValue* result)
+	static Result math_clamp(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 3)
 			return errors::args_count("clamp", 2, argCount);
@@ -395,7 +395,7 @@ namespace imq
 		}
 	}
 
-	static Result math_pow(int32_t argCount, QValue* args, QValue* result)
+	static Result math_pow(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 2)
 		{
@@ -431,7 +431,7 @@ namespace imq
 		return true;
 	}
 
-	static Result math_sqrt(int32_t argCount, QValue* args, QValue* result)
+	static Result math_sqrt(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
 		{
@@ -472,7 +472,7 @@ namespace imq
 		return true;
 	}
 
-	static Result convert_bool(int32_t argCount, QValue* args, QValue* result)
+	static Result convert_bool(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
 			return errors::args_count("bool", 1, argCount);
@@ -483,7 +483,7 @@ namespace imq
 			return errors::conversion(args[0], "Bool");
 	}
 
-	static Result convert_integer(int32_t argCount, QValue* args, QValue* result)
+	static Result convert_integer(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
 			return errors::args_count("integer", 1, argCount);
@@ -494,7 +494,7 @@ namespace imq
 			return errors::conversion(args[0], "Integer");
 	}
 
-	static Result convert_float(int32_t argCount, QValue* args, QValue* result)
+	static Result convert_float(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
 			return errors::args_count("float", 1, argCount);
@@ -505,7 +505,7 @@ namespace imq
 			return errors::conversion(args[0], "float");
 	}
 
-	static Result convert_isbool(int32_t argCount, QValue* args, QValue* result)
+	static Result convert_isbool(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
 			return errors::args_count("isbool", 1, argCount);
@@ -514,7 +514,7 @@ namespace imq
 		return true;
 	}
 
-	static Result convert_isinteger(int32_t argCount, QValue* args, QValue* result)
+	static Result convert_isinteger(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
 			return errors::args_count("isinteger", 1, argCount);
@@ -523,7 +523,7 @@ namespace imq
 		return true;
 	}
 
-	static Result convert_isfloat(int32_t argCount, QValue* args, QValue* result)
+	static Result convert_isfloat(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
 			return errors::args_count("isfloat", 1, argCount);
@@ -532,7 +532,7 @@ namespace imq
 		return true;
 	}
 
-	static Result convert_isnumber(int32_t argCount, QValue* args, QValue* result)
+	static Result convert_isnumber(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
 			return errors::args_count("isnumber", 1, argCount);
@@ -541,7 +541,7 @@ namespace imq
 		return true;
 	}
 
-	static Result convert_isobject(int32_t argCount, QValue* args, QValue* result)
+	static Result convert_isobject(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
 			return errors::args_count("isobject", 1, argCount);
@@ -550,7 +550,7 @@ namespace imq
 		return true;
 	}
 
-	static Result convert_isfunction(int32_t argCount, QValue* args, QValue* result)
+	static Result convert_isfunction(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
 			return errors::args_count("isfunction", 1, argCount);
@@ -559,7 +559,7 @@ namespace imq
 		return true;
 	}
 
-	static Result convert_sametypes(int32_t argCount, QValue* args, QValue* result)
+	static Result convert_sametypes(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 2)
 			return errors::args_count("sametypes", 2, argCount);
@@ -568,7 +568,7 @@ namespace imq
 		return true;
 	}
 
-	static Result convert_isnan(int32_t argCount, QValue* args, QValue* result)
+	static Result convert_isnan(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
 			return errors::args_count("isnan", 1, argCount);

@@ -1,6 +1,7 @@
 #include <imq/value.h>
 #include <imq/object.h>
 #include <imq/cast.h>
+#include <imq/vm.h>
 #include <gtest/gtest.h>
 
 using namespace imq;
@@ -10,8 +11,8 @@ class ATestObject : public QObject
 	IMQ_DECLARE_TYPE(ATestObject);
 
 public:
-	ATestObject()
-		: QObject()
+	ATestObject(VMachine* vm)
+		: QObject(vm)
 	{
 
 	}
@@ -34,8 +35,8 @@ class BTestObject : public QObject
 	IMQ_DECLARE_TYPE(BTestObject);
 
 public:
-	BTestObject()
-		: QObject()
+	BTestObject(VMachine* vm)
+		: QObject(vm)
 	{
 
 	}
@@ -55,14 +56,14 @@ IMQ_DEFINE_TYPE(BTestObject);
 
 TEST(QObject, Cast)
 {
-	QObject* obj = new ATestObject();
+	QObject* obj = new ATestObject(nullptr);
 	ATestObject* testA = objectCast<ATestObject>(obj);
 
 	ASSERT_NE(testA, nullptr);
 
 	delete obj;
 
-	obj = new BTestObject();
+	obj = new BTestObject(nullptr);
 	testA = objectCast<ATestObject>(obj);
 
 	ASSERT_EQ(testA, nullptr);

@@ -5,7 +5,7 @@
 namespace imq
 {
 	ScriptFunction::ScriptFunction(const String& funcName, ContextPtr outerCtx, const std::shared_ptr<VBlock> block, const std::vector<String>& argNames)
-		: funcName(funcName), outerCtx(outerCtx), block(block), argNames(argNames)
+		: QFunction(outerCtx->getVM()), funcName(funcName), outerCtx(outerCtx), block(block), argNames(argNames)
 	{
 	}
 
@@ -13,7 +13,7 @@ namespace imq
 	{
 	}
 
-	Result ScriptFunction::execute(int32_t argCount, QValue* args, QValue* result)
+	Result ScriptFunction::execute(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != argNames.size())
 			return errors::args_count(funcName, argNames.size(), argCount);
@@ -21,8 +21,9 @@ namespace imq
 		if (!block)
 			return true;
 
-		ContextPtr subContext(new SubContext(outerCtx));
+		ContextPtr subContext(new SubContext(vm, outerCtx));
 		subContext->setReturnable(true);
+		ScopedRoot ctxRoot(vm->getGC(), subContext);
 
 		for (int32_t i = 0; i < argCount; ++i)
 		{
@@ -42,42 +43,9 @@ namespace imq
 		return true;
 	}
 
-	ScriptFunctor::ScriptFunctor()
-		: funcPtr(nullptr)
+	void ScriptFunction::GC_markChildren()
 	{
-	}
-
-	ScriptFunctor::ScriptFunctor(const std::shared_ptr<ScriptFunction> funcPtr)
-		: funcPtr(funcPtr)
-	{
-	}
-
-	ScriptFunctor::ScriptFunctor(const ScriptFunctor& other)
-	{
-		funcPtr = other.funcPtr;
-	}
-
-	ScriptFunctor::~ScriptFunctor()
-	{
-	}
-
-	ScriptFunctor& ScriptFunctor::operator=(const ScriptFunctor& other)
-	{
-		funcPtr = other.funcPtr;
-		return *this;
-	}
-
-	Result ScriptFunctor::operator()(int32_t argCount, QValue* args, QValue* result)
-	{
-		if (!funcPtr)
-			return errors::func_generic_error("ScriptFunctor::funcPtr == nullptr");
-
-		return funcPtr->execute(argCount, args, result);
-	}
-
-	const std::shared_ptr<ScriptFunction>& ScriptFunctor::getFunctionPointer() const
-	{
-		return funcPtr;
+		outerCtx->GC_mark();
 	}
 
 	DefineFunctionExpr::DefineFunctionExpr(const String& funcName, VBlock* block, const std::vector<String>& argNames, const VLocation& loc)
@@ -101,8 +69,7 @@ namespace imq
 
 	Result DefineFunctionExpr::execute(ContextPtr context, QValue* result)
 	{
-		std::shared_ptr<ScriptFunction> func(new ScriptFunction(funcName, context, block, argNames));
-		*result = QValue::Function(ScriptFunctor(func));
+		*result = QValue::Function(new ScriptFunction(funcName, context, block, argNames));
 		return true;
 	}
 }

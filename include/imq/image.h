@@ -3,16 +3,19 @@
 #include "platform.h"
 #include "value.h"
 #include "object.h"
+#include "gc.h"
 
 namespace imq
 {
+	class VMachine;
+
 	class QColor : public QObject
 	{
 		IMQ_DECLARE_TYPE(QColor);
 
 	public:
-		QColor();
-		QColor(float r, float g, float b, float a = 1.f);
+		QColor(VMachine* vm);
+		QColor(VMachine* vm, float r, float g, float b, float a = 1.f);
 		QColor(const QColor& other);
 
 		QColor& operator=(const QColor& other);
@@ -73,11 +76,11 @@ namespace imq
 	public:
 		friend class QImageSelection;
 
-		static Result loadFromFile(const char* filename, QImage** result);
+		static Result loadFromFile(VMachine* vm, const char* filename, QImage** result);
 
-		QImage();
-		QImage(int32_t width, int32_t height);
-		QImage(int32_t width, int32_t height, const QColor& color);
+		QImage(VMachine* vm);
+		QImage(VMachine* vm, int32_t width, int32_t height);
+		QImage(VMachine* vm, int32_t width, int32_t height, const QColor& color);
 		QImage(const QImage& other);
 		virtual ~QImage();
 
@@ -134,8 +137,8 @@ namespace imq
 
 		QImage* source;
 		QImage* dest;
-		std::shared_ptr<QColor> color;
+		QColor* color;
 		int32_t index;
-		std::shared_ptr<RestrictedSubContext> context;
+		RestrictedSubContext* context;
 	};
 }

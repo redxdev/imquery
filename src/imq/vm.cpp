@@ -1,6 +1,7 @@
 #include "vm.h"
 
 #include <sstream>
+#include <iostream>
 
 #include "errors.h"
 
@@ -115,6 +116,8 @@ namespace imq
 			Result res = statements[i]->execute(context);
 			if (!res)
 				return res;
+
+			context->getVM()->getGC()->collect();
 		}
 
 		return true;
@@ -137,15 +140,26 @@ namespace imq
 
 	VMachine::VMachine()
 	{
-		rootContext = std::shared_ptr<RootContext>(new RootContext());
+		gc = new GarbageCollector();
+		rootContext = new RootContext(this);
+		gc->addRoot(rootContext);
+		gc->manage(rootContext);
 	}
 
 	VMachine::~VMachine()
 	{
-		rootContext->reset();
+		gc->removeRoot(rootContext);
+		gc->collect(true);
+
+		if (gc->getManagedCount() > 0)
+		{
+			std::cerr << "VM leak: " << gc->getManagedCount() << " gc managed objects remaining" << std::endl;
+		}
+
+		delete gc;
 	}
 
-	std::shared_ptr<RootContext> VMachine::getRootContext() const
+	RootContext* VMachine::getRootContext() const
 	{
 		return rootContext;
 	}
@@ -156,5 +170,10 @@ namespace imq
 			return errors::vm_invalid_block();
 
 		return block->execute(rootContext);
+	}
+
+	GarbageCollector* VMachine::getGC()
+	{
+		return gc;
 	}
 }

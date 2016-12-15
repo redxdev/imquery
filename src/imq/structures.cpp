@@ -9,20 +9,20 @@ namespace imq
 {
 	IMQ_DEFINE_TYPE(QTableEntry);
 
-	QTableEntry::QTableEntry()
-		: QObject()
+	QTableEntry::QTableEntry(VMachine* vm)
+		: QObject(vm)
 	{
 		initializeObject();
 	}
 
-	QTableEntry::QTableEntry(const QValue& key, const QValue& value)
-		: QObject(), key(key), value(value)
+	QTableEntry::QTableEntry(VMachine* vm, const QValue& key, const QValue& value)
+		: QObject(vm), key(key), value(value)
 	{
 		initializeObject();
 	}
 
 	QTableEntry::QTableEntry(const QTableEntry& other)
-		: QObject(), key(other.key), value(other.value)
+		: QObject(other.getVM()), key(other.key), value(other.value)
 	{
 		initializeObject();
 	}
@@ -103,8 +103,8 @@ namespace imq
 		return value;
 	}
 
-	QTableIterator::QTableIterator(const std::unordered_map<QValue, QValue, std::hash<QValue>>::iterator& begin, const std::unordered_map<QValue, QValue, std::hash<QValue>>::iterator& end)
-		: it(begin), end(end)
+	QTableIterator::QTableIterator(VMachine* vm, const std::unordered_map<QValue, QValue, std::hash<QValue>>::iterator& begin, const std::unordered_map<QValue, QValue, std::hash<QValue>>::iterator& end)
+		: vm(vm), it(begin), end(end)
 	{
 	}
 
@@ -124,27 +124,27 @@ namespace imq
 
 	QValue QTableIterator::getCurrentValue() const
 	{
-		return QValue::Object(new QTableEntry(it->first, it->second));
+		return QValue::Object(new QTableEntry(vm, it->first, it->second));
 	}
 
 	IMQ_DEFINE_TYPE(QTable);
 
-	QTable::QTable()
-		: QObject()
+	QTable::QTable(VMachine* vm)
+		: QObject(vm)
 	{
 		initializeObject();
 	}
 
 	QTable::QTable(const QTable& other)
-		: QObject()
+		: QObject(other.getVM())
 	{
 		map = other.map;
 
 		initializeObject();
 	}
 
-	QTable::QTable(const std::unordered_map<QValue, QValue>& map)
-		: QObject(), map(map)
+	QTable::QTable(VMachine* vm, const std::unordered_map<QValue, QValue>& map)
+		: QObject(vm), map(map)
 	{
 		initializeObject();
 	}
@@ -156,8 +156,7 @@ namespace imq
 	void QTable::initializeObject()
 	{
 		fields.getter("has", [&](QValue* result) {
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+			*result = QValue::Function(getVM(), this, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
 				if (argCount != 1)
 					return errors::args_count("QTable.has", 1, argCount);
 
@@ -168,8 +167,7 @@ namespace imq
 		});
 
 		fields.getter("erase", [&](QValue* result) {
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+			*result = QValue::Function(getVM(), this, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
 				if (argCount != 1)
 					return errors::args_count("QTable.erase", 1, argCount);
 
@@ -184,8 +182,7 @@ namespace imq
 		});
 
 		fields.getter("clear", [&](QValue* result) {
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+			*result = QValue::Function(getVM(), this, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
 				if (argCount != 0)
 					return errors::args_count("QList.clear", 0, argCount);
 
@@ -204,7 +201,7 @@ namespace imq
 				keys.push_back(entry.first);
 			}
 
-			*result = QValue::Object(new QList(keys));
+			*result = QValue::Object(new QList(getVM(), keys));
 			return true;
 		});
 
@@ -215,7 +212,7 @@ namespace imq
 				values.push_back(entry.second);
 			}
 
-			*result = QValue::Object(new QList(values));
+			*result = QValue::Object(new QList(getVM(), values));
 			return true;
 		});
 	}
@@ -291,13 +288,23 @@ namespace imq
 
 	Result QTable::iterate(ContextPtr context, QIterator** result)
 	{
-		*result = new QTableIterator(map.begin(), map.end());
+		*result = new QTableIterator(getVM(), map.begin(), map.end());
 		return true;
 	}
 
 	const std::unordered_map<imq::QValue, imq::QValue>& QTable::getMap() const
 	{
 		return map;
+	}
+
+	void QTable::GC_markChildren()
+	{
+		for (auto entry : map)
+		{
+			QValue key = entry.first;
+			key.GC_mark(); // because it is const if we operate directly on the entry
+			entry.second.GC_mark();
+		}
 	}
 
 	QListIterator::QListIterator(const std::vector<QValue>::iterator& begin, const std::vector<QValue>::iterator& end)
@@ -326,22 +333,22 @@ namespace imq
 
 	IMQ_DEFINE_TYPE(QList);
 
-	QList::QList()
-		: QObject()
+	QList::QList(VMachine* vm)
+		: QObject(vm)
 	{
 		initializeObject();
 	}
 
 	QList::QList(const QList& other)
-		: QObject()
+		: QObject(other.getVM())
 	{
 		vec = other.vec;
 
 		initializeObject();
 	}
 
-	QList::QList(const std::vector<QValue>& vec)
-		: QObject(), vec(vec)
+	QList::QList(VMachine* vm, const std::vector<QValue>& vec)
+		: QObject(vm), vec(vec)
 	{
 		initializeObject();
 	}
@@ -364,8 +371,7 @@ namespace imq
 		});
 
 		fields.getter("insert", [&](QValue* result) {
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+			*result = QValue::Function(getVM(), this, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
 				switch (argCount)
 				{
 				default:
@@ -390,8 +396,8 @@ namespace imq
 		});
 
 		fields.getter("erase", [&](QValue* result) {
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+			//QObjectPtr sptr = getSelfPointer().lock(); // TODO
+			*result = QValue::Function(getVM(), this, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
 				if (argCount != 1)
 					return errors::args_count("QList.erase", 1, argCount);
 
@@ -409,8 +415,8 @@ namespace imq
 		});
 
 		fields.getter("clear", [&](QValue* result) {
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+			//QObjectPtr sptr = getSelfPointer().lock(); // TODO
+			*result = QValue::Function(getVM(), this, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
 				if (argCount != 0)
 					return errors::args_count("QList.clear", 0, argCount);
 
@@ -505,4 +511,11 @@ namespace imq
 		return vec;
 	}
 
+	void QList::GC_markChildren()
+	{
+		for (auto val : vec)
+		{
+			val.GC_mark();
+		}
+	}
 }

@@ -151,7 +151,7 @@ namespace imq
 			blue = red;
 		}
 
-		*result = QValue::Object(new QColor(red, green, blue, alpha));
+		*result = QValue::Object(new QColor(context->getVM(), red, green, blue, alpha));
 		return true;
 	}
 
@@ -189,7 +189,7 @@ namespace imq
 			results.push_back(value);
 		}
 
-		*result = QValue::Object(new QList(results));
+		*result = QValue::Object(new QList(context->getVM(), results));
 		return true;
 	}
 
@@ -240,7 +240,7 @@ namespace imq
 			results.insert({ key, value });
 		}
 
-		*result = QValue::Object(new QTable(results));
+		*result = QValue::Object(new QTable(context->getVM(), results));
 		return true;
 	}
 
@@ -302,7 +302,7 @@ namespace imq
 			return res;
 		}
 
-		QObjectPtr obj;
+		QObject* obj;
 		if (!value.getObject(&obj))
 		{
 			return errors::vm_generic_error(getLocation(), "Expected valid QObject subexpression for RetrieveField");
@@ -358,7 +358,7 @@ namespace imq
 			return res;
 		}
 
-		QObjectPtr obj;
+		QObject* obj;
 		if (!value.getObject(&obj))
 		{
 			return errors::vm_generic_error(getLocation(), "Expected valid QObject subexpression for RetrieveIndex");
@@ -420,7 +420,7 @@ namespace imq
 			return res;
 		}
 
-		QFunction func;
+		QFunction* func;
 		if (!value.getFunction(&func))
 		{
 			return errors::vm_generic_error(getLocation(), "Expected valid QFunction subexpression for RetrieveField");
@@ -447,7 +447,7 @@ namespace imq
 			}
 		}
 
-		res = func(argCount, argValues, result);
+		res = func->execute(context->getVM(), argCount, argValues, result);
 		delete[] argValues;
 		if (!res)
 		{
@@ -530,7 +530,7 @@ namespace imq
 			return res;
 		}
 
-		QObjectPtr obj;
+		QObject* obj;
 		if (!value.getObject(&obj))
 		{
 			return errors::vm_generic_error(getLocation(), "Expected valid QObject subexpression for SetField");
@@ -597,7 +597,7 @@ namespace imq
 			return res;
 		}
 
-		QObjectPtr obj;
+		QObject* obj;
 		if (!value.getObject(&obj))
 		{
 			return errors::vm_generic_error(getLocation(), "Expected valid QObject subexpression for SetIndex");
@@ -710,11 +710,14 @@ namespace imq
 			return res;
 		}
 
-		QObjectPtr source;
+		QObject* source;
 		if (!sourceVal.getObject(&source))
 		{
 			return errors::vm_generic_error(getLocation(), "Source subexpression for Select must return a QObject");
 		}
+
+		auto gc = context->getVM()->getGC();
+		ScopedRoot sourceRoot(gc, source);
 
 		QValue dest;
 		res = destExpr->execute(context, &dest);
@@ -906,7 +909,10 @@ namespace imq
 		if (!checkExpr)
 			return errors::vm_generic_error(getLocation(), "Invalid check subexpression for Branch");
 
-		ContextPtr subContext(new SubContext(context));
+		ContextPtr subContext(new SubContext(context->getVM(), context));
+		auto gc = context->getVM()->getGC();
+		gc->manage(subContext);
+		ScopedRoot ctxRoot(gc, subContext);
 		QValue value;
 		Result res = checkExpr->execute(subContext, &value);
 
@@ -961,8 +967,11 @@ namespace imq
 			return errors::vm_generic_error(getLocation(), "Invalid check subexpression for For");
 		}
 
-		ContextPtr subContext(new SubContext(context));
+		ContextPtr subContext(new SubContext(context->getVM(), context));
 		subContext->setBreakable(true);
+		auto gc = context->getVM()->getGC();
+		gc->manage(subContext);
+		ScopedRoot ctxRoot(gc, subContext);
 		Result res;
 
 		if (initStm)
@@ -1049,8 +1058,11 @@ namespace imq
 			return errors::vm_generic_error(getLocation(), "Invalid check subexpression for While");
 		}
 
-		ContextPtr subContext(new SubContext(context));
+		ContextPtr subContext(new SubContext(context->getVM(), context));
 		subContext->setBreakable(true);
+		auto gc = context->getVM()->getGC();
+		gc->manage(subContext);
+		ScopedRoot ctxRoot(gc, subContext);
 		Result res;
 
 		QValue value;
@@ -1112,8 +1124,11 @@ namespace imq
 
 	Result InfiniteLoopStm::execute(ContextPtr context)
 	{
-		ContextPtr subContext(new SubContext(context));
+		ContextPtr subContext(new SubContext(context->getVM(), context));
 		subContext->setBreakable(true);
+		auto gc = context->getVM()->getGC();
+		gc->manage(subContext);
+		ScopedRoot ctxRoot(gc, subContext);
 		Result res;
 
 		while (true)
@@ -1157,19 +1172,24 @@ namespace imq
 			return errors::vm_generic_error(getLocation(), "Invalid iterator subexpression for ForEach");
 		}
 
-		ContextPtr subContext(new SubContext(context));
+		ContextPtr subContext(new SubContext(context->getVM(), context));
 		subContext->setBreakable(true);
+		auto gc = context->getVM()->getGC();
+		gc->manage(subContext);
+		ScopedRoot ctxRoot(gc, subContext);
 
 		QValue value;
 		Result res = iterExpr->execute(subContext, &value);
 		if (!res)
 			return res;
 
-		QObjectPtr obj;
+		QObject* obj;
 		if (!value.getObject(&obj))
 		{
 			return errors::vm_generic_error(getLocation(), "Iterator expression must return an object");
 		}
+
+		ScopedRoot objRoot(gc, obj);
 
 		QIterator* iter = nullptr;
 		res = obj->iterate(subContext, &iter);

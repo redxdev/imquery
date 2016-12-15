@@ -5,17 +5,26 @@
 
 #include "value.h"
 #include "errors.h"
+#include "vm.h"
 
 namespace imq
 {
 
-	QObject::QObject()
+	QObject::QObject(VMachine* vm)
+		: vm(vm)
 	{
+		if (vm != nullptr)
+		{
+			vm->getGC()->manage(this);
+		}
 	}
 
 	QObject::~QObject()
 	{
-
+		if (vm != nullptr)
+		{
+			vm->getGC()->unmanage(this);
+		}
 	}
 
 	String QObject::toString() const
@@ -130,16 +139,9 @@ namespace imq
 		return errors::undefined_operator(getTypeString(), "greatereq");
 	}
 
-	void QObject::updateSelfPointer(const std::shared_ptr<QObject> ptr)
+	VMachine* QObject::getVM() const
 	{
-		assert(ptr.get() == this && "updateSelfPointer() called with pointer to different object");
-
-		selfPtr = ptr;
-	}
-
-	const std::weak_ptr<imq::QObject>& QObject::getSelfPointer() const
-	{
-		return selfPtr;
+		return vm;
 	}
 
 	TypeIndex ObjectRegistry::nextTypeIndex = 0;

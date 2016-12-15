@@ -1,7 +1,8 @@
 #include <imq/value.h>
 #include <imq/object.h>
+#include <imq/vm.h>
 
-inline imq::Result sampleNativeFunction(int argc, imq::QValue* args, imq::QValue* result)
+inline imq::Result sampleNativeFunction(imq::VMachine* vm, int32_t argc, imq::QValue* args, imq::QValue* result)
 {
 	*result = imq::QValue::Nil();
 	return true;
@@ -12,8 +13,8 @@ class SampleObject : public imq::QObject
 	IMQ_DECLARE_TYPE(SampleObject);
 
 public:
-	SampleObject()
-		: QObject()
+	SampleObject(imq::VMachine* vm)
+		: QObject(vm)
 	{
 
 	}

@@ -2,6 +2,7 @@
 
 #include "platform.h"
 #include "context.h"
+#include "gc.h"
 
 #include <unordered_map>
 
@@ -38,10 +39,10 @@ namespace imq
 		RHS // object is on the right-hand side
 	};
 
-	class QObject
+	class QObject : public GCObject
 	{
 	public:
-		QObject();
+		QObject(VMachine* vm);
 		virtual ~QObject();
 
 		virtual String toString() const;
@@ -80,11 +81,10 @@ namespace imq
 		virtual Result opGreater(OperationOrder order, const QValue& other, QValue* result) const;
 		virtual Result opGreaterEq(OperationOrder order, const QValue& other, QValue* result) const;
 
-		void updateSelfPointer(const std::shared_ptr<QObject> ptr);
-		const std::weak_ptr<QObject>& getSelfPointer() const;
+		VMachine* getVM() const;
 
 	private:
-		std::weak_ptr<QObject> selfPtr;
+		VMachine* vm;
 	};
 
 	// Do not use yourself - use the IMQ_DECLARE_TYPE and IMQ_DEFINE_TYPE macros.

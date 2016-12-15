@@ -12,13 +12,15 @@
 
 namespace imq
 {
+	class VMachine;
+
 	class QTableEntry : public QObject
 	{
 		IMQ_DECLARE_TYPE(QTableEntry);
 		
 	public:
-		QTableEntry();
-		QTableEntry(const QValue& key, const QValue& value);
+		QTableEntry(VMachine* vm);
+		QTableEntry(VMachine* vm, const QValue& key, const QValue& value);
 		QTableEntry(const QTableEntry& other);
 
 		virtual ~QTableEntry();
@@ -38,6 +40,7 @@ namespace imq
 
 		const QValue& getKey() const;
 		const QValue& getValue() const;
+
 	private:
 		ObjectFieldHelper fields;
 
@@ -48,7 +51,7 @@ namespace imq
 	class QTableIterator : public QIterator
 	{
 	public:
-		QTableIterator(const std::unordered_map<QValue, QValue, std::hash<QValue>>::iterator& begin, const std::unordered_map<QValue, QValue, std::hash<QValue>>::iterator& end);
+		QTableIterator(VMachine* vm, const std::unordered_map<QValue, QValue, std::hash<QValue>>::iterator& begin, const std::unordered_map<QValue, QValue, std::hash<QValue>>::iterator& end);
 		virtual ~QTableIterator();
 
 		virtual bool isValid() const override;
@@ -56,6 +59,7 @@ namespace imq
 		virtual QValue getCurrentValue() const override;
 
 	private:
+		VMachine* vm;
 		std::unordered_map<QValue, QValue, std::hash<QValue>>::iterator it;
 		std::unordered_map<QValue, QValue, std::hash<QValue>>::iterator end;
 	};
@@ -65,8 +69,8 @@ namespace imq
 		IMQ_DECLARE_TYPE(QTable);
 
 	public:
-		QTable();
-		QTable(const std::unordered_map<QValue, QValue>& map);
+		QTable(VMachine* vm);
+		QTable(VMachine* vm, const std::unordered_map<QValue, QValue>& map);
 		QTable(const QTable& other);
 		virtual ~QTable();
 
@@ -88,6 +92,10 @@ namespace imq
 		virtual Result iterate(ContextPtr context, QIterator** result) override;
 
 		const std::unordered_map<QValue, QValue>& getMap() const;
+
+	protected:
+
+		virtual void GC_markChildren() override;
 
 	private:
 		ObjectFieldHelper fields;
@@ -115,8 +123,8 @@ namespace imq
 		IMQ_DECLARE_TYPE(QList);
 
 	public:
-		QList();
-		QList(const std::vector<QValue>& vec);
+		QList(VMachine* vm);
+		QList(VMachine* vm, const std::vector<QValue>& vec);
 		QList(const QList& other);
 		virtual ~QList();
 
@@ -138,6 +146,10 @@ namespace imq
 		virtual Result iterate(ContextPtr context, QIterator** result) override;
 
 		const std::vector<QValue>& getVector() const;
+
+	protected:
+
+		virtual void GC_markChildren() override;
 
 	private:
 		ObjectFieldHelper fields;

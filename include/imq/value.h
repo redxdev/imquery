@@ -6,18 +6,58 @@
 #include <functional>
 
 #include "result.h"
+#include "gc.h"
 
 namespace imq
 {
 	class QObject;
 	class QValue;
-
-	typedef std::shared_ptr<QObject> QObjectPtr;
+	class VMachine;
 
 	// Result QFunction(int32_t argCount, QValue* args, QValue* result);
-	typedef std::function<Result(int32_t, QValue*, QValue*)> QFunction;
+	//typedef std::function<Result(VMachine*, int32_t, QValue*, QValue*)> QFunction;
 
-    class QValue
+	typedef std::function<Result(VMachine*, int32_t, QValue*, QValue*)> QFunctionPtr;
+
+	class QFunction : public GCObject
+	{
+	public:
+		QFunction(VMachine* vm);
+		virtual ~QFunction();
+
+		virtual Result execute(VMachine* vm, int32_t argCount, QValue* args, QValue* result) = 0;
+
+	private:
+		VMachine* vm;
+	};
+
+	class QSimpleFunction : public QFunction
+	{
+	public:
+		QSimpleFunction(VMachine* vm, QFunctionPtr func);
+		virtual ~QSimpleFunction();
+
+		virtual Result execute(VMachine* vm, int32_t argCount, QValue* args, QValue* result) override;
+
+	private:
+		QFunctionPtr func;
+	};
+
+	class QBoundFunction : public QSimpleFunction
+	{
+	public:
+		QBoundFunction(VMachine* vm, QObject* obj, QFunctionPtr func);
+		virtual ~QBoundFunction();
+
+	protected:
+
+		virtual void GC_markChildren() override;
+
+	private:
+		QObject* obj;
+	};
+
+    class QValue : public GCTraceable
     {
     public:
 		friend struct std::hash<imq::QValue>;
@@ -36,8 +76,9 @@ namespace imq
 		static QValue Bool(bool val);
 		static QValue Integer(int32_t val);
 		static QValue Float(float val);
-		static QValue Function(QFunction val);
-		static QValue Object(QObjectPtr val);
+		static QValue Function(QFunction* val);
+		static QValue Function(VMachine* vm, QFunctionPtr val);
+		static QValue Function(VMachine* vm, QObject* obj, QFunctionPtr val);
 		static QValue Object(QObject* val);
 
 		static String getTypeString(Type t);
@@ -65,8 +106,8 @@ namespace imq
 		bool getBool(bool* result) const;
 		bool getInteger(int32_t* result) const;
 		bool getFloat(float* result) const;
-		bool getFunction(QFunction* result) const;
-		bool getObject(QObjectPtr* result) const;
+		bool getFunction(QFunction** result) const;
+		bool getObject(QObject** result) const;
 
 		bool toBool(QValue* result) const;
 		bool toInteger(QValue* result) const;
@@ -89,6 +130,8 @@ namespace imq
 		Result opGreater(const QValue& rhs, QValue* result) const;
 		Result opGreaterEq(const QValue& rhs, QValue* result) const;
 
+		virtual void GC_mark() override;
+
     private:
 		Type valueType;
 
@@ -97,8 +140,8 @@ namespace imq
 			bool b;
 			int32_t i;
 			float f;
-			QObjectPtr obj;
-			QFunction func;
+			QObject* obj;
+			QFunction* func;
 		};
     };
 

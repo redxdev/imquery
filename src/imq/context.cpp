@@ -2,9 +2,20 @@
 
 #include "cast.h"
 #include "errors.h"
+#include "vm.h"
 
 namespace imq
 {
+
+	Context::Context(VMachine* vm)
+		: vm(vm)
+	{
+		if (vm)
+		{
+			vm->getGC()->manage(this);
+		}
+	}
+
 	Context::~Context()
 	{
 	}
@@ -13,6 +24,16 @@ namespace imq
 	{
 		QValue rv;
 		return getReturnValue(&rv);
+	}
+
+	VMachine* Context::getVM() const
+	{
+		return vm;
+	}
+
+	SimpleContext::SimpleContext(VMachine* vm)
+		: Context(vm)
+	{
 	}
 
 	SimpleContext::~SimpleContext()
@@ -131,6 +152,19 @@ namespace imq
 		}
 
 		return false;
+	}
+
+	void SimpleContext::GC_markChildren()
+	{
+		for (auto entry : values)
+		{
+			entry.second.GC_mark();
+		}
+	}
+
+	RootContext::RootContext(VMachine* vm)
+		: Context(vm)
+	{
 	}
 
 	bool RootContext::hasValue(const String& key) const
@@ -281,6 +315,24 @@ namespace imq
 		return false;
 	}
 
+	void RootContext::GC_markChildren()
+	{
+		for (auto entry : inputs)
+		{
+			entry.second.GC_mark();
+		}
+
+		for (auto entry : outputs)
+		{
+			entry.second.GC_mark();
+		}
+
+		for (auto entry : values)
+		{
+			entry.second.GC_mark();
+		}
+	}
+
 	void RootContext::setInput(const String& key, const QValue& value)
 	{
 		inputs[key] = value;
@@ -308,8 +360,8 @@ namespace imq
 		values.clear();
 	}
 
-	SubContext::SubContext(ContextPtr parent)
-		: parent(parent), Context()
+	SubContext::SubContext(VMachine* vm, ContextPtr parent)
+		: Context(vm), parent(parent)
 	{
 	}
 
@@ -448,8 +500,16 @@ namespace imq
 		return parent->getReturnValue(result);
 	}
 
-	RestrictedSubContext::RestrictedSubContext(ContextPtr parent)
-		: SubContext(parent)
+	void SubContext::GC_markChildren()
+	{
+		for (auto entry : values)
+		{
+			entry.second.GC_mark();
+		}
+	}
+
+	RestrictedSubContext::RestrictedSubContext(VMachine* vm, ContextPtr parent)
+		: SubContext(vm, parent)
 	{
 	}
 

@@ -35,7 +35,7 @@ TEST(Full, ImageCopy)
 
 	QImage* srcImage;
 
-	ASSERT_TRUE(QImage::loadFromFile("images/checkerboard.png", &srcImage));
+	ASSERT_TRUE(QImage::loadFromFile(&vm, "images/checkerboard.png", &srcImage));
 
 	vm.getRootContext()->setInput("input", QValue::Object(srcImage));
 
@@ -46,13 +46,13 @@ TEST(Full, ImageCopy)
 	QValue value;
 	ASSERT_TRUE(vm.getRootContext()->getValue("output", &value));
 
-	QObjectPtr imagePtr;
+	QObject* imagePtr;
 	QImage* image;
 	ASSERT_TRUE(value.getObject(&imagePtr));
-	image = objectCast<QImage>(imagePtr.get());
+	image = objectCast<QImage>(imagePtr);
 	ASSERT_NE(image, nullptr);
 
-	QColor color;
+	QColor color(&vm);
 	for (int32_t y = 0; y < 10; ++y)
 	{
 		for (int32_t x = 0; x < 10; ++x)
@@ -60,7 +60,7 @@ TEST(Full, ImageCopy)
 			ASSERT_TRUE(image->getPixel(x, y, &color));
 			if (x == y)
 			{
-				EXPECT_EQ(color, QColor(1.f, 0.f, 0.f, 1.f));
+				EXPECT_EQ(color, QColor(&vm, 1.f, 0.f, 0.f, 1.f));
 			}
 			else
 			{
@@ -68,22 +68,22 @@ TEST(Full, ImageCopy)
 				{
 					if (x % 2 == 0)
 					{
-						EXPECT_EQ(color, QColor(0.f, 0.f, 0.f, 1.f));
+						EXPECT_EQ(color, QColor(&vm, 0.f, 0.f, 0.f, 1.f));
 					}
 					else
 					{
-						EXPECT_EQ(color, QColor(1.f, 1.f, 1.f, 1.f));
+						EXPECT_EQ(color, QColor(&vm, 1.f, 1.f, 1.f, 1.f));
 					}
 				}
 				else
 				{
 					if (x % 2 == 0)
 					{
-						EXPECT_EQ(color, QColor(1.f, 1.f, 1.f, 1.f));
+						EXPECT_EQ(color, QColor(&vm, 1.f, 1.f, 1.f, 1.f));
 					}
 					else
 					{
-						EXPECT_EQ(color, QColor(0.f, 0.f, 0.f, 1.f));
+						EXPECT_EQ(color, QColor(&vm, 0.f, 0.f, 0.f, 1.f));
 					}
 				}
 			}

@@ -5,6 +5,7 @@
 #include "value.h"
 #include "result.h"
 #include "utility.h"
+#include "gc.h"
 
 #include <ostream>
 
@@ -83,11 +84,14 @@ namespace imq
 		VMachine();
 		~VMachine();
 
-		std::shared_ptr<RootContext> getRootContext() const;
+		RootContext* getRootContext() const;
 
 		Result execute(VBlock* block);
 
+		GarbageCollector* getGC();
+
 	private:
-		std::shared_ptr<RootContext> rootContext;
+		RootContext* rootContext;
+		GarbageCollector* gc;
 	};
 }

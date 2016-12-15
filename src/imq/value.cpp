@@ -6,9 +6,56 @@
 
 #include "object.h"
 #include "errors.h"
+#include "vm.h"
 
 namespace imq
 {
+
+	QFunction::QFunction(VMachine* vm)
+		: vm(vm)
+	{
+		if (vm != nullptr)
+		{
+			vm->getGC()->manage(this);
+		}
+	}
+
+	QFunction::~QFunction()
+	{
+		if (vm != nullptr)
+		{
+			vm->getGC()->unmanage(this);
+		}
+	}
+
+	QSimpleFunction::QSimpleFunction(VMachine* vm, QFunctionPtr func)
+		: QFunction(vm), func(func)
+	{
+	}
+
+	QSimpleFunction::~QSimpleFunction()
+	{
+	}
+
+	Result QSimpleFunction::execute(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		return func(vm, argCount, args, result);
+	}
+
+	QBoundFunction::QBoundFunction(VMachine* vm, QObject* obj, QFunctionPtr func)
+		: QSimpleFunction(vm, func), obj(obj)
+	{
+	}
+
+	QBoundFunction::~QBoundFunction()
+	{
+	}
+
+	void QBoundFunction::GC_markChildren()
+	{
+		obj->GC_mark();
+	}
+
 	QValue QValue::Nil()
 	{
 		return QValue();
@@ -38,28 +85,30 @@ namespace imq
 		return result;
 	}
 
-	QValue QValue::Function(QFunction val)
+	QValue QValue::Function(QFunction* val)
 	{
 		QValue result;
 		result.valueType = Type::Function;
-		new (&result.func) QFunction();
 		result.func = val;
 		return result;
 	}
 
-	QValue QValue::Object(QObjectPtr val)
+	QValue QValue::Function(VMachine* vm, QFunctionPtr val)
 	{
-		QValue result;
-		result.valueType = Type::Object;
-		new (&result.obj) QObjectPtr();
-		result.obj = val;
-		val->updateSelfPointer(val);
-		return result;
+		return QValue::Function(new QSimpleFunction(vm, val));
+	}
+
+	QValue QValue::Function(VMachine* vm, QObject* obj, QFunctionPtr val)
+	{
+		return QValue::Function(new QBoundFunction(vm, obj, val));
 	}
 
 	imq::QValue QValue::Object(QObject* val)
 	{
-		return QValue::Object(QObjectPtr(val));
+		QValue result;
+		result.valueType = Type::Object;
+		result.obj = val;
+		return result;
 	}
 
 	imq::String QValue::getTypeString(Type t)
@@ -115,13 +164,10 @@ namespace imq
 			break;
 
 		case Type::Object:
-			new (&obj) QObjectPtr();
 			obj = other.obj;
-			obj->updateSelfPointer(obj);
 			break;
 
 		case Type::Function:
-			new (&func) QFunction();
 			func = other.func;
 			break;
 		}
@@ -129,16 +175,6 @@ namespace imq
 
 	QValue::~QValue()
 	{
-		switch (valueType)
-		{
-		case Type::Object:
-			obj.~shared_ptr();
-			break;
-
-		case Type::Function:
-			func.~function();
-			break;
-		}
 	}
 
 	QValue::Type QValue::getType() const
@@ -244,7 +280,7 @@ namespace imq
 		return false;
 	}
 
-	bool QValue::getFunction(QFunction* result) const
+	bool QValue::getFunction(QFunction** result) const
 	{
 		if (isFunction())
 		{
@@ -255,7 +291,7 @@ namespace imq
 		return false;
 	}
 
-	bool QValue::getObject(QObjectPtr* result) const
+	bool QValue::getObject(QObject** result) const
 	{
 		if (isObject())
 		{
@@ -1131,19 +1167,22 @@ namespace imq
 		return errors::math_operator_invalid("<???>", "greatereq");
 	}
 
-	QValue& QValue::operator=(const QValue& other)
+	void QValue::GC_mark()
 	{
 		switch (valueType)
 		{
 		case Type::Object:
-			obj.~shared_ptr();
+			obj->GC_mark();
 			break;
 
 		case Type::Function:
-			func.~function();
+			func->GC_mark();
 			break;
 		}
+	}
 
+	QValue& QValue::operator=(const QValue& other)
+	{
 		valueType = other.valueType;
 		switch (valueType)
 		{
@@ -1163,12 +1202,10 @@ namespace imq
 			break;
 
 		case Type::Object:
-			new (&obj) QObjectPtr();
 			obj = other.obj;
 			break;
 
 		case Type::Function:
-			new (&func) QFunction();
 			func = other.func;
 			break;
 		}
@@ -1199,11 +1236,10 @@ namespace imq
 			return a.f == b.f;
 
 		case QValue::Type::Function:
-			// NOTE - functions do not have equality operators, so we always return false here.
-			return false;
+			return a.func == b.func;
 
 		case QValue::Type::Object:
-			return a.obj->equals(b.obj.get());
+			return a.obj->equals(b.obj);
 		}
 	}
 

@@ -1,6 +1,7 @@
 #include <imq/value.h>
 #include <imq/object.h>
 #include <imq/cast.h>
+#include <imq/vm.h>
 #include <gtest/gtest.h>
 
 #include "test/sampleobject.h"
@@ -9,11 +10,13 @@ using namespace imq;
 
 TEST(QValue, Creation)
 {
+	VMachine vm;
+
 	bool b;
 	int32_t i;
 	float f;
-	QFunction func;
-	QObjectPtr obj;
+	QFunction* func;
+	QObject* obj;
 
 	QValue value;
 	ASSERT_TRUE(value.isNil());
@@ -36,15 +39,15 @@ TEST(QValue, Creation)
 	ASSERT_TRUE(value.getFloat(&f));
 	ASSERT_EQ(f, 123.45f);
 
-	value = QValue::Function(sampleNativeFunction);
+	value = QValue::Function(&vm, sampleNativeFunction);
 	ASSERT_TRUE(value.isFunction());
 	ASSERT_TRUE(value.getFunction(&func));
-	ASSERT_TRUE(func(0, nullptr, &value));
+	ASSERT_TRUE(func->execute(&vm, 0, nullptr, &value));
 
-	value = QValue::Object(QObjectPtr(new SampleObject()));
+	value = QValue::Object(new SampleObject(&vm));
 	ASSERT_TRUE(value.isObject());
 	ASSERT_TRUE(value.getObject(&obj));
-	ASSERT_NE(objectCast<SampleObject>(obj.get()), nullptr);
+	ASSERT_NE(objectCast<SampleObject>(obj), nullptr);
 }
 
 TEST(QValue, Conversion)
@@ -90,6 +93,7 @@ TEST(QValue, Conversion)
 
 TEST(QValue, ToString)
 {
+	VMachine vm;
 	QValue value;
 
 	ASSERT_EQ(value.toString(), "");
@@ -106,19 +110,21 @@ TEST(QValue, ToString)
 	value = QValue::Float(123.45f);
 	ASSERT_EQ(value.toString(), "123.45");
 
-	value = QValue::Function(sampleNativeFunction);
+	value = QValue::Function(&vm, sampleNativeFunction);
 	ASSERT_EQ(value.toString(), "<QFunction>");
 
-	value = QValue::Object(QObjectPtr(new SampleObject()));
+	value = QValue::Object(new SampleObject(&vm));
 	ASSERT_EQ(value.toString(), "<SampleObject>");
 }
 
 TEST(QValue, Equality)
 {
+	VMachine vm;
+
 	QValue valueA;
 	QValue valueB;
-	QObjectPtr objPtrA(new SampleObject());
-	QObjectPtr objPtrB(new SampleObject());
+	QObject* objPtrA = new SampleObject(&vm);
+	QObject* objPtrB = new SampleObject(&vm);
 
 	ASSERT_EQ(valueA, valueB);
 
@@ -149,11 +155,14 @@ TEST(QValue, Equality)
 	valueB = QValue::Float(10.34f);
 	ASSERT_EQ(valueA, valueB);
 
-	valueA = QValue::Function(sampleNativeFunction);
+	valueA = QValue::Function(&vm, sampleNativeFunction);
 	ASSERT_NE(valueA, valueB);
 
-	valueB = QValue::Function(sampleNativeFunction);
-	ASSERT_NE(valueA, valueB); // functions cannot be compared, so != is expected.
+	valueB = QValue::Function(&vm, sampleNativeFunction);
+	ASSERT_NE(valueA, valueB); // separate function references (even to the same function pointer) should not be equal
+
+	valueB = valueA;
+	ASSERT_EQ(valueA, valueB); // this should have copied the reference and so the values should be equal
 
 	valueA = QValue::Object(objPtrA);
 	ASSERT_NE(valueA, valueB);

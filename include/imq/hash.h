@@ -45,9 +45,9 @@ namespace imq
 namespace std
 {
 	template<>
-	struct hash<imq::QObjectPtr>
+	struct hash<imq::QObject*>
 	{
-		size_t operator()(const imq::QObjectPtr& obj) const
+		size_t operator()(const imq::QObject* obj) const
 		{
 			return obj->getHash();
 		}
@@ -79,7 +79,7 @@ namespace std
 				break;
 
 			case imq::QValue::Type::Object:
-				imq::hash_combine<imq::QObjectPtr>(result, val.obj);
+				imq::hash_combine<imq::QObject*>(result, val.obj);
 				break;
 			}
 

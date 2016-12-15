@@ -6,12 +6,12 @@ using namespace imq;
 
 TEST(SimpleContext, Construct)
 {
-	SimpleContext ctx;
+	SimpleContext ctx(nullptr);
 }
 
 TEST(SimpleContext, Values)
 {
-	SimpleContext ctx;
+	SimpleContext ctx(nullptr);
 	QValue value;
 
 	EXPECT_FALSE(ctx.hasValue("foobar"));
@@ -31,16 +31,18 @@ TEST(SimpleContext, Values)
 
 TEST(SubContext, Construct)
 {
-	ContextPtr parent(new SimpleContext());
-	SubContext ctx(parent);
+	ContextPtr parent = new SimpleContext(nullptr);
+	SubContext ctx(nullptr, parent);
 
 	EXPECT_EQ(ctx.getParent(), parent);
+
+	delete parent;
 }
 
 TEST(SubContext, Values)
 {
-	ContextPtr parent(new SimpleContext());
-	SubContext ctx(parent);
+	ContextPtr parent = new SimpleContext(nullptr);
+	SubContext ctx(nullptr, parent);
 	QValue value;
 
 	EXPECT_FALSE(ctx.hasValue("foobar"));
@@ -74,20 +76,24 @@ TEST(SubContext, Values)
 	EXPECT_FALSE(ctx.deleteValue("baz"));
 	EXPECT_FALSE(ctx.hasValue("baz"));
 	EXPECT_FALSE(parent->hasValue("baz"));
+
+	delete parent;
 }
 
 TEST(RestrictedSubContext, Construct)
 {
-	ContextPtr parent(new SimpleContext());
-	RestrictedSubContext ctx(parent);
+	ContextPtr parent = new SimpleContext(nullptr);
+	RestrictedSubContext ctx(nullptr, parent);
 
 	EXPECT_EQ(ctx.getParent(), parent);
+
+	delete parent;
 }
 
 TEST(RestrictedSubContext, Values)
 {
-	ContextPtr parent(new SimpleContext());
-	RestrictedSubContext ctx(parent);
+	ContextPtr parent = new SimpleContext(nullptr);
+	RestrictedSubContext ctx(nullptr, parent);
 	QValue value;
 
 	EXPECT_FALSE(ctx.hasValue("foobar"));
@@ -112,4 +118,6 @@ TEST(RestrictedSubContext, Values)
 	EXPECT_TRUE(parent->deleteValue("baz"));
 	EXPECT_FALSE(ctx.hasValue("baz"));
 	EXPECT_FALSE(parent->hasValue("baz"));
+
+	delete parent;
 }

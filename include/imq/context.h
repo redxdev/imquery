@@ -3,15 +3,19 @@
 #include "platform.h"
 #include "result.h"
 #include "value.h"
+#include "gc.h"
 
 #include <unordered_map>
 #include <memory>
 
 namespace imq
 {
-	class Context
+	class VMachine;
+
+	class Context : public GCObject
 	{
 	public:
+		Context(VMachine* vm);
 		virtual ~Context();
 
 		virtual bool hasValue(const String& key) const = 0;
@@ -32,15 +36,21 @@ namespace imq
 		virtual Result returnContext(const QValue& value) = 0;
 		virtual bool getReturnValue(QValue* result) const = 0;
 		bool isContextReturnedFrom() const;
+
+		VMachine* getVM() const;
+	private:
+		VMachine* vm;
 	};
 
-	typedef std::shared_ptr<Context> ContextPtr;
+	// DEPRECATED, use Context* instead.
+	typedef Context* ContextPtr;
 
 	// A simple form of context. This stores values in an unordered_map and allows both read and write access.
 	// This type of context is generally used as the root context.
 	class SimpleContext : public Context
 	{
 	public:
+		SimpleContext(VMachine* vm);
 		virtual ~SimpleContext();
 
 		virtual bool hasValue(const String& key) const override;
@@ -58,6 +68,8 @@ namespace imq
 		virtual Result returnContext(const QValue& value) override;
 		virtual bool getReturnValue(QValue* result) const override;
 
+		virtual void GC_markChildren() override;
+
 	protected:
 		std::unordered_map<String, QValue> values;
 		bool bBreakable = false;
@@ -70,6 +82,7 @@ namespace imq
 	class RootContext : public Context
 	{
 	public:
+		RootContext(VMachine* vm);
 		virtual bool hasValue(const String& key) const override;
 		virtual Result getValue(const String& key, QValue* result) const override;
 		virtual Result setValue(const String& key, const QValue& value) override;
@@ -84,6 +97,8 @@ namespace imq
 		virtual bool isReturnable() const override;
 		virtual Result returnContext(const QValue& value) override;
 		virtual bool getReturnValue(QValue* result) const override;
+
+		virtual void GC_markChildren() override;
 
 		void setInput(const String& key, const QValue& value);
 		void setOutput(const String& key, const QValue& value);
@@ -104,7 +119,7 @@ namespace imq
 	class SubContext : public Context
 	{
 	public:
-		SubContext(ContextPtr parent);
+		SubContext(VMachine* vm, ContextPtr parent);
 		virtual ~SubContext();
 
 		ContextPtr getParent() const;
@@ -124,6 +139,8 @@ namespace imq
 		virtual Result returnContext(const QValue& value) override;
 		virtual bool getReturnValue(QValue* result) const override;
 
+		virtual void GC_markChildren() override;
+
 	protected:
 		ContextPtr parent;
 		std::unordered_map<String, QValue> values;
@@ -137,7 +154,7 @@ namespace imq
 	class RestrictedSubContext : public SubContext
 	{
 	public:
-		RestrictedSubContext(ContextPtr parent);
+		RestrictedSubContext(VMachine* vm, ContextPtr parent);
 		virtual ~RestrictedSubContext();
 
 		// Allows you to bypass the lock on setValue

@@ -10,6 +10,7 @@
 #include "utility.h"
 #include "errors.h"
 #include "hash.h"
+#include "vm.h"
 
 namespace imq
 {
@@ -17,15 +18,15 @@ namespace imq
 
 	IMQ_DEFINE_TYPE(QColor);
 
-	QColor::QColor()
-		: QObject(),
+	QColor::QColor(VMachine* vm)
+		: QObject(vm),
 		red(0.f), green(0.f), blue(0.f), alpha(1.f)
 	{
 		initializeObject();
 	}
 
-	QColor::QColor(float r, float g, float b, float a)
-		: QObject(),
+	QColor::QColor(VMachine* vm, float r, float g, float b, float a)
+		: QObject(vm),
 		red(r), green(g), blue(b), alpha(a)
 	{
 		initializeObject();
@@ -33,7 +34,7 @@ namespace imq
 
 
 	QColor::QColor(const QColor& other)
-		: QObject()
+		: QObject(other.getVM())
 	{
 		this->red = other.red;
 		this->green = other.green;
@@ -71,8 +72,7 @@ namespace imq
 		fields.getter("a", [&](QValue* result) { *result = QValue::Float(alpha); return true; });
 
 		fields.getter("clamp", [&](QValue* result) {
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+			*result = QValue::Function(getVM(), this, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
 				if (argCount != 0)
 				{
 					return errors::args_count("QColor.clamp", 0, argCount);
@@ -85,14 +85,13 @@ namespace imq
 		});
 
 		fields.getter("each", [&](QValue* result) {
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+			*result = QValue::Function(getVM(), this, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
 				if (argCount != 1)
 				{
 					return errors::args_count("QColor.each", 1, argCount);
 				}
 
-				QFunction func;
+				QFunction* func;
 				if (!args[0].getFunction(&func))
 				{
 					return errors::args_type("QColor.each", 0, "QFunction", args[0]);
@@ -106,7 +105,7 @@ namespace imq
 				QValue* funcArgs = new QValue[1]{ QValue::Float(red) };
 				QValue value;
 
-				Result res = func(1, funcArgs, &value);
+				Result res = func->execute(vm, 1, funcArgs, &value);
 				if (!res)
 				{
 					delete[] funcArgs;
@@ -121,7 +120,7 @@ namespace imq
 
 				value = QValue::Nil();
 				funcArgs[0] = QValue::Float(green);
-				res = func(1, funcArgs, &value);
+				res = func->execute(vm, 1, funcArgs, &value);
 				if (!res)
 				{
 					delete[] funcArgs;
@@ -136,7 +135,7 @@ namespace imq
 
 				value = QValue::Nil();
 				funcArgs[0] = QValue::Float(blue);
-				res = func(1, funcArgs, &value);
+				res = func->execute(vm, 1, funcArgs, &value);
 				if (!res)
 				{
 					delete[] funcArgs;
@@ -151,7 +150,7 @@ namespace imq
 
 				value = QValue::Nil();
 				funcArgs[0] = QValue::Float(alpha);
-				res = func(1, funcArgs, &value);
+				res = func->execute(vm, 1, funcArgs, &value);
 				if (!res)
 				{
 					delete[] funcArgs;
@@ -166,7 +165,7 @@ namespace imq
 
 				delete[] funcArgs;
 
-				*result = QValue::Object(new QColor(r, g, b, a));
+				*result = QValue::Object(new QColor(getVM(), r, g, b, a));
 				return true;
 			});
 			return true;
@@ -256,9 +255,10 @@ namespace imq
 		alpha = val;
 	}
 
-	imq::QColor QColor::clamp() const
+	QColor QColor::clamp() const
 	{
 		return QColor(
+			getVM(),
 			utility::clamp(red, 0.f, 1.f),
 			utility::clamp(green, 0.f, 1.f),
 			utility::clamp(blue, 0.f, 1.f),
@@ -321,7 +321,7 @@ namespace imq
 		{
 			int32_t i;
 			other.getInteger(&i);
-			*result = QValue::Object(new QColor(red + i, green + i, blue + i, alpha + i));
+			*result = QValue::Object(new QColor(getVM(), red + i, green + i, blue + i, alpha + i));
 			return true;
 		}
 
@@ -329,19 +329,19 @@ namespace imq
 		{
 			float f;
 			other.getFloat(&f);
-			*result = QValue::Object(new QColor(red + f, green + f, blue + f, alpha + f));
+			*result = QValue::Object(new QColor(getVM(), red + f, green + f, blue + f, alpha + f));
 			return true;
 		}
 
 		case QValue::Type::Object:
 		{
-			QObjectPtr obj;
+			QObject* obj;
 			other.getObject(&obj);
-			QColor* col = objectCast<QColor>(obj.get());
+			QColor* col = objectCast<QColor>(obj);
 			if (!col)
 				return errors::math_operator_obj_invalid("+", getTypeString(), obj->getTypeString());
 
-			*result = QValue::Object(new QColor(red + col->red, green + col->green, blue + col->blue, alpha + col->alpha));
+			*result = QValue::Object(new QColor(getVM(), red + col->red, green + col->green, blue + col->blue, alpha + col->alpha));
 			return true;
 		}
 		}
@@ -359,7 +359,7 @@ namespace imq
 		{
 			int32_t i;
 			other.getInteger(&i);
-			res = new QColor(red - i, green - i, blue - i, alpha - i);
+			res = new QColor(getVM(), red - i, green - i, blue - i, alpha - i);
 			break;
 		}
 
@@ -367,19 +367,19 @@ namespace imq
 		{
 			float f;
 			other.getFloat(&f);
-			res = new QColor(red - f, green - f, blue - f, alpha - f);
+			res = new QColor(getVM(), red - f, green - f, blue - f, alpha - f);
 			break;
 		}
 
 		case QValue::Type::Object:
 		{
-			QObjectPtr obj;
+			QObject* obj;
 			other.getObject(&obj);
-			QColor* col = objectCast<QColor>(obj.get());
+			QColor* col = objectCast<QColor>(obj);
 			if (!col)
 				return errors::math_operator_obj_invalid("-", getTypeString(), obj->getTypeString());
 
-			res = new QColor(red - col->red, green - col->green, blue - col->blue, alpha - col->alpha);
+			res = new QColor(getVM(), red - col->red, green - col->green, blue - col->blue, alpha - col->alpha);
 			break;
 		}
 		}
@@ -407,7 +407,7 @@ namespace imq
 		{
 			int32_t i;
 			other.getInteger(&i);
-			*result = QValue::Object(new QColor(red * i, green * i, blue * i, alpha * i));
+			*result = QValue::Object(new QColor(getVM(), red * i, green * i, blue * i, alpha * i));
 			return true;
 		}
 
@@ -415,19 +415,19 @@ namespace imq
 		{
 			float f;
 			other.getFloat(&f);
-			*result = QValue::Object(new QColor(red * f, green * f, blue * f, alpha * f));
+			*result = QValue::Object(new QColor(getVM(), red * f, green * f, blue * f, alpha * f));
 			return true;
 		}
 
 		case QValue::Type::Object:
 		{
-			QObjectPtr obj;
+			QObject* obj;
 			other.getObject(&obj);
-			QColor* col = objectCast<QColor>(obj.get());
+			QColor* col = objectCast<QColor>(obj);
 			if (!col)
 				return errors::math_operator_obj_invalid("/", getTypeString(), obj->getTypeString());
 
-			*result = QValue::Object(new QColor(red * col->red, green * col->green, blue * col->blue, alpha * col->alpha));
+			*result = QValue::Object(new QColor(getVM(), red * col->red, green * col->green, blue * col->blue, alpha * col->alpha));
 			return true;
 		}
 		}
@@ -449,14 +449,14 @@ namespace imq
 				if (i == 0)
 					return errors::math_divide_by_zero();
 
-				*result = QValue::Object(new QColor(red / i, green / i, blue / i, alpha / i));
+				*result = QValue::Object(new QColor(getVM(), red / i, green / i, blue / i, alpha / i));
 			}
 			else
 			{
 				if (red == 0.f || green == 0.f || blue == 0.f || alpha == 0.f)
 					return errors::math_divide_by_zero();
 
-				*result = QValue::Object(new QColor(i / red, i / green, i / blue, i / alpha));
+				*result = QValue::Object(new QColor(getVM(), i / red, i / green, i / blue, i / alpha));
 			}
 			return true;
 		}
@@ -470,23 +470,23 @@ namespace imq
 				if (f == 0.f)
 					return errors::math_divide_by_zero();
 
-				*result = QValue::Object(new QColor(red / f, green / f, blue / f, alpha / f));
+				*result = QValue::Object(new QColor(getVM(), red / f, green / f, blue / f, alpha / f));
 			}
 			else
 			{
 				if (red == 0.f || green == 0.f || blue == 0.f || alpha == 0.f)
 					return errors::math_divide_by_zero();
 
-				*result = QValue::Object(new QColor(f / red, f / green, f / blue, f / alpha));
+				*result = QValue::Object(new QColor(getVM(), f / red, f / green, f / blue, f / alpha));
 			}
 			return true;
 		}
 
 		case QValue::Type::Object:
 		{
-			QObjectPtr obj;
+			QObject* obj;
 			other.getObject(&obj);
-			QColor* col = objectCast<QColor>(obj.get());
+			QColor* col = objectCast<QColor>(obj);
 			if (!col)
 				return errors::math_operator_obj_invalid("/", getTypeString(), obj->getTypeString());
 
@@ -495,14 +495,14 @@ namespace imq
 				if (col->red == 0.f || col->green == 0.f || col->blue == 0.f || col->alpha == 0.f)
 					return errors::math_divide_by_zero();
 
-				*result = QValue::Object(new QColor(red / col->red, green / col->green, blue / col->blue, alpha / col->alpha));
+				*result = QValue::Object(new QColor(getVM(), red / col->red, green / col->green, blue / col->blue, alpha / col->alpha));
 			}
 			else
 			{
 				if (red == 0.f || green == 0.f || blue == 0.f || alpha == 0.f)
 					return errors::math_divide_by_zero();
 
-				*result = QValue::Object(new QColor(col->red / red, col->green / green, col->blue / blue, col->alpha / alpha));
+				*result = QValue::Object(new QColor(getVM(), col->red / red, col->green / green, col->blue / blue, col->alpha / alpha));
 			}
 			return true;
 		}
@@ -525,14 +525,14 @@ namespace imq
 				if (i == 0)
 					return errors::math_mod_by_zero();
 
-				*result = QValue::Object(new QColor((float)std::fmod<float>(red, i), (float)std::fmod<float>(green, i), (float)std::fmod<float>(blue, i), (float)std::fmod<float>(alpha, i)));
+				*result = QValue::Object(new QColor(getVM(), (float)std::fmod<float>(red, i), (float)std::fmod<float>(green, i), (float)std::fmod<float>(blue, i), (float)std::fmod<float>(alpha, i)));
 			}
 			else
 			{
 				if (red == 0.f || green == 0.f || blue == 0.f || alpha == 0.f)
 					return errors::math_mod_by_zero();
 
-				*result = QValue::Object(new QColor(std::fmod<float>((float)i, red), std::fmod<float>((float)i, green), std::fmod<float>((float)i, blue), std::fmod<float>((float)i, alpha)));
+				*result = QValue::Object(new QColor(getVM(), std::fmod<float>((float)i, red), std::fmod<float>((float)i, green), std::fmod<float>((float)i, blue), std::fmod<float>((float)i, alpha)));
 			}
 			return true;
 		}
@@ -546,23 +546,23 @@ namespace imq
 				if (f == 0.f)
 					return errors::math_mod_by_zero();
 
-				*result = QValue::Object(new QColor(std::fmod(red, f), std::fmod(green, f), std::fmod(blue, f), std::fmod(alpha, f)));
+				*result = QValue::Object(new QColor(getVM(), std::fmod(red, f), std::fmod(green, f), std::fmod(blue, f), std::fmod(alpha, f)));
 			}
 			else
 			{
 				if (red == 0.f || green == 0.f || blue == 0.f || alpha == 0.f)
 					return errors::math_mod_by_zero();
 
-				*result = QValue::Object(new QColor(std::fmod(f, red), std::fmod(f, green), std::fmod(f, blue), std::fmod(f, alpha)));
+				*result = QValue::Object(new QColor(getVM(), std::fmod(f, red), std::fmod(f, green), std::fmod(f, blue), std::fmod(f, alpha)));
 			}
 			return true;
 		}
 
 		case QValue::Type::Object:
 		{
-			QObjectPtr obj;
+			QObject* obj;
 			other.getObject(&obj);
-			QColor* col = objectCast<QColor>(obj.get());
+			QColor* col = objectCast<QColor>(obj);
 			if (!col)
 				return errors::math_operator_obj_invalid("%", getTypeString(), obj->getTypeString());
 
@@ -571,14 +571,14 @@ namespace imq
 				if (col->red == 0.f || col->green == 0.f || col->blue == 0.f || col->alpha == 0.f)
 					return errors::math_mod_by_zero();
 
-				*result = QValue::Object(new QColor(std::fmod(red, col->red), std::fmod(green, col->green), std::fmod(blue, col->blue), std::fmod(alpha, col->alpha)));
+				*result = QValue::Object(new QColor(getVM(), std::fmod(red, col->red), std::fmod(green, col->green), std::fmod(blue, col->blue), std::fmod(alpha, col->alpha)));
 			}
 			else
 			{
 				if (red == 0.f || green == 0.f || blue == 0.f || alpha == 0.f)
 					return errors::math_mod_by_zero();
 
-				*result = QValue::Object(new QColor(std::fmod(col->red, red), std::fmod(col->green, green), std::fmod(col->blue, blue), std::fmod(col->alpha, alpha)));
+				*result = QValue::Object(new QColor(getVM(), std::fmod(col->red, red), std::fmod(col->green, green), std::fmod(col->blue, blue), std::fmod(col->alpha, alpha)));
 			}
 			return true;
 		}
@@ -587,7 +587,7 @@ namespace imq
 
 	Result QColor::opNegate(QValue* result) const
 	{
-		*result = QValue::Object(new QColor(-red, -green, -blue, -alpha));
+		*result = QValue::Object(new QColor(getVM(), -red, -green, -blue, -alpha));
 		return true;
 	}
 
@@ -595,7 +595,7 @@ namespace imq
 
 	IMQ_DEFINE_TYPE(QImage);
 
-	Result QImage::loadFromFile(const char* filename, QImage** result)
+	Result QImage::loadFromFile(VMachine* vm, const char* filename, QImage** result)
 	{
 		int width;
 		int height;
@@ -606,7 +606,7 @@ namespace imq
 			return errors::image_load_error(stbi_failure_reason());
 		}
 
-		*result = new QImage(width, height);
+		*result = new QImage(vm, width, height);
 		for (size_t idx = 0; idx < (size_t)(4 * width * height); ++idx)
 		{
 			(*result)->data[idx] = (float)(data[idx] / 255.f);
@@ -617,8 +617,8 @@ namespace imq
 		return true;
 	}
 
-	QImage::QImage()
-		: QObject()
+	QImage::QImage(VMachine* vm)
+		: QObject(vm)
 	{
 		width = 0;
 		height = 0;
@@ -627,13 +627,13 @@ namespace imq
 		initializeObject();
 	}
 
-	QImage::QImage(int32_t width, int32_t height)
-		: QImage(width, height, QColor(0.f, 0.f, 0.f))
+	QImage::QImage(VMachine* vm, int32_t width, int32_t height)
+		: QImage(vm, width, height, QColor(vm, 0.f, 0.f, 0.f))
 	{
 	}
 
-	QImage::QImage(int32_t width, int32_t height, const QColor& color)
-		: QObject()
+	QImage::QImage(VMachine* vm, int32_t width, int32_t height, const QColor& color)
+		: QObject(vm)
 	{
 		this->width = width;
 		this->height = height;
@@ -644,7 +644,7 @@ namespace imq
 	}
 
 	QImage::QImage(const QImage& other)
-		: QObject()
+		: QObject(other.getVM())
 	{
 		this->width = other.width;
 		this->height = other.height;
@@ -681,8 +681,7 @@ namespace imq
 		fields.getter("h", [&](QValue* result) { *result = QValue::Integer(height); return true; });
 
 		fields.getter("pixel", [&](QValue* result) {
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+			*result = QValue::Function(getVM(), this, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
 				if (argCount != 2 && argCount != 3)
 					return errors::args_count("pixel", 2, 3, argCount);
 
@@ -697,7 +696,7 @@ namespace imq
 
 				if (argCount == 2)
 				{
-					QColor col;
+					QColor col(getVM());
 					bool res = getPixel(x, y, &col);
 					if (!res)
 						return errors::func_generic_error("Unable to get pixel");
@@ -707,11 +706,11 @@ namespace imq
 				}
 				else
 				{
-					QObjectPtr obj;
+					QObject* obj;
 					if (!args[2].getObject(&obj))
 						return errors::args_type("pixel", 2, "Object", args[2]);
 
-					QColor* col = objectCast<QColor>(obj.get());
+					QColor* col = objectCast<QColor>(obj);
 					if (!col)
 						return errors::args_type("pixel", 2, "Color", args[2]);
 
@@ -727,8 +726,7 @@ namespace imq
 		});
 
 		fields.getter("clamp", [&](QValue* result) {
-			QObjectPtr sptr = getSelfPointer().lock();
-			*result = QValue::Function([&, sptr](int32_t argCount, QValue* args, QValue* result) -> Result {
+			*result = QValue::Function(getVM(), this, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
 				if (argCount != 0)
 					return errors::args_count("clamp", 0, argCount);
 
@@ -759,8 +757,8 @@ namespace imq
 			if (data == image->data)
 				return true;
 
-			QColor colorA;
-			QColor colorB;
+			QColor colorA(getVM());
+			QColor colorB(getVM());
 			for (int32_t y = 0; y < height; ++y)
 			{
 				for (int32_t x = 0; x < width; ++x)
@@ -883,13 +881,13 @@ namespace imq
 
 	Result QImage::selection(ContextPtr context, const QValue& value, QSelection** result)
 	{
-		QObjectPtr obj;
+		QObject* obj;
 		if (!value.getObject(&obj))
 		{
 			return errors::selection_create_error("expected QObject destination");
 		}
 
-		QImage* dest = objectCast<QImage>(obj.get());
+		QImage* dest = objectCast<QImage>(obj);
 		if (!dest)
 		{
 			return errors::selection_create_error("expected QImage destination");
@@ -902,15 +900,22 @@ namespace imq
 	QImageSelection::QImageSelection(ContextPtr parent, QImage* source, QImage* dest)
 		: source(source), dest(dest), index(0)
 	{
-		context = std::shared_ptr<RestrictedSubContext>(new RestrictedSubContext(parent));
+		context = new RestrictedSubContext(parent->getVM(), parent);
 		context->setBreakable(true);
-		color = std::shared_ptr<QColor>(new QColor());
+		color = new QColor(parent->getVM());
 		context->setRawValue("color", QValue::Object(color));
+
+		auto gc = parent->getVM()->getGC();
+		gc->manage(context);
+		gc->addRoot(context);
+
 		updateContext();
 	}
 
 	QImageSelection::~QImageSelection()
 	{
+		auto gc = context->getVM()->getGC();
+		gc->removeRoot(context);
 	}
 
 	ContextPtr QImageSelection::getContext() const
@@ -931,13 +936,13 @@ namespace imq
 
 	Result QImageSelection::apply(const QValue& value, int32_t coordCount, QValue* coords)
 	{
-		QObjectPtr obj;
+		QObject* obj;
 		if (!value.getObject(&obj))
 		{
 			return errors::selection_apply_error("expected a QObject");
 		}
 
-		QColor* color = objectCast<QColor>(obj.get());
+		QColor* color = objectCast<QColor>(obj);
 		if (!color)
 		{
 			return errors::selection_apply_error("expected a QColor");
