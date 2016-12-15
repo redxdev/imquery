@@ -1134,6 +1134,75 @@ namespace imq
 		return true;
 	}
 
+	ForEachStm::ForEachStm(const String& varName, VExpression* iterExpr, VStatement* execStm, const VLocation& loc)
+		: VStatement(loc), varName(varName), iterExpr(iterExpr), execStm(execStm)
+	{
+	}
+
+	ForEachStm::~ForEachStm()
+	{
+		delete iterExpr;
+		delete execStm;
+	}
+
+	String ForEachStm::getName() const
+	{
+		return "ForEach";
+	}
+
+	Result ForEachStm::execute(ContextPtr context)
+	{
+		if (!iterExpr)
+		{
+			return errors::vm_generic_error(getLocation(), "Invalid iterator subexpression for ForEach");
+		}
+
+		ContextPtr subContext(new SubContext(context));
+		subContext->setBreakable(true);
+
+		QValue value;
+		Result res = iterExpr->execute(subContext, &value);
+		if (!res)
+			return res;
+
+		QObjectPtr obj;
+		if (!value.getObject(&obj))
+		{
+			return errors::vm_generic_error(getLocation(), "Iterator expression must return an object");
+		}
+
+		QIterator* iter = nullptr;
+		res = obj->iterate(subContext, &iter);
+		if (!res)
+			return errors::vm_generic_error(getLocation(), res.getErr());
+
+		while (iter->isValid() && !subContext->isContextBroken() && !subContext->isContextReturnedFrom())
+		{
+			value = iter->getCurrentValue();
+			res = subContext->setValue(varName, value);
+			if (!res)
+			{
+				delete iter;
+				return errors::vm_generic_error(getLocation(), res.getErr());
+			}
+
+			if (execStm)
+			{
+				res = execStm->execute(subContext);
+				if (!res)
+				{
+					delete iter;
+					return res;
+				}
+			}
+
+			iter->next();
+		}
+
+		delete iter;
+		return true;
+	}
+
 	BreakStm::BreakStm(const VLocation& loc)
 		: VStatement(loc)
 	{

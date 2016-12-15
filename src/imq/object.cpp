@@ -60,67 +60,72 @@ namespace imq
 		return errors::undefined_selection(getTypeString());
 	}
 
-	imq::Result QObject::opAdd(OperationOrder order, const QValue& other, QValue* result) const
+	Result QObject::iterate(ContextPtr context, QIterator** result)
+	{
+		return errors::undefined_iteration(getTypeString());
+	}
+
+	Result QObject::opAdd(OperationOrder order, const QValue& other, QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "add");
 	}
 
-	imq::Result QObject::opSub(OperationOrder order, const QValue& other, QValue* result) const
+	Result QObject::opSub(OperationOrder order, const QValue& other, QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "sub");
 	}
 
-	imq::Result QObject::opMul(OperationOrder order, const QValue& other, QValue* result) const
+	Result QObject::opMul(OperationOrder order, const QValue& other, QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "mul");
 	}
 
-	imq::Result QObject::opDiv(OperationOrder order, const QValue& other, QValue* result) const
+	Result QObject::opDiv(OperationOrder order, const QValue& other, QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "div");
 	}
 
-	imq::Result QObject::opMod(OperationOrder order, const QValue& other, QValue* result) const
+	Result QObject::opMod(OperationOrder order, const QValue& other, QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "mod");
 	}
 
-	imq::Result QObject::opNegate(QValue* result) const
+	Result QObject::opNegate(QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "negate");
 	}
 
-	imq::Result QObject::opNot(QValue* result) const
+	Result QObject::opNot(QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "not");
 	}
 
-	imq::Result QObject::opAnd(OperationOrder order, const QValue& other, QValue* result) const
+	Result QObject::opAnd(OperationOrder order, const QValue& other, QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "and");
 	}
 
-	imq::Result QObject::opOr(OperationOrder order, const QValue& other, QValue* result) const
+	Result QObject::opOr(OperationOrder order, const QValue& other, QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "or");
 	}
 
-	imq::Result QObject::opLess(OperationOrder order, const QValue& other, QValue* result) const
+	Result QObject::opLess(OperationOrder order, const QValue& other, QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "less");
 	}
 
-	imq::Result QObject::opLessEq(OperationOrder order, const QValue& other, QValue* result) const
+	Result QObject::opLessEq(OperationOrder order, const QValue& other, QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "lesseq");
 	}
 
-	imq::Result QObject::opGreater(OperationOrder order, const QValue& other, QValue* result) const
+	Result QObject::opGreater(OperationOrder order, const QValue& other, QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "greater");
 	}
 
-	imq::Result QObject::opGreaterEq(OperationOrder order, const QValue& other, QValue* result) const
+	Result QObject::opGreaterEq(OperationOrder order, const QValue& other, QValue* result) const
 	{
 		return errors::undefined_operator(getTypeString(), "greatereq");
 	}
@@ -158,6 +163,11 @@ namespace imq
 
 	QSelection::~QSelection()
 	{
+	}
+
+	QIterator::~QIterator()
+	{
+
 	}
 
 	void ObjectFieldHelper::getter(const String& name, std::function<Result(QValue*)> getFunc)

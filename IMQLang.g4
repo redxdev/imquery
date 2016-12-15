@@ -57,6 +57,7 @@ statement returns [VStatement* stm]
     |   return_stm SEMICOLON            {$stm = $return_stm.stm;}
     |   branch_stm                      {$stm = $branch_stm.stm;} // no semicolon, uses block syntax
     |   for_loop_stm                    {$stm = $for_loop_stm.stm;} // ^^
+    |   for_each_stm                    {$stm = $for_each_stm.stm;} // ^^
     |   while_loop_stm                  {$stm = $while_loop_stm.stm;} // ^^
     |   loop_stm                        {$stm = $loop_stm.stm;} // ^^
     |   define_function_stm             {$stm = $define_function_stm.stm;} // ^^
@@ -65,7 +66,7 @@ statement returns [VStatement* stm]
     ;
 
 define_input_stm returns [VStatement* stm]
-    :   INPUT IDENT EQUAL expression {$stm = createNodeFromToken<DefineInputStm>($INPUT, $IDENT.text, $expression.expr);}
+    :   IN IDENT EQUAL expression {$stm = createNodeFromToken<DefineInputStm>($IN, $IDENT.text, $expression.expr);}
     ;
 
 define_output_stm returns [VStatement* stm]
@@ -146,6 +147,16 @@ for_loop_stm returns [VStatement* stm]
         R_BRACE
         {
             $stm = createNodeFromToken<ForLoopStm>($FOR, $init.stm, $expression.expr, $incr.stm, $block);
+        }
+    ;
+
+for_each_stm returns [VStatement* stm]
+    locals [VBlock* block = nullptr]
+    :   FOR IDENT IN expression L_BRACE
+        (statements {$block = createNodeFromToken<VBlock>($statements.start, $statements.count, $statements.stmArr);})?
+        R_BRACE
+        {
+            $stm = createNodeFromToken<ForEachStm>($FOR, $IDENT.text, $expression.expr, $block);
         }
     ;
 
@@ -438,7 +449,7 @@ RETURN
     :   'return'
     ;
 
-INPUT
+IN
     :   'in'
     ;
 

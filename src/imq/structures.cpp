@@ -7,6 +7,126 @@
 
 namespace imq
 {
+	IMQ_DEFINE_TYPE(QTableEntry);
+
+	QTableEntry::QTableEntry()
+		: QObject()
+	{
+		initializeObject();
+	}
+
+	QTableEntry::QTableEntry(const QValue& key, const QValue& value)
+		: QObject(), key(key), value(value)
+	{
+		initializeObject();
+	}
+
+	QTableEntry::QTableEntry(const QTableEntry& other)
+		: QObject(), key(other.key), value(other.value)
+	{
+		initializeObject();
+	}
+
+	QTableEntry::~QTableEntry()
+	{
+	}
+
+	void QTableEntry::initializeObject()
+	{
+		fields.getter("key", [&](QValue* result) {
+			*result = key;
+			return true;
+		});
+
+		fields.setter("key", [&](const QValue& val) {
+			key = val;
+			return true;
+		});
+
+		fields.getter("value", [&](QValue* result) {
+			*result = value;
+			return true;
+		});
+
+		fields.setter("value", [&](const QValue& val) {
+			value = val;
+			return true;
+		});
+	}
+
+	QTableEntry& QTableEntry::operator=(const QTableEntry& other)
+	{
+		key = other.key;
+		value = other.value;
+		return *this;
+	}
+
+	String QTableEntry::toString() const
+	{
+		std::stringstream ss;
+		ss << "TableEntry[" << key.toString() << "," << value.toString() << "]";
+		return ss.str();
+	}
+
+	bool QTableEntry::equals(const QObject* other) const
+	{
+		const QTableEntry* entry = objectCast<QTableEntry>(other);
+		if (!entry)
+			return false;
+
+		return key == entry->key && value == entry->value;
+	}
+
+	Result QTableEntry::copyObject(QValue* result) const
+	{
+		*result = QValue::Object(new QTableEntry(*this));
+		return true;
+	}
+
+	Result QTableEntry::getField(const String& name, QValue* result)
+	{
+		return fields.handleGet(this, name, result);
+	}
+
+	Result QTableEntry::setField(const String& name, const QValue& value)
+	{
+		return fields.handleSet(this, name, value);
+	}
+
+	const QValue& QTableEntry::getKey() const
+	{
+		return key;
+	}
+
+	const QValue& QTableEntry::getValue() const
+	{
+		return value;
+	}
+
+	QTableIterator::QTableIterator(const std::unordered_map<QValue, QValue, std::hash<QValue>>::iterator& begin, const std::unordered_map<QValue, QValue, std::hash<QValue>>::iterator& end)
+		: it(begin), end(end)
+	{
+	}
+
+	QTableIterator::~QTableIterator()
+	{
+	}
+
+	bool QTableIterator::isValid() const
+	{
+		return it != end;
+	}
+
+	void QTableIterator::next()
+	{
+		++it;
+	}
+
+	QValue QTableIterator::getCurrentValue() const
+	{
+		return QValue::Object(new QTableEntry(it->first, it->second));
+	}
+
 	IMQ_DEFINE_TYPE(QTable);
 
 	QTable::QTable()
@@ -169,9 +289,39 @@ namespace imq
 		return true;
 	}
 
+	Result QTable::iterate(ContextPtr context, QIterator** result)
+	{
+		*result = new QTableIterator(map.begin(), map.end());
+		return true;
+	}
+
 	const std::unordered_map<imq::QValue, imq::QValue>& QTable::getMap() const
 	{
 		return map;
+	}
+
+	QListIterator::QListIterator(const std::vector<QValue>::iterator& begin, const std::vector<QValue>::iterator& end)
+		: it(begin), end(end)
+	{
+	}
+
+	QListIterator::~QListIterator()
+	{
+	}
+
+	bool QListIterator::isValid() const
+	{
+		return it != end;
+	}
+
+	void QListIterator::next()
+	{
+		++it;
+	}
+
+	QValue QListIterator::getCurrentValue() const
+	{
+		return *it;
 	}
 
 	IMQ_DEFINE_TYPE(QList);
@@ -341,6 +491,12 @@ namespace imq
 			return errors::index_out_of_range(index);
 
 		vec[i] = value;
+		return true;
+	}
+
+	Result QList::iterate(ContextPtr context, QIterator** result)
+	{
+		*result = new QListIterator(vec.begin(), vec.end());
 		return true;
 	}
 

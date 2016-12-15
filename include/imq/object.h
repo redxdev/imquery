@@ -22,6 +22,16 @@ namespace imq
 		virtual Result apply(const QValue& value, int32_t coordCount, QValue* coords) = 0;
 	};
 
+	class QIterator
+	{
+	public:
+		virtual ~QIterator();
+
+		virtual bool isValid() const = 0;
+		virtual void next() = 0;
+		virtual QValue getCurrentValue() const = 0;
+	};
+
 	enum class OperationOrder
 	{
 		LHS, // object is on the left-hand side
@@ -53,6 +63,7 @@ namespace imq
 		virtual Result setIndex(const QValue& index, const QValue& value);
 
 		virtual Result selection(ContextPtr context, const QValue& value, QSelection** result);
+		virtual Result iterate(ContextPtr context, QIterator** result);
 
 		// Operators - order is the position this object is in (RHS for right-hand, LHS for left-hand).
 		virtual Result opAdd(OperationOrder order, const QValue& other, QValue* result) const;

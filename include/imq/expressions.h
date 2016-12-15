@@ -282,6 +282,21 @@ namespace imq
 		VStatement* execStm;
 	};
 
+	class ForEachStm : public VStatement
+	{
+	public:
+		ForEachStm(const String& varName, VExpression* iterExpr, VStatement* execStm, const VLocation& loc);
+		virtual ~ForEachStm();
+
+		virtual String getName() const override;
+		virtual Result execute(ContextPtr context) override;
+
+	private:
+		String varName;
+		VExpression* iterExpr;
+		VStatement* execStm;
+	};
+
 	class BreakStm : public VStatement
 	{
 	public:

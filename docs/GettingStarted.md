@@ -377,7 +377,7 @@ Here are some relevant operators:
 
 ## Loops
 
-imq supports three types of loops: `for`, `while`, and `loop`.
+imq supports four types of loops: `for`, `while`, `loop`, and `for-each`.
 
 The for loop is in the following format:
 
@@ -414,6 +414,19 @@ optimizations that imq can make if you do so:
     loop {
         # do something infinitely
     }
+
+### For-Each
+
+`for-each` loops are a special case of the `for` loop. They let you iterate over certain types
+of objects. See the sections on lists and tables below for examples. The general form of a
+`for-each` loop is as follows:
+
+    for myVariable in iterableObject {
+        doSomething();
+    }
+    
+The `iterableObject` expression must be a type that can be iterated, such as a list or table.
+For each value in the iterator, `myVariable` will be set and the loop will be executed.
 
 ### Breaking out of loops
 
@@ -547,6 +560,15 @@ You can clear the list:
     > myList;
     [empty list]
 
+#### Iteration
+
+Lists support iteration via `for-each` loops:
+
+    > for myVar in [1,2,3] { print(myVar); }
+    1
+    2
+    3
+
 ### Tables
 
 A table in imq is a hashmap or associative array. You define tables like so:
@@ -599,3 +621,28 @@ You can get the list of keys or values with `keys` and `values`:
 You can clear the table:
 
     > myTable.clear();
+
+#### Iteration
+
+Tables support iteration via `for-each` loops but instead of supplying the keys or values,
+tables supply a `TableEntry` object that holds a key and value:
+
+    > for myVar in [! 1 = 2, 3 = 4] { print(myVar); }
+    TableEntry[1,2]
+    TableEntry[3,4]
+    > for myVar in [! 1 = 2, 3 = 4] { print(myVar.key); }
+    1
+    3
+    > for myVar in [! 1 = 2, 3 = 4] { print(myVar.value); }
+    2
+    4
+
+You can also iterate over just the set of keys or values, since the `keys` and `values`
+properties are just lists:
+
+    > for myVar in [! 1 = 2, 3 = 4].keys { print(myVar); }
+    1
+    3
+    > for myVar in [! 1 = 2, 3 = 4].values { print(myVar); }
+    2
+    4
