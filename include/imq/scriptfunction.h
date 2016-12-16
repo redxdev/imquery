@@ -44,6 +44,7 @@ namespace imq
 
 	private:
 		String funcName;
+		VBlock* initialBlock;
 		std::shared_ptr<VBlock> block;
 		std::vector<String> argNames;
 	};

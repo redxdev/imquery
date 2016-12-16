@@ -15,6 +15,14 @@
 
 using namespace imq;
 
+bool bRunning = true;
+
+Result iqc_stop(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+{
+	bRunning = false;
+	return true;
+}
+
 struct InputArg
 {
 	std::string name;
@@ -139,13 +147,15 @@ bool execute(VMachine* vm, VBlock* block, const std::vector<IOPair>& outputs, bo
 		return true;
 	}
 
+	vm->getRootContext()->setValue("exit", QValue::Function(vm, iqc_stop));
+
 	QueryParser parser;
 	parser.setDebugMode(bDebugMode);
 
 	Result res;
 	QValue lastResult;
 
-	while (true)
+	while (bRunning)
 	{
 		lastResult = QValue();
 		std::cout << "> ";
@@ -187,6 +197,8 @@ bool execute(VMachine* vm, VBlock* block, const std::vector<IOPair>& outputs, bo
 
 		vm->getGC()->collect(true);
 	}
+
+	return true;
 }
 
 int main(int argc, char** argv)

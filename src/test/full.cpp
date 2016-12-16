@@ -8,6 +8,8 @@
 
 using namespace imq;
 
+static const char* bad_script = "in input = image();input = 5;asdf = 99; foo = () => {input.blah()};if (false) {print(12345.23);}\n"
+	"out output =";
 static const char* copy_image =
 	"in input = image();\n"
 	"out output = image(input.w, input.h);" // the missing newline here is to test whether newlines are parsed correctly - this should still succeed.
@@ -18,6 +20,8 @@ TEST(Full, Parse)
 {
 	QueryParser parser;
 	VBlock* block;
+
+	ASSERT_FALSE(parser.parseString(bad_script, &block));
 	ASSERT_TRUE(parser.parseString(copy_image, &block));
 
 	delete block;

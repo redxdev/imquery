@@ -21,6 +21,16 @@ namespace imq
 		return location;
 	}
 
+	bool VNode::getErrorState() const
+	{
+		return bErrorState;
+	}
+
+	void VNode::setErrorState(bool bNewState)
+	{
+		bErrorState = bNewState;
+	}
+
 	VStatement::VStatement(const VLocation& loc)
 		: VNode(loc)
 	{
@@ -46,7 +56,10 @@ namespace imq
 
 	VExpressionAsStatement::~VExpressionAsStatement()
 	{
-		delete expression;
+		if (!getErrorState())
+		{
+			delete expression;
+		}
 	}
 
 	VExpression* VExpressionAsStatement::getExpression() const
@@ -74,9 +87,12 @@ namespace imq
 
 	VBlock::~VBlock()
 	{
-		for (int32_t i = 0; i < count; ++i)
+		if (!getErrorState())
 		{
-			delete statements[i];
+			for (int32_t i = 0; i < count; ++i)
+			{
+				delete statements[i];
+			}
 		}
 
 		delete[] statements;

@@ -49,7 +49,7 @@ namespace imq
 	}
 
 	DefineFunctionExpr::DefineFunctionExpr(const String& funcName, VBlock* block, const std::vector<String>& argNames, const VLocation& loc)
-		: VExpression(loc), funcName(funcName), block(block), argNames(argNames)
+		: VExpression(loc), funcName(funcName), initialBlock(block), argNames(argNames)
 	{
 	}
 
@@ -60,6 +60,11 @@ namespace imq
 
 	DefineFunctionExpr::~DefineFunctionExpr()
 	{
+		if (!getErrorState())
+		{
+			if (initialBlock)
+				delete initialBlock;
+		}
 	}
 
 	String DefineFunctionExpr::getName() const
@@ -69,6 +74,12 @@ namespace imq
 
 	Result DefineFunctionExpr::execute(ContextPtr context, QValue* result)
 	{
+		if (initialBlock)
+		{
+			block = std::shared_ptr<VBlock>(initialBlock);
+			initialBlock = nullptr;
+		}
+
 		*result = QValue::Function(new ScriptFunction(funcName, context, block, argNames));
 		return true;
 	}

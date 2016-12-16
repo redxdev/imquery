@@ -11,8 +11,11 @@ namespace imq
 
 	TwoOperatorMathExpr::~TwoOperatorMathExpr()
 	{
-		delete lhsExpr;
-		delete rhsExpr;
+		if (!getErrorState())
+		{
+			delete lhsExpr;
+			delete rhsExpr;
+		}
 	}
 
 	Result TwoOperatorMathExpr::execute(ContextPtr context, QValue* result)
@@ -52,7 +55,10 @@ namespace imq
 
 	OneOperatorMathExpr::~OneOperatorMathExpr()
 	{
-		delete expr;
+		if (!getErrorState())
+		{
+			delete expr;
+		}
 	}
 
 	Result OneOperatorMathExpr::execute(ContextPtr context, QValue* result)

@@ -77,6 +77,12 @@ namespace imq
 		}
 		catch (const std::exception& outer)
 		{
+			for (auto node : parser.generatedVNodes)
+			{
+				node->setErrorState(true);
+				delete node;
+			}
+
 			if (!errorListener.getLastMessage().empty())
 			{
 				return Result(false, errorListener.getLastMessage());
@@ -117,6 +123,12 @@ namespace imq
 		}
 		catch (const std::exception& outer)
 		{
+			for (auto node : parser.generatedVNodes)
+			{
+				node->setErrorState(true);
+				delete node;
+			}
+
 			if (!errorListener.getLastMessage().empty())
 			{
 				return Result(false, errorListener.getLastMessage());

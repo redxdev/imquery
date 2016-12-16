@@ -7,13 +7,27 @@ grammar IMQLang;
     #include "value.h"
     #include "object.h"
     #include "image.h"
-    #include "parseutils.h"
+    #include "utility.h"
     #include "platform.h"
+    #include "vm.h"
 
     #include <string>
     #include <memory>
     #include <vector>
     #include <cmath>
+}
+
+@parser::members {
+    std::vector<VNode*> generatedVNodes;
+
+    template<typename T, typename... Args>
+    T* createNodeFromToken(antlr4::Token* token, Args&&... args)
+    {
+        static_assert(std::is_base_of<VNode, T>::value, "T must have a base type of VNode (VExpression, VStatement)");
+        T* val = new T(args..., { (int32_t)token->getLine(), (int32_t)token->getCharPositionInLine() });
+        generatedVNodes.push_back(val);
+        return val;
+    }
 }
 
 ////

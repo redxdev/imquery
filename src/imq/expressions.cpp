@@ -36,10 +36,13 @@ namespace imq
 
 	ColorExpr::~ColorExpr()
 	{
-		delete rExpr;
-		delete gExpr;
-		delete bExpr;
-		delete aExpr;
+		if (!getErrorState())
+		{
+			delete rExpr;
+			delete gExpr;
+			delete bExpr;
+			delete aExpr;
+		}
 	}
 
 	String ColorExpr::getName() const
@@ -162,9 +165,12 @@ namespace imq
 
 	ListExpr::~ListExpr()
 	{
-		for (auto expr : values)
+		if (!getErrorState())
 		{
-			delete expr;
+			for (auto expr : values)
+			{
+				delete expr;
+			}
 		}
 	}
 
@@ -200,10 +206,13 @@ namespace imq
 
 	TableExpr::~TableExpr()
 	{
-		for (auto val : values)
+		if (!getErrorState())
 		{
-			delete std::get<0>(val);
-			delete std::get<1>(val);
+			for (auto val : values)
+			{
+				delete std::get<0>(val);
+				delete std::get<1>(val);
+			}
 		}
 	}
 
@@ -279,7 +288,10 @@ namespace imq
 
 	RetrieveFieldExpr::~RetrieveFieldExpr()
 	{
-		delete objExpr;
+		if (!getErrorState())
+		{
+			delete objExpr;
+		}
 	}
 
 
@@ -330,8 +342,11 @@ namespace imq
 
 	RetrieveIndexExpr::~RetrieveIndexExpr()
 	{
-		delete objExpr;
-		delete indexExpr;
+		if (!getErrorState())
+		{
+			delete objExpr;
+			delete indexExpr;
+		}
 	}
 
 	String RetrieveIndexExpr::getName() const
@@ -392,10 +407,13 @@ namespace imq
 
 	CallFunctionExpr::~CallFunctionExpr()
 	{
-		delete funcExpr;
-		for (int32_t i = 0; i < argCount; ++i)
+		if (!getErrorState())
 		{
-			delete args[i];
+			delete funcExpr;
+			for (int32_t i = 0; i < argCount; ++i)
+			{
+				delete args[i];
+			}
 		}
 
 		delete[] args;
@@ -464,7 +482,10 @@ namespace imq
 
 	SetVariableStm::~SetVariableStm()
 	{
-		delete valueExpr;
+		if (!getErrorState())
+		{
+			delete valueExpr;
+		}
 	}
 
 	String SetVariableStm::getName() const
@@ -502,8 +523,11 @@ namespace imq
 
 	SetFieldStm::~SetFieldStm()
 	{
-		delete valueExpr;
-		delete objExpr;
+		if (!getErrorState())
+		{
+			delete valueExpr;
+			delete objExpr;
+		}
 	}
 
 	String SetFieldStm::getName() const
@@ -563,9 +587,12 @@ namespace imq
 
 	SetIndexStm::~SetIndexStm()
 	{
-		delete indexExpr;
-		delete objExpr;
-		delete valueExpr;
+		if (!getErrorState())
+		{
+			delete indexExpr;
+			delete objExpr;
+			delete valueExpr;
+		}
 	}
 
 	String SetIndexStm::getName() const
@@ -662,15 +689,18 @@ namespace imq
 
 	SelectStm::~SelectStm()
 	{
-		delete destExpr;
-		delete srcExpr;
-		delete calcExpr;
-		delete whereExpr;
-		delete elseExpr;
-
-		for (int32_t i = 0; i < coordCount; ++i)
+		if (!getErrorState())
 		{
-			delete coordsExpr[i];
+			delete destExpr;
+			delete srcExpr;
+			delete calcExpr;
+			delete whereExpr;
+			delete elseExpr;
+
+			for (int32_t i = 0; i < coordCount; ++i)
+			{
+				delete coordsExpr[i];
+			}
 		}
 
 		delete[] coordsExpr;
@@ -820,7 +850,10 @@ namespace imq
 
 	DefineInputStm::~DefineInputStm()
 	{
-		delete valueExpr;
+		if (!getErrorState())
+		{
+			delete valueExpr;
+		}
 	}
 
 	String DefineInputStm::getName() const
@@ -858,7 +891,10 @@ namespace imq
 
 	DefineOutputStm::~DefineOutputStm()
 	{
-		delete valueExpr;
+		if (!getErrorState())
+		{
+			delete valueExpr;
+		}
 	}
 
 	String DefineOutputStm::getName() const
@@ -894,9 +930,12 @@ namespace imq
 
 	BranchStm::~BranchStm()
 	{
-		delete checkExpr;
-		delete trueStm;
-		delete falseStm;
+		if (!getErrorState())
+		{
+			delete checkExpr;
+			delete trueStm;
+			delete falseStm;
+		}
 	}
 
 	String BranchStm::getName() const
@@ -949,10 +988,13 @@ namespace imq
 
 	ForLoopStm::~ForLoopStm()
 	{
-		delete initStm;
-		delete checkExpr;
-		delete incrStm;
-		delete execStm;
+		if (!getErrorState())
+		{
+			delete initStm;
+			delete checkExpr;
+			delete incrStm;
+			delete execStm;
+		}
 	}
 
 	String ForLoopStm::getName() const
@@ -1042,8 +1084,11 @@ namespace imq
 
 	WhileLoopStm::~WhileLoopStm()
 	{
-		delete checkExpr;
-		delete execStm;
+		if (!getErrorState())
+		{
+			delete checkExpr;
+			delete execStm;
+		}
 	}
 
 	String WhileLoopStm::getName() const
@@ -1114,7 +1159,10 @@ namespace imq
 
 	InfiniteLoopStm::~InfiniteLoopStm()
 	{
-		delete execStm;
+		if (!getErrorState())
+		{
+			delete execStm;
+		}
 	}
 
 	String InfiniteLoopStm::getName() const
@@ -1156,8 +1204,11 @@ namespace imq
 
 	ForEachStm::~ForEachStm()
 	{
-		delete iterExpr;
-		delete execStm;
+		if (!getErrorState())
+		{
+			delete iterExpr;
+			delete execStm;
+		}
 	}
 
 	String ForEachStm::getName() const
@@ -1255,7 +1306,10 @@ namespace imq
 
 	ReturnStm::~ReturnStm()
 	{
-		delete valueExpr;
+		if (!getErrorState())
+		{
+			delete valueExpr;
+		}
 	}
 
 	String ReturnStm::getName() const
@@ -1308,9 +1362,12 @@ namespace imq
 
 	TernaryExpr::~TernaryExpr()
 	{
-		delete checkExpr;
-		delete trueExpr;
-		delete falseExpr;
+		if (!getErrorState())
+		{
+			delete checkExpr;
+			delete trueExpr;
+			delete falseExpr;
+		}
 	}
 
 	String TernaryExpr::getName() const

@@ -21,8 +21,15 @@ namespace imq
 
 		virtual String getName() const = 0;
 
+		// Error state is set to true when there was an issue constructing the VNode tree.
+		// When the destructor for a VNode is called and the error state is set, a node should
+		// NOT delete any subnodes it contains (they will be cleaned up elsewhere).
+		bool getErrorState() const;
+		void setErrorState(bool bNewState);
+
 	private:
 		VLocation location;
+		bool bErrorState = false;
 	};
 
 	class VStatement : public VNode
