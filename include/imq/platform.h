@@ -2,7 +2,7 @@
 
 #include <string>
 
-#define IMQ_VERSION_STR ("0.1")
+#define IMQ_VERSION_STR ("0.2")
 
 namespace imq
 {
