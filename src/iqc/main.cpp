@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <signal.h>
 
 #include "thirdparty/tclap/CmdLine.h"
 
@@ -16,6 +17,11 @@
 using namespace imq;
 
 bool bRunning = true;
+
+void sigint_handler(int sig)
+{
+	bRunning = false;
+}
 
 Result iqc_stop(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 {
@@ -154,6 +160,8 @@ bool execute(VMachine* vm, VBlock* block, const std::vector<IOPair>& outputs, bo
 
 	Result res;
 	QValue lastResult;
+
+	signal(SIGINT, sigint_handler);
 
 	while (bRunning)
 	{
