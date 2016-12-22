@@ -89,7 +89,7 @@ namespace imq
 		virtual Result getIndex(const QValue& index, QValue* result) override;
 		virtual Result setIndex(const QValue& index, const QValue& value) override;
 
-		virtual Result iterate(ContextPtr context, QIterator** result) override;
+		virtual Result iterate(Context* context, QIterator** result) override;
 
 		const std::unordered_map<QValue, QValue>& getMap() const;
 
@@ -143,7 +143,7 @@ namespace imq
 		virtual Result getIndex(const QValue& index, QValue* result) override;
 		virtual Result setIndex(const QValue& index, const QValue& value) override;
 
-		virtual Result iterate(ContextPtr context, QIterator** result) override;
+		virtual Result iterate(Context* context, QIterator** result) override;
 
 		const std::vector<QValue>& getVector() const;
 

@@ -74,7 +74,7 @@ namespace imq
 		return ss.str();
 	}
 
-	Result VExpressionAsStatement::execute(ContextPtr context)
+	Result VExpressionAsStatement::execute(Context* context)
 	{
 		QValue exprValue;
 		return expression->execute(context, &exprValue);
@@ -103,7 +103,7 @@ namespace imq
 		return "Block";
 	}
 
-	Result VBlock::execute(ContextPtr context)
+	Result VBlock::execute(Context* context)
 	{
 		if (count < 0)
 			return errors::vm_generic_error(getLocation(), "Invalid statement block - count < 0");

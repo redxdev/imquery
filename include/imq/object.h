@@ -17,7 +17,7 @@ namespace imq
 	public:
 		virtual ~QSelection();
 
-		virtual ContextPtr getContext() const = 0;
+		virtual Context* getContext() const = 0;
 		virtual bool isValid() const = 0;
 		virtual void next() = 0;
 		virtual Result apply(const QValue& value, int32_t coordCount, QValue* coords) = 0;
@@ -63,8 +63,8 @@ namespace imq
 		virtual Result getIndex(const QValue& index, QValue* result);
 		virtual Result setIndex(const QValue& index, const QValue& value);
 
-		virtual Result selection(ContextPtr context, const QValue& value, QSelection** result);
-		virtual Result iterate(ContextPtr context, QIterator** result);
+		virtual Result selection(Context* context, const QValue& value, QSelection** result);
+		virtual Result iterate(Context* context, QIterator** result);
 
 		// Operators - order is the position this object is in (RHS for right-hand, LHS for left-hand).
 		virtual Result opAdd(OperationOrder order, const QValue& other, QValue* result) const;

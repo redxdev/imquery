@@ -13,7 +13,7 @@ namespace imq
 	class ScriptFunction : public QFunction
 	{
 	public:
-		ScriptFunction(const String& funcName, ContextPtr outerCtx, const std::shared_ptr<VBlock> block, const std::vector<String>& argNames);
+		ScriptFunction(const String& funcName, Context* outerCtx, const std::shared_ptr<VBlock> block, const std::vector<String>& argNames);
 		virtual ~ScriptFunction();
 
 		virtual Result execute(VMachine* vm, int32_t argCount, QValue* args, QValue* result) override;
@@ -27,7 +27,7 @@ namespace imq
 		ScriptFunction& operator=(const ScriptFunction& other) = default;
 
 		String funcName;
-		ContextPtr outerCtx;
+		Context* outerCtx;
 		std::shared_ptr<VBlock> block;
 		std::vector<String> argNames;
 	};
@@ -40,7 +40,7 @@ namespace imq
 		virtual ~DefineFunctionExpr();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context, QValue* result) override;
+		virtual Result execute(Context* context, QValue* result) override;
 
 	private:
 		String funcName;

@@ -111,7 +111,7 @@ namespace imq
 
 		virtual Result getField(const String& name, QValue* result) override;
 
-		virtual Result selection(ContextPtr context, const QValue& value, QSelection** result) override;
+		virtual Result selection(Context* context, const QValue& value, QSelection** result) override;
 
 	private:
 		ObjectFieldHelper fields;
@@ -124,10 +124,10 @@ namespace imq
 	class QImageSelection : public QSelection
 	{
 	public:
-		QImageSelection(ContextPtr parent, QImage* source, QImage* dest);
+		QImageSelection(Context* parent, QImage* source, QImage* dest);
 		virtual ~QImageSelection();
 
-		virtual ContextPtr getContext() const override;
+		virtual Context* getContext() const override;
 		virtual bool isValid() const override;
 		virtual void next() override;
 		virtual Result apply(const QValue& value, int32_t coordCount, QValue* coords) override;

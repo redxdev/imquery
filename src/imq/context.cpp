@@ -360,7 +360,7 @@ namespace imq
 		values.clear();
 	}
 
-	SubContext::SubContext(VMachine* vm, ContextPtr parent)
+	SubContext::SubContext(VMachine* vm, Context* parent)
 		: Context(vm), parent(parent)
 	{
 	}
@@ -369,7 +369,7 @@ namespace imq
 	{
 	}
 
-	ContextPtr SubContext::getParent() const
+	Context* SubContext::getParent() const
 	{
 		return parent;
 	}
@@ -508,7 +508,7 @@ namespace imq
 		}
 	}
 
-	RestrictedSubContext::RestrictedSubContext(VMachine* vm, ContextPtr parent)
+	RestrictedSubContext::RestrictedSubContext(VMachine* vm, Context* parent)
 		: SubContext(vm, parent)
 	{
 	}

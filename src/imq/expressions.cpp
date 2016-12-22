@@ -23,7 +23,7 @@ namespace imq
 		return "Constant(" + value.toString() + ")";
 	}
 
-	Result ConstantExpr::execute(ContextPtr context, QValue* result)
+	Result ConstantExpr::execute(Context* context, QValue* result)
 	{
 		*result = value;
 		return true;
@@ -50,7 +50,7 @@ namespace imq
 		return "Color";
 	}
 
-	Result ColorExpr::execute(ContextPtr context, QValue* result)
+	Result ColorExpr::execute(Context* context, QValue* result)
 	{
 		Result res;
 		QValue value;
@@ -179,7 +179,7 @@ namespace imq
 		return "List";
 	}
 
-	Result ListExpr::execute(ContextPtr context, QValue* result)
+	Result ListExpr::execute(Context* context, QValue* result)
 	{
 		std::vector<QValue> results;
 		for (auto expr : values)
@@ -221,7 +221,7 @@ namespace imq
 		return "Table";
 	}
 
-	Result TableExpr::execute(ContextPtr context, QValue* result)
+	Result TableExpr::execute(Context* context, QValue* result)
 	{
 		std::unordered_map<QValue, QValue> results;
 		for (auto val : values)
@@ -269,7 +269,7 @@ namespace imq
 		return "Variable(" + variable + ")";
 	}
 
-	Result RetrieveVariableExpr::execute(ContextPtr context, QValue* result)
+	Result RetrieveVariableExpr::execute(Context* context, QValue* result)
 	{
 		Result res = context->getValue(variable, result);
 		if (!res)
@@ -300,7 +300,7 @@ namespace imq
 		return "Field(" + field + ")";
 	}
 
-	Result RetrieveFieldExpr::execute(ContextPtr context, QValue* result)
+	Result RetrieveFieldExpr::execute(Context* context, QValue* result)
 	{
 		if (!objExpr)
 		{
@@ -354,7 +354,7 @@ namespace imq
 		return "Index";
 	}
 
-	Result RetrieveIndexExpr::execute(ContextPtr context, QValue* result)
+	Result RetrieveIndexExpr::execute(Context* context, QValue* result)
 	{
 		if (!objExpr)
 		{
@@ -424,7 +424,7 @@ namespace imq
 		return "Call";
 	}
 
-	Result CallFunctionExpr::execute(ContextPtr context, QValue* result)
+	Result CallFunctionExpr::execute(Context* context, QValue* result)
 	{
 		if (!funcExpr)
 		{
@@ -493,7 +493,7 @@ namespace imq
 		return "SetVariable(" + variable + ")";
 	}
 
-	Result SetVariableStm::execute(ContextPtr context)
+	Result SetVariableStm::execute(Context* context)
 	{
 		if (!valueExpr)
 		{
@@ -535,7 +535,7 @@ namespace imq
 		return "SetField(" + field + ")";
 	}
 
-	Result SetFieldStm::execute(ContextPtr context)
+	Result SetFieldStm::execute(Context* context)
 	{
 		if (!objExpr)
 		{
@@ -600,7 +600,7 @@ namespace imq
 		return "SetIndex";
 	}
 
-	Result SetIndexStm::execute(ContextPtr context)
+	Result SetIndexStm::execute(Context* context)
 	{
 		if (!objExpr)
 		{
@@ -671,7 +671,7 @@ namespace imq
 		return "Delete(" + variable + ")";
 	}
 
-	Result DeleteVariableStm::execute(ContextPtr context)
+	Result DeleteVariableStm::execute(Context* context)
 	{
 		Result res = context->deleteValue(variable);
 		if (!res)
@@ -711,7 +711,7 @@ namespace imq
 		return "Select";
 	}
 
-	Result SelectStm::execute(ContextPtr context)
+	Result SelectStm::execute(Context* context)
 	{
 		if (!srcExpr)
 		{
@@ -861,7 +861,7 @@ namespace imq
 		return "Input";
 	}
 
-	Result DefineInputStm::execute(ContextPtr context)
+	Result DefineInputStm::execute(Context* context)
 	{
 		if (!valueExpr)
 		{
@@ -902,7 +902,7 @@ namespace imq
 		return "Output";
 	}
 
-	Result DefineOutputStm::execute(ContextPtr context)
+	Result DefineOutputStm::execute(Context* context)
 	{
 		QValue value;
 		if (valueExpr)
@@ -943,12 +943,12 @@ namespace imq
 		return "Branch";
 	}
 
-	Result BranchStm::execute(ContextPtr context)
+	Result BranchStm::execute(Context* context)
 	{
 		if (!checkExpr)
 			return errors::vm_generic_error(getLocation(), "Invalid check subexpression for Branch");
 
-		ContextPtr subContext(new SubContext(context->getVM(), context));
+		Context* subContext(new SubContext(context->getVM(), context));
 		auto gc = context->getVM()->getGC();
 		gc->manage(subContext);
 		ScopedRoot ctxRoot(gc, subContext);
@@ -1002,14 +1002,14 @@ namespace imq
 		return "For";
 	}
 
-	Result ForLoopStm::execute(ContextPtr context)
+	Result ForLoopStm::execute(Context* context)
 	{
 		if (!checkExpr)
 		{
 			return errors::vm_generic_error(getLocation(), "Invalid check subexpression for For");
 		}
 
-		ContextPtr subContext(new SubContext(context->getVM(), context));
+		Context* subContext(new SubContext(context->getVM(), context));
 		subContext->setBreakable(true);
 		auto gc = context->getVM()->getGC();
 		gc->manage(subContext);
@@ -1096,14 +1096,14 @@ namespace imq
 		return "While";
 	}
 
-	Result WhileLoopStm::execute(ContextPtr context)
+	Result WhileLoopStm::execute(Context* context)
 	{
 		if (!checkExpr)
 		{
 			return errors::vm_generic_error(getLocation(), "Invalid check subexpression for While");
 		}
 
-		ContextPtr subContext(new SubContext(context->getVM(), context));
+		Context* subContext(new SubContext(context->getVM(), context));
 		subContext->setBreakable(true);
 		auto gc = context->getVM()->getGC();
 		gc->manage(subContext);
@@ -1170,9 +1170,9 @@ namespace imq
 		return "Loop";
 	}
 
-	Result InfiniteLoopStm::execute(ContextPtr context)
+	Result InfiniteLoopStm::execute(Context* context)
 	{
-		ContextPtr subContext(new SubContext(context->getVM(), context));
+		Context* subContext(new SubContext(context->getVM(), context));
 		subContext->setBreakable(true);
 		auto gc = context->getVM()->getGC();
 		gc->manage(subContext);
@@ -1216,14 +1216,14 @@ namespace imq
 		return "ForEach";
 	}
 
-	Result ForEachStm::execute(ContextPtr context)
+	Result ForEachStm::execute(Context* context)
 	{
 		if (!iterExpr)
 		{
 			return errors::vm_generic_error(getLocation(), "Invalid iterator subexpression for ForEach");
 		}
 
-		ContextPtr subContext(new SubContext(context->getVM(), context));
+		Context* subContext(new SubContext(context->getVM(), context));
 		subContext->setBreakable(true);
 		auto gc = context->getVM()->getGC();
 		gc->manage(subContext);
@@ -1288,7 +1288,7 @@ namespace imq
 		return "Break";
 	}
 
-	Result BreakStm::execute(ContextPtr context)
+	Result BreakStm::execute(Context* context)
 	{
 		Result res = context->breakContext();
 		if (!res)
@@ -1317,7 +1317,7 @@ namespace imq
 		return "Return";
 	}
 
-	Result ReturnStm::execute(ContextPtr context)
+	Result ReturnStm::execute(Context* context)
 	{
 		QValue value;
 		if (valueExpr)
@@ -1350,7 +1350,7 @@ namespace imq
 		return "NoOp";
 	}
 
-	Result NoOpStm::execute(ContextPtr context)
+	Result NoOpStm::execute(Context* context)
 	{
 		return true;
 	}
@@ -1375,7 +1375,7 @@ namespace imq
 		return "Ternary";
 	}
 
-	Result TernaryExpr::execute(ContextPtr context, QValue* result)
+	Result TernaryExpr::execute(Context* context, QValue* result)
 	{
 		if (!checkExpr)
 		{

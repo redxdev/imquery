@@ -879,7 +879,7 @@ namespace imq
 		return fields.handleGet(this, name, result);
 	}
 
-	Result QImage::selection(ContextPtr context, const QValue& value, QSelection** result)
+	Result QImage::selection(Context* context, const QValue& value, QSelection** result)
 	{
 		QObject* obj;
 		if (!value.getObject(&obj))
@@ -897,7 +897,7 @@ namespace imq
 		return true;
 	}
 
-	QImageSelection::QImageSelection(ContextPtr parent, QImage* source, QImage* dest)
+	QImageSelection::QImageSelection(Context* parent, QImage* source, QImage* dest)
 		: source(source), dest(dest), index(0)
 	{
 		context = new RestrictedSubContext(parent->getVM(), parent);
@@ -918,7 +918,7 @@ namespace imq
 		gc->removeRoot(context);
 	}
 
-	ContextPtr QImageSelection::getContext() const
+	Context* QImageSelection::getContext() const
 	{
 		return context;
 	}

@@ -42,9 +42,6 @@ namespace imq
 		VMachine* vm;
 	};
 
-	// DEPRECATED, use Context* instead.
-	typedef Context* ContextPtr;
-
 	// A simple form of context. This stores values in an unordered_map and allows both read and write access.
 	// This type of context is generally used as the root context.
 	class SimpleContext : public Context
@@ -119,10 +116,10 @@ namespace imq
 	class SubContext : public Context
 	{
 	public:
-		SubContext(VMachine* vm, ContextPtr parent);
+		SubContext(VMachine* vm, Context* parent);
 		virtual ~SubContext();
 
-		ContextPtr getParent() const;
+		Context* getParent() const;
 
 		virtual bool hasValue(const String& key) const override;
 		virtual Result getValue(const String& key, QValue* result) const override;
@@ -142,7 +139,7 @@ namespace imq
 		virtual void GC_markChildren() override;
 
 	protected:
-		ContextPtr parent;
+		Context* parent;
 		std::unordered_map<String, QValue> values;
 		bool bBreakable = false;
 		bool bBroken = false;
@@ -154,7 +151,7 @@ namespace imq
 	class RestrictedSubContext : public SubContext
 	{
 	public:
-		RestrictedSubContext(VMachine* vm, ContextPtr parent);
+		RestrictedSubContext(VMachine* vm, Context* parent);
 		virtual ~RestrictedSubContext();
 
 		// Allows you to bypass the lock on setValue

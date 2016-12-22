@@ -38,7 +38,7 @@ namespace imq
 		VStatement(const VLocation& loc);
 		virtual ~VStatement();
 
-		virtual Result execute(ContextPtr context) = 0;
+		virtual Result execute(Context* context) = 0;
 	};
 
 	class VExpression : public VNode
@@ -47,7 +47,7 @@ namespace imq
 		VExpression(const VLocation& loc);
 		virtual ~VExpression();
 
-		virtual Result execute(ContextPtr context, QValue* result) = 0;
+		virtual Result execute(Context* context, QValue* result) = 0;
 	};
 
 	class VExpressionAsStatement : public VStatement
@@ -59,7 +59,7 @@ namespace imq
 		VExpression* getExpression() const;
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context) override;
+		virtual Result execute(Context* context) override;
 
 	private:
 		VExpression* expression;
@@ -72,7 +72,7 @@ namespace imq
 		virtual ~VBlock();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context) override;
+		virtual Result execute(Context* context) override;
 
 		int32_t getCount() const;
 		VStatement** getStatements() const;

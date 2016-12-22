@@ -31,7 +31,7 @@ TEST(SimpleContext, Values)
 
 TEST(SubContext, Construct)
 {
-	ContextPtr parent = new SimpleContext(nullptr);
+	Context* parent = new SimpleContext(nullptr);
 	SubContext ctx(nullptr, parent);
 
 	EXPECT_EQ(ctx.getParent(), parent);
@@ -41,7 +41,7 @@ TEST(SubContext, Construct)
 
 TEST(SubContext, Values)
 {
-	ContextPtr parent = new SimpleContext(nullptr);
+	Context* parent = new SimpleContext(nullptr);
 	SubContext ctx(nullptr, parent);
 	QValue value;
 
@@ -82,7 +82,7 @@ TEST(SubContext, Values)
 
 TEST(RestrictedSubContext, Construct)
 {
-	ContextPtr parent = new SimpleContext(nullptr);
+	Context* parent = new SimpleContext(nullptr);
 	RestrictedSubContext ctx(nullptr, parent);
 
 	EXPECT_EQ(ctx.getParent(), parent);
@@ -92,7 +92,7 @@ TEST(RestrictedSubContext, Construct)
 
 TEST(RestrictedSubContext, Values)
 {
-	ContextPtr parent = new SimpleContext(nullptr);
+	Context* parent = new SimpleContext(nullptr);
 	RestrictedSubContext ctx(nullptr, parent);
 	QValue value;
 

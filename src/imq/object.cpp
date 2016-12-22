@@ -64,12 +64,12 @@ namespace imq
 		return errors::undefined_set_index(getTypeString());
 	}
 
-	Result QObject::selection(ContextPtr context, const QValue& value, QSelection** result)
+	Result QObject::selection(Context* context, const QValue& value, QSelection** result)
 	{
 		return errors::undefined_selection(getTypeString());
 	}
 
-	Result QObject::iterate(ContextPtr context, QIterator** result)
+	Result QObject::iterate(Context* context, QIterator** result)
 	{
 		return errors::undefined_iteration(getTypeString());
 	}

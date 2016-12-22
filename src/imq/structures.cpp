@@ -286,7 +286,7 @@ namespace imq
 		return true;
 	}
 
-	Result QTable::iterate(ContextPtr context, QIterator** result)
+	Result QTable::iterate(Context* context, QIterator** result)
 	{
 		*result = new QTableIterator(getVM(), map.begin(), map.end());
 		return true;
@@ -500,7 +500,7 @@ namespace imq
 		return true;
 	}
 
-	Result QList::iterate(ContextPtr context, QIterator** result)
+	Result QList::iterate(Context* context, QIterator** result)
 	{
 		*result = new QListIterator(vec.begin(), vec.end());
 		return true;

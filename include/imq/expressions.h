@@ -15,7 +15,7 @@ namespace imq
 		virtual ~ConstantExpr();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context, QValue* result) override;
+		virtual Result execute(Context* context, QValue* result) override;
 
 	private:
 		QValue value;
@@ -28,7 +28,7 @@ namespace imq
 		virtual ~ColorExpr();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context, QValue* result) override;
+		virtual Result execute(Context* context, QValue* result) override;
 
 	private:
 		VExpression* rExpr;
@@ -44,7 +44,7 @@ namespace imq
 		virtual ~ListExpr();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context, QValue* result) override;
+		virtual Result execute(Context* context, QValue* result) override;
 
 	private:
 		std::vector<VExpression*> values;
@@ -57,7 +57,7 @@ namespace imq
 		virtual ~TableExpr();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context, QValue* result) override;
+		virtual Result execute(Context* context, QValue* result) override;
 
 	private:
 		std::vector<std::tuple<VExpression*, VExpression*>> values;
@@ -70,7 +70,7 @@ namespace imq
 		virtual ~RetrieveVariableExpr();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context, QValue* result) override;
+		virtual Result execute(Context* context, QValue* result) override;
 
 	private:
 		String variable;
@@ -83,7 +83,7 @@ namespace imq
 		virtual ~RetrieveFieldExpr();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context, QValue* result) override;
+		virtual Result execute(Context* context, QValue* result) override;
 	
 	private:
 		VExpression* objExpr;
@@ -97,7 +97,7 @@ namespace imq
 		virtual ~RetrieveIndexExpr();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context, QValue* result) override;
+		virtual Result execute(Context* context, QValue* result) override;
 
 	private:
 		VExpression* objExpr;
@@ -111,7 +111,7 @@ namespace imq
 		virtual ~CallFunctionExpr();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context, QValue* result) override;
+		virtual Result execute(Context* context, QValue* result) override;
 
 	private:
 		VExpression* funcExpr;
@@ -126,7 +126,7 @@ namespace imq
 		virtual ~SetVariableStm();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context) override;
+		virtual Result execute(Context* context) override;
 
 	private:
 		String variable;
@@ -140,7 +140,7 @@ namespace imq
 		virtual ~SetFieldStm();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context) override;
+		virtual Result execute(Context* context) override;
 
 	private:
 		String field;
@@ -155,7 +155,7 @@ namespace imq
 		virtual ~SetIndexStm();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context) override;
+		virtual Result execute(Context* context) override;
 
 	private:
 		VExpression* indexExpr;
@@ -170,7 +170,7 @@ namespace imq
 		virtual ~DeleteVariableStm();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context) override;
+		virtual Result execute(Context* context) override;
 
 	private:
 		String variable;
@@ -183,7 +183,7 @@ namespace imq
 		virtual ~SelectStm();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context) override;
+		virtual Result execute(Context* context) override;
 
 	private:
 		VExpression* destExpr;
@@ -203,7 +203,7 @@ namespace imq
 		virtual ~DefineInputStm();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context) override;
+		virtual Result execute(Context* context) override;
 
 	private:
 		String name;
@@ -217,7 +217,7 @@ namespace imq
 		virtual ~DefineOutputStm();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context) override;
+		virtual Result execute(Context* context) override;
 
 	private:
 		String name;
@@ -231,7 +231,7 @@ namespace imq
 		virtual ~BranchStm();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context) override;
+		virtual Result execute(Context* context) override;
 
 	private:
 		VExpression* checkExpr;
@@ -246,7 +246,7 @@ namespace imq
 		virtual ~ForLoopStm();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context) override;
+		virtual Result execute(Context* context) override;
 
 	private:
 		VStatement* initStm;
@@ -262,7 +262,7 @@ namespace imq
 		virtual ~WhileLoopStm();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context) override;
+		virtual Result execute(Context* context) override;
 
 	private:
 		VExpression* checkExpr;
@@ -276,7 +276,7 @@ namespace imq
 		virtual ~InfiniteLoopStm();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context) override;
+		virtual Result execute(Context* context) override;
 		
 	private:
 		VStatement* execStm;
@@ -289,7 +289,7 @@ namespace imq
 		virtual ~ForEachStm();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context) override;
+		virtual Result execute(Context* context) override;
 
 	private:
 		String varName;
@@ -304,7 +304,7 @@ namespace imq
 		virtual ~BreakStm();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context) override;
+		virtual Result execute(Context* context) override;
 	};
 
 	class ReturnStm : public VStatement
@@ -314,7 +314,7 @@ namespace imq
 		virtual ~ReturnStm();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context) override;
+		virtual Result execute(Context* context) override;
 
 	private:
 		VExpression* valueExpr;
@@ -327,7 +327,7 @@ namespace imq
 		virtual ~NoOpStm();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context) override;
+		virtual Result execute(Context* context) override;
 	};
 
 	class TernaryExpr : public VExpression
@@ -337,7 +337,7 @@ namespace imq
 		virtual ~TernaryExpr();
 
 		virtual String getName() const override;
-		virtual Result execute(ContextPtr context, QValue* result) override;
+		virtual Result execute(Context* context, QValue* result) override;
 
 	private:
 		VExpression* checkExpr;

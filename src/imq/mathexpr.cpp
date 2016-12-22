@@ -18,7 +18,7 @@ namespace imq
 		}
 	}
 
-	Result TwoOperatorMathExpr::execute(ContextPtr context, QValue* result)
+	Result TwoOperatorMathExpr::execute(Context* context, QValue* result)
 	{
 		if (!lhsExpr)
 		{
@@ -61,7 +61,7 @@ namespace imq
 		}
 	}
 
-	Result OneOperatorMathExpr::execute(ContextPtr context, QValue* result)
+	Result OneOperatorMathExpr::execute(Context* context, QValue* result)
 	{
 		if (!expr)
 		{

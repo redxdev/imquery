@@ -9,7 +9,7 @@ using namespace imq;
 TEST(VMachine, CallFunctionExpr)
 {
 	VMachine vm;
-	ContextPtr ctx(new SimpleContext(&vm));
+	Context* ctx(new SimpleContext(&vm));
 
 	bool functionCalled = false;
 	QValue func = QValue::Function(&vm, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
@@ -61,7 +61,7 @@ TEST(VMachine, CallFunctionExpr)
 TEST(VMachine, Variables)
 {
 	VMachine vm;
-	ContextPtr ctx(new SimpleContext(&vm));
+	Context* ctx(new SimpleContext(&vm));
 	QValue value;
 
 	VExpression* expr = new RetrieveVariableExpr("foo", { 1, 2 });
@@ -82,7 +82,7 @@ TEST(VMachine, Variables)
 TEST(VMachine, Fields)
 {
 	VMachine vm;
-	ContextPtr ctx(new SimpleContext(&vm));
+	Context* ctx(new SimpleContext(&vm));
 	QValue obj = QValue::Object(new QColor(&vm, 1.f, 0.3f, 0.4f, 1.f));
 	QValue value;
 
@@ -106,7 +106,7 @@ TEST(VMachine, Fields)
 TEST(VMachine, Indices)
 {
 	VMachine vm;
-	ContextPtr ctx(new SimpleContext(&vm));
+	Context* ctx(new SimpleContext(&vm));
 	QValue obj = QValue::Object(new QColor(&vm, 1.f, 0.3f, 0.4f, 1.f));
 	QValue value;
 
@@ -130,7 +130,7 @@ TEST(VMachine, Indices)
 TEST(VMachine, Select)
 {
 	VMachine vm;
-	ContextPtr ctx(new SimpleContext(&vm));
+	Context* ctx(new SimpleContext(&vm));
 
 	QImage* imageA = new QImage(&vm, 100, 100, QColor(&vm, 1.f, 1.f, 1.f, 1.f));
 	QImage* imageB = new QImage(&vm, 100, 100, QColor(&vm, 0.f, 0.f, 0.f, 0.f));
@@ -163,7 +163,7 @@ TEST(VMachine, Select)
 TEST(VMachine, MathExpressions)
 {
 	VMachine vm;
-	ContextPtr ctx(new SimpleContext(&vm));
+	Context* ctx(new SimpleContext(&vm));
 
 	// (8 + (5 - 3)) / 2 * 4
 	VExpression* expr = new MulExpr(
@@ -235,7 +235,7 @@ TEST(VMachine, MathExpressions)
 TEST(VMachine, DefineInput)
 {
 	VMachine vm;
-	ContextPtr ctx(new SimpleContext(&vm));
+	Context* ctx(new SimpleContext(&vm));
 	VStatement* stm = new DefineInputStm("foo", new ConstantExpr(QValue::Nil(), { 0,0 }), { 0,0 });
 	Result res = stm->execute(ctx);
 	ASSERT_FALSE(res);
@@ -275,7 +275,7 @@ TEST(VMachine, DefineInput)
 TEST(VMachine, DefineOutput)
 {
 	VMachine vm;
-	ContextPtr ctx(new SimpleContext(&vm));
+	Context* ctx(new SimpleContext(&vm));
 	VStatement* stm = new DefineOutputStm("foo", nullptr, { 0,0 });
 	Result res = stm->execute(ctx);
 	ASSERT_FALSE(res);
@@ -315,7 +315,7 @@ TEST(VMachine, DefineOutput)
 TEST(VMachine, Branch)
 {
 	VMachine vm;
-	ContextPtr ctx(new SimpleContext(&vm));
+	Context* ctx(new SimpleContext(&vm));
 	bool trueCalled = false;
 	bool falseCalled = false;
 	QValue trueFunc = QValue::Function(&vm, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {

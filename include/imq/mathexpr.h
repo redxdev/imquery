@@ -11,7 +11,7 @@ namespace imq
 		TwoOperatorMathExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
 		virtual ~TwoOperatorMathExpr();
 
-		virtual Result execute(ContextPtr context, QValue* result) override;
+		virtual Result execute(Context* context, QValue* result) override;
 		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) = 0;
 
 	private:
@@ -25,7 +25,7 @@ namespace imq
 		OneOperatorMathExpr(VExpression* expr, const VLocation& loc);
 		virtual ~OneOperatorMathExpr();
 
-		virtual Result execute(ContextPtr context, QValue* result) override;
+		virtual Result execute(Context* context, QValue* result) override;
 		virtual Result operate(const QValue& value, QValue* result) = 0;
 
 	private:
