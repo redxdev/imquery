@@ -64,7 +64,7 @@ namespace imq
 	String QTableEntry::toString() const
 	{
 		std::stringstream ss;
-		ss << "TableEntry[" << key.toString() << "," << value.toString() << "]";
+		ss << "TableEntry[" << key.asString() << "," << value.asString() << "]";
 		return ss.str();
 	}
 
@@ -231,7 +231,7 @@ namespace imq
 		for (auto entry : map)
 		{
 			++count;
-			ss << entry.first.toString() << " = " << entry.second.toString();
+			ss << entry.first.asString() << " = " << entry.second.asString();
 			if (count != map.size())
 			{
 				ss << ", ";
@@ -435,7 +435,7 @@ namespace imq
 		for (auto val : vec)
 		{
 			++count;
-			ss << val.toString();
+			ss << val.asString();
 			if (count != vec.size())
 			{
 				ss << ", ";

@@ -185,7 +185,7 @@ bool execute(VMachine* vm, VBlock* block, const std::vector<IOPair>& outputs, bo
 
 		if (lastResult.getType() != QValue::Type::Nil)
 		{
-			std::cout << lastResult.toString() << std::endl;
+			std::cout << lastResult.asString() << std::endl;
 		}
 
 		res = saveOutputs(vm, outputs, false);

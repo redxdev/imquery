@@ -3,6 +3,8 @@
 #include <sstream>
 #include <limits>
 #include <cmath>
+#include <cstring>
+#include <string>
 
 #include "object.h"
 #include "errors.h"
@@ -85,6 +87,22 @@ namespace imq
 		return result;
 	}
 
+	QValue QValue::String(const CString val)
+	{
+		QValue result;
+		result.valueType = Type::String;
+		auto len = strlen(val);
+		result.s = new char[len + 1];
+		strncpy(result.s, val, len);
+		result.s[len] = '\0';
+		return result;
+	}
+
+	QValue QValue::String(const imq::String& val)
+	{
+		return QValue::String((const CString) val.c_str());
+	}
+
 	QValue QValue::Function(QFunction* val)
 	{
 		QValue result;
@@ -130,6 +148,9 @@ namespace imq
 		case Type::Float:
 			return "Float";
 
+		case Type::String:
+			return "String";
+
 		case Type::Function:
 			return "Function";
 
@@ -163,6 +184,15 @@ namespace imq
 			f = other.f;
 			break;
 
+		case Type::String:
+		{
+			auto len = strlen(other.s);
+			s = new char[len + 1];
+			strncpy(s, other.s, len);
+			s[len] = '\0';
+			break;
+		}
+
 		case Type::Object:
 			obj = other.obj;
 			break;
@@ -175,6 +205,12 @@ namespace imq
 
 	QValue::~QValue()
 	{
+		switch (valueType)
+		{
+		case Type::String:
+			delete[] s;
+			break;
+		}
 	}
 
 	QValue::Type QValue::getType() const
@@ -182,7 +218,7 @@ namespace imq
 		return valueType;
 	}
 
-	imq::String QValue::toString() const
+	imq::String QValue::asString() const
 	{
 		switch (valueType)
 		{
@@ -207,6 +243,11 @@ namespace imq
 			std::stringstream ss;
 			ss << f;
 			return ss.str();
+		}
+
+		case Type::String:
+		{
+			return "\"" + imq::String(s) + "\"";
 		}
 
 		case Type::Function:
@@ -235,6 +276,11 @@ namespace imq
 	bool QValue::isFloat() const
 	{
 		return valueType == Type::Float;
+	}
+
+	bool QValue::isString() const
+	{
+		return valueType == Type::String;
 	}
 
 	bool QValue::isFunction() const
@@ -274,6 +320,28 @@ namespace imq
 		if (isFloat())
 		{
 			*result = f;
+			return true;
+		}
+
+		return false;
+	}
+
+	bool QValue::getString(CString* result) const
+	{
+		if (isString())
+		{
+			*result = s;
+			return true;
+		}
+
+		return false;
+	}
+
+	bool QValue::getString(imq::String* result) const
+	{
+		if (isString())
+		{
+			*result = imq::String(s);
 			return true;
 		}
 
@@ -320,6 +388,20 @@ namespace imq
 		case Type::Float:
 			*result = QValue::Bool(std::abs(f) >= std::numeric_limits<float>::epsilon());
 			return true;
+
+		case Type::String:
+			if (strcmp(s, "true") == 0)
+			{
+				*result = QValue::Bool(true);
+				return true;
+			}
+			else if (strcmp(s, "false") == 0)
+			{
+				*result = QValue::Bool(false);
+				return true;
+			}
+
+			return false;
 		}
 	}
 
@@ -341,6 +423,17 @@ namespace imq
 		case Type::Float:
 			*result = QValue::Integer((int32_t)f);
 			return true;
+
+		case Type::String:
+		{
+			size_t pos;
+			int32_t val = std::stoi(s, &pos);
+			if (pos != strlen(s))
+				return false;
+
+			*result = QValue::Integer(val);
+			return true;
+		}
 		}
 	}
 
@@ -362,7 +455,55 @@ namespace imq
 		case Type::Float:
 			*result = QValue(*this);
 			return true;
+
+		case Type::String:
+		{
+			size_t pos;
+			float val = std::stof(s, &pos);
+			if (pos != strlen(s))
+				return false;
+
+			*result = QValue::Float(val);
+			return true;
 		}
+		}
+	}
+
+	bool QValue::toString(QValue* result) const
+	{
+		std::stringstream ss;
+
+		switch (valueType)
+		{
+		default:
+			return false;
+
+		case Type::Nil:
+			break;
+
+		case Type::Bool:
+			ss << (b ? "true" : "false");
+			break;
+
+		case Type::Integer:
+			ss << i;
+			break;
+
+		case Type::Float:
+			ss << f;
+			break;
+
+		case Type::String:
+			*result = QValue(*this);
+			return true;
+
+		case Type::Object:
+			ss << obj->toString();
+			break;
+		}
+
+		*result = QValue::String(ss.str().c_str());
+		return true;
 	}
 
 	imq::Result QValue::opAdd(const QValue& rhs, QValue* result) const
@@ -425,6 +566,24 @@ namespace imq
 			}
 			return errors::math_operator_invalid("<???>", "+");
 
+		case Type::String:
+		{
+			// TODO: This can be optimized
+
+			imq::String strA;
+			imq::String strB;
+			getString(&strA);
+
+			QValue otherStr;
+			if (!rhs.toString(&otherStr))
+				return errors::math_operator_invalid("NotStringConvertable", "+");
+
+			otherStr.getString(&strB);
+
+			*result = QValue::String(strA + strB);
+			return true;
+		}
+
 		case Type::Function:
 			return errors::math_operator_invalid("Function", "+");
 
@@ -462,6 +621,9 @@ namespace imq
 				*result = QValue::Float(i - rhs.f);
 				return true;
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "-");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "-");
 
@@ -487,6 +649,9 @@ namespace imq
 				*result = QValue::Float(f - rhs.f);
 				return true;
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "-");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "-");
 
@@ -494,6 +659,9 @@ namespace imq
 				return rhs.obj->opSub(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "-");
+
+		case Type::String:
+			return errors::math_operator_invalid("String", "-");
 
 		case Type::Function:
 			return errors::math_operator_invalid("Function", "-");
@@ -532,6 +700,9 @@ namespace imq
 				*result = QValue::Float(i * rhs.f);
 				return true;
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "*");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "*");
 
@@ -557,6 +728,9 @@ namespace imq
 				*result = QValue::Float(f * rhs.f);
 				return true;
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "*");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "*");
 
@@ -564,6 +738,9 @@ namespace imq
 				return rhs.obj->opMul(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "*");
+
+		case Type::String:
+			return errors::math_operator_invalid("String", "*");
 
 		case Type::Function:
 			return errors::math_operator_invalid("Function", "*");
@@ -608,6 +785,9 @@ namespace imq
 				*result = QValue::Float(i / rhs.f);
 				return true;
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "/");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "/");
 
@@ -639,6 +819,9 @@ namespace imq
 				*result = QValue::Float(f / rhs.f);
 				return true;
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "/");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "/");
 
@@ -646,6 +829,9 @@ namespace imq
 				return rhs.obj->opDiv(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "/");
+
+		case Type::String:
+			return errors::math_operator_invalid("String", "/");
 
 		case Type::Function:
 			return errors::math_operator_invalid("Function", "/");
@@ -689,6 +875,9 @@ namespace imq
 				*result = QValue::Float(std::fmod((float) i, rhs.f));
 				return true;
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "%");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "%");
 
@@ -720,6 +909,9 @@ namespace imq
 				*result = QValue::Float(std::fmod(f, rhs.f));
 				return true;
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "%");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "%");
 
@@ -727,6 +919,9 @@ namespace imq
 				return rhs.obj->opMod(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "%");
+
+		case Type::String:
+			return errors::math_operator_invalid("String", "%");
 
 		case Type::Function:
 			return errors::math_operator_invalid("Function", "%");
@@ -756,6 +951,9 @@ namespace imq
 			*result = QValue::Float(-f);
 			return true;
 
+		case Type::String:
+			return errors::math_operator_invalid("String", "-");
+
 		case Type::Function:
 			return errors::math_operator_invalid("Function", "-");
 
@@ -782,6 +980,9 @@ namespace imq
 
 		case Type::Float:
 			return errors::math_operator_invalid("Float", "not");
+
+		case Type::String:
+			return errors::math_operator_invalid("String", "not");
 
 		case Type::Function:
 			return errors::math_operator_invalid("Function", "not");
@@ -816,6 +1017,9 @@ namespace imq
 			case Type::Float:
 				return errors::math_operator_invalid("Float", "and");
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "and");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "and");
 
@@ -829,6 +1033,9 @@ namespace imq
 
 		case Type::Float:
 			return errors::math_operator_invalid("Float", "and");
+
+		case Type::String:
+			return errors::math_operator_invalid("String", "and");
 
 		case Type::Function:
 			return errors::math_operator_invalid("Function", "and");
@@ -863,6 +1070,9 @@ namespace imq
 			case Type::Float:
 				return errors::math_operator_invalid("Float", "or");
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "or");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "or");
 
@@ -876,6 +1086,9 @@ namespace imq
 
 		case Type::Float:
 			return errors::math_operator_invalid("Float", "or");
+
+		case Type::String:
+			return errors::math_operator_invalid("String", "or");
 
 		case Type::Function:
 			return errors::math_operator_invalid("Function", "or");
@@ -914,6 +1127,9 @@ namespace imq
 				*result = QValue::Bool(i < rhs.f);
 				return true;
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "less");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "less");
 
@@ -939,6 +1155,9 @@ namespace imq
 				*result = QValue::Bool(f < rhs.f);
 				return true;
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "less");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "less");
 
@@ -946,6 +1165,9 @@ namespace imq
 				return rhs.obj->opLess(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "less");
+
+		case Type::String:
+			return errors::math_operator_invalid("String", "less");
 
 		case Type::Function:
 			return errors::math_operator_invalid("Function", "less");
@@ -984,6 +1206,9 @@ namespace imq
 				*result = QValue::Bool(i <= rhs.f);
 				return true;
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "lesseq");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "lesseq");
 
@@ -1009,6 +1234,9 @@ namespace imq
 				*result = QValue::Bool(f <= rhs.f);
 				return true;
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "lesseq");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "lesseq");
 
@@ -1016,6 +1244,9 @@ namespace imq
 				return rhs.obj->opLessEq(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "lesseq");
+
+		case Type::String:
+			return errors::math_operator_invalid("String", "lesseq");
 
 		case Type::Function:
 			return errors::math_operator_invalid("Function", "lesseq");
@@ -1054,6 +1285,9 @@ namespace imq
 				*result = QValue::Bool(i > rhs.f);
 				return true;
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "greater");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "greater");
 
@@ -1079,6 +1313,9 @@ namespace imq
 				*result = QValue::Bool(f > rhs.f);
 				return true;
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "greater");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "greater");
 
@@ -1086,6 +1323,9 @@ namespace imq
 				return rhs.obj->opGreater(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "greater");
+
+		case Type::String:
+			return errors::math_operator_invalid("String", "greater");
 
 		case Type::Function:
 			return errors::math_operator_invalid("Function", "greater");
@@ -1124,6 +1364,9 @@ namespace imq
 				*result = QValue::Bool(i >= rhs.f);
 				return true;
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "greatereq");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "greatereq");
 
@@ -1149,6 +1392,9 @@ namespace imq
 				*result = QValue::Bool(f >= rhs.f);
 				return true;
 
+			case Type::String:
+				return errors::math_operator_invalid("String", "greatereq");
+
 			case Type::Function:
 				return errors::math_operator_invalid("Function", "greatereq");
 
@@ -1156,6 +1402,9 @@ namespace imq
 				return rhs.obj->opGreaterEq(OperationOrder::RHS, *this, result);
 			}
 			return errors::math_operator_invalid("<???>", "greatereq");
+
+		case Type::String:
+			return errors::math_operator_invalid("String", "greatereq");
 
 		case Type::Function:
 			return errors::math_operator_invalid("Function", "greatereq");
@@ -1183,6 +1432,15 @@ namespace imq
 
 	QValue& QValue::operator=(const QValue& other)
 	{
+		// cleanup
+		switch (valueType)
+		{
+		case Type::String:
+			delete[] s;
+			break;
+		}
+
+		// copy
 		valueType = other.valueType;
 		switch (valueType)
 		{
@@ -1200,6 +1458,15 @@ namespace imq
 		case Type::Float:
 			f = other.f;
 			break;
+
+		case Type::String:
+		{
+			auto len = strlen(other.s);
+			s = new char[len + 1];
+			strncpy(s, other.s, len);
+			s[len] = '\0';
+			break;
+		}
 
 		case Type::Object:
 			obj = other.obj;
@@ -1234,6 +1501,9 @@ namespace imq
 
 		case QValue::Type::Float:
 			return a.f == b.f;
+
+		case QValue::Type::String:
+			return strcmp(a.s, b.s) == 0;
 
 		case QValue::Type::Function:
 			return a.func == b.func;

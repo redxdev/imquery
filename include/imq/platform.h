@@ -7,4 +7,5 @@
 namespace imq
 {
 	typedef std::string String;
+	typedef char* CString;
 }

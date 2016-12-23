@@ -20,7 +20,7 @@ namespace imq
 
 	String ConstantExpr::getName() const
 	{
-		return "Constant(" + value.toString() + ")";
+		return "Constant(" + value.asString() + ")";
 	}
 
 	Result ConstantExpr::execute(Context* context, QValue* result)

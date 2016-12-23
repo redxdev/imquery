@@ -15,6 +15,8 @@ TEST(QValue, Creation)
 	bool b;
 	int32_t i;
 	float f;
+	String str;
+	char* cstr;
 	QFunction* func;
 	QObject* obj;
 
@@ -39,6 +41,13 @@ TEST(QValue, Creation)
 	ASSERT_TRUE(value.getFloat(&f));
 	ASSERT_EQ(f, 123.45f);
 
+	value = QValue::String("foo bar baz");
+	ASSERT_TRUE(value.isString());
+	ASSERT_TRUE(value.getString(&str));
+	ASSERT_EQ(str, "foo bar baz");
+	ASSERT_TRUE(value.getString(&cstr));
+	ASSERT_STREQ(cstr, "foo bar baz");
+
 	value = QValue::Function(&vm, sampleNativeFunction);
 	ASSERT_TRUE(value.isFunction());
 	ASSERT_TRUE(value.getFunction(&func));
@@ -57,6 +66,7 @@ TEST(QValue, Conversion)
 	bool b;
 	int32_t i;
 	float f;
+	String str;
 
 	// Nil -> x
 	ASSERT_FALSE(value.toBool(&result));
@@ -77,6 +87,10 @@ TEST(QValue, Conversion)
 	ASSERT_TRUE(result.getFloat(&f));
 	ASSERT_FLOAT_EQ(f, 0.f);
 
+	ASSERT_TRUE(value.toString(&result));
+	ASSERT_TRUE(result.getString(&str));
+	ASSERT_EQ(str, "false");
+
 	value = QValue::Bool(true);
 	ASSERT_TRUE(value.toBool(&result));
 	ASSERT_TRUE(result.getBool(&b));
@@ -89,6 +103,10 @@ TEST(QValue, Conversion)
 	ASSERT_TRUE(value.toFloat(&result));
 	ASSERT_TRUE(result.getFloat(&f));
 	ASSERT_FLOAT_EQ(f, 1.f);
+
+	ASSERT_TRUE(value.toString(&result));
+	ASSERT_TRUE(result.getString(&str));
+	ASSERT_EQ(str, "true");
 }
 
 TEST(QValue, ToString)
@@ -96,25 +114,28 @@ TEST(QValue, ToString)
 	VMachine vm;
 	QValue value;
 
-	ASSERT_EQ(value.toString(), "");
+	ASSERT_EQ(value.asString(), "");
 	
 	value = QValue::Bool(false);
-	ASSERT_EQ(value.toString(), "false");
+	ASSERT_EQ(value.asString(), "false");
 
 	value = QValue::Bool(true);
-	ASSERT_EQ(value.toString(), "true");
+	ASSERT_EQ(value.asString(), "true");
 
 	value = QValue::Integer(12345);
-	ASSERT_EQ(value.toString(), "12345");
+	ASSERT_EQ(value.asString(), "12345");
 
 	value = QValue::Float(123.45f);
-	ASSERT_EQ(value.toString(), "123.45");
+	ASSERT_EQ(value.asString(), "123.45");
+
+	value = QValue::String("foo bar baz");
+	ASSERT_EQ(value.asString(), "\"foo bar baz\"");
 
 	value = QValue::Function(&vm, sampleNativeFunction);
-	ASSERT_EQ(value.toString(), "<QFunction>");
+	ASSERT_EQ(value.asString(), "<QFunction>");
 
 	value = QValue::Object(new SampleObject(&vm));
-	ASSERT_EQ(value.toString(), "<SampleObject>");
+	ASSERT_EQ(value.asString(), "<SampleObject>");
 }
 
 TEST(QValue, Equality)

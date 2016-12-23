@@ -30,9 +30,9 @@ namespace imq
 
 		IMQ_ERROR_DEF(undefined_field, "Invalid field " << fieldName << " for type " << typeName, const String& typeName, const String& fieldName);
 
-		IMQ_ERROR_DEF(undefined_index, "Invalid index " << index.toString() << " for type " << typeName, const String& typeName, const QValue& index);
+		IMQ_ERROR_DEF(undefined_index, "Invalid index " << index.asString() << " for type " << typeName, const String& typeName, const QValue& index);
 		IMQ_ERROR_DEF(invalid_index_type, "Invalid index type " << QValue::getTypeString(index.getType()) << " for type " << typeName, const String& typeName, const QValue& index);
-		IMQ_ERROR_DEF(index_out_of_range, "Index " << index.toString() << " is out of range", const QValue& index);
+		IMQ_ERROR_DEF(index_out_of_range, "Index " << index.asString() << " is out of range", const QValue& index);
 
 		IMQ_ERROR_DEF(immutable_obj, "Object " << typeName << " is immutable.", const String& typeName);
 		IMQ_ERROR_DEF(uncopyable_obj, "Object " << typeName << " is not copyable.", const String& typeName);

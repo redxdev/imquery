@@ -5,6 +5,8 @@ workspace "imquery"
 	startproject "testimq"
     filter "system:not windows"
         buildoptions "-std=c++11"
+    filter "system:windows"
+        defines {"_CRT_SECURE_NO_WARNINGS" }
 
 project "imq"
     kind "StaticLib"

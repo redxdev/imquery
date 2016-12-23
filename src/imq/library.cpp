@@ -140,9 +140,19 @@ namespace imq
 
 	static Result io_print(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
+		QValue value;
 		for (int32_t i = 0; i < argCount; ++i)
 		{
-			std::cout << args[i].toString();
+			if (args[i].toString(&value))
+			{
+				String str;
+				value.getString(&str);
+				std::cout << str;
+			}
+			else
+			{
+				std::cout << args[i].asString();
+			}
 		}
 
 		std::cout << std::endl;
@@ -502,7 +512,18 @@ namespace imq
 		if (args[0].toFloat(result))
 			return true;
 		else
-			return errors::conversion(args[0], "float");
+			return errors::conversion(args[0], "Float");
+	}
+
+	static Result convert_string(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("string", 1, argCount);
+
+		if (args[0].toString(result))
+			return true;
+		else
+			return errors::conversion(args[0], "String");
 	}
 
 	static Result convert_isbool(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
@@ -538,6 +559,15 @@ namespace imq
 			return errors::args_count("isnumber", 1, argCount);
 
 		*result = QValue::Bool(args[0].isInteger() || args[0].isFloat());
+		return true;
+	}
+
+	static Result convert_isstring(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("isstring", 1, argCount);
+
+		*result = QValue::Bool(args[0].isString());
 		return true;
 	}
 
@@ -589,11 +619,13 @@ namespace imq
 		IMQ_LIB_FUNC("bool",		convert_bool);
 		IMQ_LIB_FUNC("integer",		convert_integer);
 		IMQ_LIB_FUNC("float",		convert_float);
+		IMQ_LIB_FUNC("string",		convert_string);
 
 		IMQ_LIB_FUNC("isbool",		convert_isbool);
 		IMQ_LIB_FUNC("isinteger",	convert_isinteger);
 		IMQ_LIB_FUNC("isfloat",		convert_isfloat);
 		IMQ_LIB_FUNC("isnumber",	convert_isnumber);
+		IMQ_LIB_FUNC("isstring",	convert_isstring);
 		IMQ_LIB_FUNC("isobject",	convert_isobject);
 		IMQ_LIB_FUNC("isfunction",	convert_isfunction);
 

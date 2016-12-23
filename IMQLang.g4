@@ -23,10 +23,64 @@ grammar IMQLang;
     template<typename T, typename... Args>
     T* createNodeFromToken(antlr4::Token* token, Args&&... args)
     {
-        static_assert(std::is_base_of<VNode, T>::value, "T must have a base type of VNode (VExpression, VStatement)");
-        T* val = new T(args..., { (int32_t)token->getLine(), (int32_t)token->getCharPositionInLine() });
-        generatedVNodes.push_back(val);
-        return val;
+      static_assert(std::is_base_of<VNode, T>::value, "T must have a base type of VNode (VExpression, VStatement)");
+      T* val = new T(args..., { (int32_t)token->getLine(), (int32_t)token->getCharPositionInLine() });
+      generatedVNodes.push_back(val);
+      return val;
+    }
+}
+
+@lexer::header {
+    #include "platform.h"
+
+    #include <sstream>
+    #include <string>
+}
+
+@lexer::members {
+    String parseEscapedString(const String& text)
+    {
+      bool bEscaped = false;
+      std::stringstream ss;
+      for (auto it = text.begin(); it != text.end(); ++it)
+      {
+        // skip first and last characters
+        if (it == text.begin() || (it + 1) == text.end())
+          continue;
+
+        if (bEscaped)
+        {
+            switch (*it)
+            {
+            default:
+                ss << *it;
+                break;
+
+            case 'n':
+                ss << '\n';
+                break;
+
+            case 'r':
+                ss << '\r';
+                break;
+
+            case 't':
+                ss << '\t';
+                break;
+            }
+
+            bEscaped = false;
+        }
+        else
+        {
+            if (*it == '\\')
+                bEscaped = true;
+            else
+                ss << *it;
+        }
+      }
+
+      return ss.str();
     }
 }
 
@@ -319,6 +373,7 @@ const_value returns [QValue val]
     |   FLOAT       {$val = QValue::Float(std::stof($FLOAT.text));}
     |   NAN_VALUE   {$val = QValue::Float(std::nanf(""));}
     |   NIL         {$val = QValue::Nil();}
+    |   STRING      {$val = QValue::String($STRING.text);}
     |   boolean     {$val = QValue::Bool($boolean.val);}
     ;
 
@@ -609,6 +664,14 @@ B_FALSE
 
 NIL
     :   'nil'
+    ;
+
+STRING
+    :   ('"' ('\\\\' | '\\"' | ~('\n' | '\r'))*? '"'
+    |   '\'' ('\\\\' | '\\\'' | ~('\n' | '\r'))*? '\'')
+        {
+            setText(parseEscapedString(getText()));
+        }
     ;
 
 FLOAT

@@ -68,6 +68,7 @@ namespace imq
 			Bool,
             Integer,
             Float,
+			String,
             Function,
             Object
         };
@@ -76,12 +77,14 @@ namespace imq
 		static QValue Bool(bool val);
 		static QValue Integer(int32_t val);
 		static QValue Float(float val);
+		static QValue String(const CString val);
+		static QValue String(const imq::String& val);
 		static QValue Function(QFunction* val);
 		static QValue Function(VMachine* vm, QFunctionPtr val);
 		static QValue Function(VMachine* vm, QObject* obj, QFunctionPtr val);
 		static QValue Object(QObject* val);
 
-		static String getTypeString(Type t);
+		static imq::String getTypeString(Type t);
 
 		QValue();
 		QValue(const QValue& other);
@@ -94,24 +97,28 @@ namespace imq
 		// This is _not_ equivalent to the other toX methods - it doesn't
 		// create a new String QValue. This gets the string representation of
 		// this QValue and returns it.
-		String toString() const;
+		imq::String asString() const;
 
 		bool isNil() const;
 		bool isBool() const;
 		bool isInteger() const;
 		bool isFloat() const;
+		bool isString() const;
 		bool isFunction() const;
 		bool isObject() const;
 
 		bool getBool(bool* result) const;
 		bool getInteger(int32_t* result) const;
 		bool getFloat(float* result) const;
+		bool getString(CString* result) const;
+		bool getString(imq::String* result) const;
 		bool getFunction(QFunction** result) const;
 		bool getObject(QObject** result) const;
 
 		bool toBool(QValue* result) const;
 		bool toInteger(QValue* result) const;
 		bool toFloat(QValue* result) const;
+		bool toString(QValue* result) const;
 
 		friend bool operator==(const QValue& a, const QValue& b);
 		friend bool operator!=(const QValue& a, const QValue& b);
@@ -140,6 +147,7 @@ namespace imq
 			bool b;
 			int32_t i;
 			float f;
+			CString s;
 			QObject* obj;
 			QFunction* func;
 		};

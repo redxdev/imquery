@@ -24,10 +24,9 @@ list of possible types are as follows:
 * Bool
 * Integer
 * Float
+* String
 * Object/QObject
 * Function/QFunction
-
-Strings are not currently supported, but may be in the future.
 
 All types except for _Object_ and _Function_ are value types - when passing them around, you
 copy them. _Object_/_Function_ are reference types - unless you explicitly copy it, you will
@@ -51,6 +50,10 @@ The Integer type contains a single 32-bit signed integer.
 
 The Float type contains a single 32-bit float. Float constants always have a decimal. For example,
 `42` is an integer, while `42.` is a float.
+
+### String
+
+The string type contains a string of characters.
 
 ### Object
 
