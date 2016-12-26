@@ -326,6 +326,40 @@ namespace imq
 		return false;
 	}
 
+	bool QValue::getNumber(int32_t* result) const
+	{
+		switch (valueType)
+		{
+		default:
+			return false;
+
+		case Type::Integer:
+			*result = i;
+			return true;
+
+		case Type::Float:
+			*result = (int32_t)f;
+			return true;
+		}
+	}
+
+	bool QValue::getNumber(float* result) const
+	{
+		switch (valueType)
+		{
+		default:
+			return false;
+
+		case Type::Integer:
+			*result = (float)i;
+			return true;
+
+		case Type::Float:
+			*result = f;
+			return true;
+		}
+	}
+
 	bool QValue::getString(CString* result) const
 	{
 		if (isString())

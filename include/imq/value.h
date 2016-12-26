@@ -110,6 +110,8 @@ namespace imq
 		bool getBool(bool* result) const;
 		bool getInteger(int32_t* result) const;
 		bool getFloat(float* result) const;
+		bool getNumber(int32_t* result) const;
+		bool getNumber(float* result) const;
 		bool getString(CString* result) const;
 		bool getString(imq::String* result) const;
 		bool getFunction(QFunction** result) const;

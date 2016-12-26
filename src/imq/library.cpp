@@ -228,8 +228,8 @@ namespace imq
 			return errors::args_count("sin", 1, argCount);
 
 		float val;
-		if (!args[0].getFloat(&val))
-			return errors::args_type("sin", 0, "Float", args[0]);
+		if (!args[0].getNumber(&val))
+			return errors::args_type("sin", 0, "Number", args[0]);
 
 		*result = QValue::Float(std::sin(val));
 		return true;
@@ -241,8 +241,8 @@ namespace imq
 			return errors::args_count("cos", 1, argCount);
 
 		float val;
-		if (!args[0].getFloat(&val))
-			return errors::args_type("cos", 0, "Float", args[0]);
+		if (!args[0].getNumber(&val))
+			return errors::args_type("cos", 0, "Number", args[0]);
 
 		*result = QValue::Float(std::cos(val));
 		return true;
@@ -254,8 +254,8 @@ namespace imq
 			return errors::args_count("tan", 1, argCount);
 
 		float val;
-		if (!args[0].getFloat(&val))
-			return errors::args_type("tan", 0, "Float", args[0]);
+		if (!args[0].getNumber(&val))
+			return errors::args_type("tan", 0, "Number", args[0]);
 
 		*result = QValue::Float(std::tan(val));
 		return true;
@@ -269,7 +269,7 @@ namespace imq
 		switch (args[0].getType())
 		{
 		default:
-			return errors::args_type("min", 0, "Integer or Float", args[0]);
+			return errors::args_type("min", 0, "Number", args[0]);
 
 		case QValue::Type::Integer:
 		{
@@ -309,7 +309,7 @@ namespace imq
 		switch (args[0].getType())
 		{
 		default:
-			return errors::args_type("max", 0, "Integer or Float", args[0]);
+			return errors::args_type("max", 0, "Number", args[0]);
 
 		case QValue::Type::Integer:
 		{
@@ -349,7 +349,7 @@ namespace imq
 		switch (args[0].getType())
 		{
 		default:
-			return errors::args_type("clamp", 0, "Integer or Float", args[0]);
+			return errors::args_type("clamp", 0, "Number", args[0]);
 
 		case QValue::Type::Integer:
 		{
@@ -434,29 +434,17 @@ namespace imq
 			return errors::args_count("pow", 2, argCount);
 		}
 
-		QValue value;
-
 		float base;
 		float exp;
 
-		if (!args[0].toFloat(&value))
+		if (!args[0].getNumber(&base))
 		{
-			return errors::args_type("pow", 0, "Float", args[0]);
+			return errors::args_type("pow", 0, "Number", args[0]);
 		}
 
-		if (!value.getFloat(&base))
+		if (!args[1].getNumber(&exp))
 		{
-			return errors::args_type("pow", 0, "Float", value);
-		}
-
-		if (!args[1].toFloat(&value))
-		{
-			return errors::args_type("pow", 1, "Float", args[1]);
-		}
-
-		if (!value.getFloat(&exp))
-		{
-			return errors::args_type("pow", 1, "Float", value);
+			return errors::args_type("pow", 1, "Number", args[1]);
 		}
 
 		*result = QValue::Float(std::pow(base, exp));
@@ -470,17 +458,10 @@ namespace imq
 			return errors::args_count("sqrt", 1, argCount);
 		}
 
-		QValue value;
 		float arg;
-
-		if (!args[0].toFloat(&value))
+		if (!args[0].getNumber(&arg))
 		{
-			return errors::args_type("sqrt", 0, "Float", args[0]);
-		}
-
-		if (!value.getFloat(&arg))
-		{
-			return errors::args_type("sqrt", 0, "Float", value);
+			return errors::args_type("sqrt", 0, "Number", args[0]);
 		}
 
 		*result = QValue::Float(std::sqrt(arg));
