@@ -282,10 +282,13 @@ some value, even if that value is nil.
 
 If a script you are running has inputs or outputs, you may specify them to iqc like so:
 
-    iqc -i "myInput=images/myImage.png" -o "myOutput=images/myOutput.png"
+    iqc -i "myInput=image_load('images/myImage.png')" -o "myOutput=images/myOutput.png"
 
-All inputs and outputs must be filepaths to images at this time, and outputs are always saved
-in PNG format.
+All outputs must be filepaths and are always saved in PNG format.
+
+Inputs are not imquery statements - the left side of the equal sign (and the equal sign itself)
+is parsed separately. The right of the equal sign is parsed as a normal expression - this is
+why we can use the `image_load` function.
 
 If an input is specified on the command line, then it is checked against your input definition
 to make sure they are of the same type. That is why you will often see an input being defined
