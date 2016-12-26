@@ -131,9 +131,31 @@ namespace imq
 		}
 	}
 
+	static Result image_load(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("image_load", 1, argCount);
+
+		char* path;
+		if (!args[0].getString(&path))
+		{
+			return errors::args_type("image_load", 0, "String", args[0]);
+		}
+
+		QImage* image;
+
+		Result res = QImage::loadFromFile(vm, path, &image);
+		if (!res)
+			return res;
+
+		*result = QValue::Object(image);
+		return true;
+	}
+
 	IMQ_LIB(register_image)
 	{
 		IMQ_LIB_FUNC("image", image_construct);
+		IMQ_LIB_FUNC("image_load", image_load);
 
 		return true;
 	}
@@ -614,6 +636,23 @@ namespace imq
 		return true;
 	}
 
+	static Result convert_typename(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("typename", 1, argCount);
+
+		if (args[0].getType() == QValue::Type::Object)
+		{
+			QObject* obj;
+			args[0].getObject(&obj);
+			*result = QValue::String(obj->getTypeString());
+			return true;
+		}
+
+		*result = QValue::String(QValue::getTypeString(args[0].getType()));
+		return true;
+	}
+
 	IMQ_LIB(register_conversion)
 	{
 		IMQ_LIB_FUNC("bool",		convert_bool);
@@ -632,6 +671,8 @@ namespace imq
 		IMQ_LIB_FUNC("sametypes",	convert_sametypes);
 
 		IMQ_LIB_FUNC("isnan",		convert_isnan);
+
+		IMQ_LIB_FUNC("typename",	convert_typename);
 
 		return true;
 	}

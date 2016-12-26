@@ -737,6 +737,27 @@ namespace imq
 			});
 			return true;
 		});
+
+		fields.getter("save", [&](QValue* result) {
+			*result = QValue::Function(getVM(), this, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 1)
+					return errors::args_count("save", 1, argCount);
+
+				char* path;
+
+				if (!args[0].getString(&path))
+				{
+					return errors::args_type("save", 0, "String", args[0]);
+				}
+
+				Result res = this->saveToFile(path);
+				if (!res)
+					return res;
+
+				return true;
+			});
+			return true;
+		});
 	}
 
 	imq::String QImage::toString() const
