@@ -19,6 +19,8 @@ public:
 
 	bool equal(const imq::String& name, const imq::QValue& check);
 
+	imq::VMachine* getVM();
+
 private:
 	imq::VMachine vm;
 };

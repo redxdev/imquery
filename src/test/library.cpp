@@ -12,6 +12,7 @@ static const char* max_test = "a = max(5, 10); b = max(10, 5); c = max(5., 10.);
 static const char* clamp_test = "a = clamp(1, 0, 5); b = clamp(10, 0, 5); c = clamp(-5, 0, 5); d = clamp(1., 0., 5.); e = clamp(10., 0., 5.); f = clamp(-5., 0., 5.);";
 static const char* pow_test = "a = pow(2, 10); b = pow(2, -10); c = pow(-3, 3); d = pow(-3, -5);";
 static const char* sqrt_test = "a = sqrt(4); b = sqrt(10); c = sqrt(99); d = sqrt(144);";
+static const char* lerp_test = "a = lerp(0, 1, 0.5); b = lerp(10, 50, 0.3); c = lerp({0,0,0,0}, {1,1,1,1}, 0.5); d = lerp({10,10}, {20,20}, 0.3);";
 
 TEST(Library, Math)
 {
@@ -59,4 +60,10 @@ TEST(Library, Math)
 	EXPECT_TRUE(st.equal("b", QValue::Float(std::sqrt(10.f))));
 	EXPECT_TRUE(st.equal("c", QValue::Float(std::sqrt(99.f))));
 	EXPECT_TRUE(st.equal("d", QValue::Float(std::sqrt(144.f))));
+
+	ASSERT_TRUE(st.run(lerp_test));
+	EXPECT_TRUE(st.equal("a", QValue::Float(0.5f)));
+	EXPECT_TRUE(st.equal("b", QValue::Float(22.f)));
+	EXPECT_TRUE(st.equal("c", QValue::Object(new QColor(st.getVM(), 0.5f, 0.5f, 0.5f, 0.5f))));
+	EXPECT_TRUE(st.equal("d", QValue::Object(new QColor(st.getVM(), 13.f, 13.f, 13.f, 13.f))));
 }

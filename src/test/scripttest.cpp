@@ -22,18 +22,23 @@ Result ScriptTest::run(const char* script)
 	return res;
 }
 
-imq::QValue ScriptTest::get(const imq::String& name)
+QValue ScriptTest::get(const String& name)
 {
 	QValue value;
 	vm.getRootContext()->getValue(name, &value);
 	return value;
 }
 
-bool ScriptTest::equal(const imq::String& name, const QValue& check)
+bool ScriptTest::equal(const String& name, const QValue& check)
 {
 	QValue value;
 	if (!vm.getRootContext()->getValue(name, &value))
 		return false;
 
 	return value == check;
+}
+
+VMachine* ScriptTest::getVM()
+{
+	return &vm;
 }

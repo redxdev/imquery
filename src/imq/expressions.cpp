@@ -836,6 +836,8 @@ namespace imq
 			}
 
 			selection->next();
+
+			context->getVM()->getGC()->collect();
 		}
 
 		delete selection;

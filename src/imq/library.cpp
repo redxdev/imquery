@@ -468,6 +468,35 @@ namespace imq
 		return true;
 	}
 
+	static Result math_lerp(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 3)
+		{
+			return errors::args_count("lerp", 3, argCount);
+		}
+
+		QValue x = args[0];
+		QValue y = args[1];
+		float alpha;
+
+		if (!args[2].getFloat(&alpha))
+		{
+			return errors::args_type("lerp", 2, "Float", args[2]);
+		}
+
+		QValue vX;
+		Result res = x.opMul(QValue::Float(1 - alpha), &vX);
+		if (!res)
+			return res;
+
+		QValue vY;
+		res = y.opMul(QValue::Float(alpha), &vY);
+		if (!res)
+			return res;
+
+		return vX.opAdd(vY, result);
+	}
+
 	IMQ_LIB(register_math)
 	{
 		IMQ_LIB_FUNC("abs",		math_abs);
@@ -479,6 +508,7 @@ namespace imq
 		IMQ_LIB_FUNC("clamp",	math_clamp);
 		IMQ_LIB_FUNC("pow",		math_pow);
 		IMQ_LIB_FUNC("sqrt",	math_sqrt);
+		IMQ_LIB_FUNC("lerp",	math_lerp);
 
 		IMQ_LIB_VAL("pi", QValue::Float((float) M_PI));
 
