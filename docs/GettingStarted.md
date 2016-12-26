@@ -121,7 +121,7 @@ For example:
     > {1., 2., 3., 4.};
     {1,2,3,4}
 
-Color expressions accept any number.
+Color expressions accept any type of number.
 
     > {1, 2, 3, 4};
     {1,2,3,4}
