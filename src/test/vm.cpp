@@ -9,7 +9,6 @@ using namespace imq;
 TEST(VMachine, CallFunctionExpr)
 {
 	VMachine vm;
-	Context* ctx(new SimpleContext(&vm));
 
 	bool functionCalled = false;
 	QValue func = QValue::Function(&vm, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
@@ -33,7 +32,7 @@ TEST(VMachine, CallFunctionExpr)
 
 	CallFunctionExpr* expr = new CallFunctionExpr(new ConstantExpr(func, { 0, 0 }), 0, nullptr, { 0, 0 });
 	QValue value;
-	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_TRUE(expr->execute(vm.getRootContext(), &value));
 	ASSERT_TRUE(functionCalled);
 	ASSERT_EQ(value, QValue::Integer(0));
 
@@ -42,7 +41,7 @@ TEST(VMachine, CallFunctionExpr)
 
 	VExpression** args = new VExpression*[1]{ new ConstantExpr(QValue::Integer(321), {0,0}) };
 	expr = new CallFunctionExpr(new ConstantExpr(func, { 0, 0 }), 1, args, { 0, 0 });
-	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_TRUE(expr->execute(vm.getRootContext(), &value));
 	ASSERT_TRUE(functionCalled);
 	ASSERT_EQ(value, QValue::Integer(321));
 
@@ -51,7 +50,7 @@ TEST(VMachine, CallFunctionExpr)
 
 	args = new VExpression*[2]{ new ConstantExpr(QValue::Integer(321), {0,0}), new ConstantExpr(QValue::Integer(123), {0,0}) };
 	expr = new CallFunctionExpr(new ConstantExpr(func, { 0,0 }), 2, args, { 0, 0 });
-	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_TRUE(expr->execute(vm.getRootContext(), &value));
 	ASSERT_TRUE(functionCalled);
 	ASSERT_EQ(value, QValue::Float(3.f));
 
@@ -61,18 +60,17 @@ TEST(VMachine, CallFunctionExpr)
 TEST(VMachine, Variables)
 {
 	VMachine vm;
-	Context* ctx(new SimpleContext(&vm));
 	QValue value;
 
 	VExpression* expr = new RetrieveVariableExpr("foo", { 1, 2 });
-	Result result = expr->execute(ctx, &value);
+	Result result = expr->execute(vm.getRootContext(), &value);
 	ASSERT_FALSE(result);
 	ASSERT_EQ(result.getErr(), "line 1:2: Unknown variable \"foo\"");
 
 	VStatement* stm = new SetVariableStm("foo", new ConstantExpr(QValue::Integer(345), { 0, 0 }), { 0, 0 });
-	ASSERT_TRUE(stm->execute(ctx));
+	ASSERT_TRUE(stm->execute(vm.getRootContext()));
 
-	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_TRUE(expr->execute(vm.getRootContext(), &value));
 	ASSERT_EQ(value, QValue::Integer(345));
 
 	delete expr;
@@ -82,21 +80,20 @@ TEST(VMachine, Variables)
 TEST(VMachine, Fields)
 {
 	VMachine vm;
-	Context* ctx(new SimpleContext(&vm));
 	QValue obj = QValue::Object(new QColor(&vm, 1.f, 0.3f, 0.4f, 1.f));
 	QValue value;
 
 	VExpression* expr = new RetrieveFieldExpr(new ConstantExpr(obj, { 0, 0 }), "foo", { 0, 0 });
-	ASSERT_FALSE(expr->execute(ctx, &value));
+	ASSERT_FALSE(expr->execute(vm.getRootContext(), &value));
 
 	delete expr;
 	expr = new RetrieveFieldExpr(new ConstantExpr(obj, { 0, 0 }), "g", { 0, 0 });
-	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_TRUE(expr->execute(vm.getRootContext(), &value));
 	ASSERT_EQ(value, QValue::Float(0.3f));
 
 	VStatement* stm = new SetFieldStm(new ConstantExpr(obj, { 0, 0 }), "green", new ConstantExpr(QValue::Float(0.89f), { 0,0 }), { 0, 0 });
-	ASSERT_FALSE(stm->execute(ctx));
-	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_FALSE(stm->execute(vm.getRootContext()));
+	ASSERT_TRUE(expr->execute(vm.getRootContext(), &value));
 	ASSERT_EQ(value, QValue::Float(0.3f));
 
 	delete expr;
@@ -106,21 +103,20 @@ TEST(VMachine, Fields)
 TEST(VMachine, Indices)
 {
 	VMachine vm;
-	Context* ctx(new SimpleContext(&vm));
 	QValue obj = QValue::Object(new QColor(&vm, 1.f, 0.3f, 0.4f, 1.f));
 	QValue value;
 
 	VExpression* expr = new RetrieveIndexExpr(new ConstantExpr(obj, { 0,0 }), new ConstantExpr(QValue::Integer(-1), { 0,0 }), { 0, 0 });
-	ASSERT_FALSE(expr->execute(ctx, &value));
+	ASSERT_FALSE(expr->execute(vm.getRootContext(), &value));
 
 	delete expr;
 	expr = new RetrieveIndexExpr(new ConstantExpr(obj, { 0,0 }), new ConstantExpr(QValue::Integer(2), { 0,0 }), { 0, 0 });
-	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_TRUE(expr->execute(vm.getRootContext(), &value));
 	ASSERT_EQ(value, QValue::Float(0.4f));
 
 	VStatement* stm = new SetIndexStm(new ConstantExpr(obj, { 0, 0 }), new ConstantExpr(QValue::Integer(2), { 0,0 }), new ConstantExpr(QValue::Float(0.132f), { 0,0 }), { 0,0 });
-	ASSERT_FALSE(stm->execute(ctx));
-	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_FALSE(stm->execute(vm.getRootContext()));
+	ASSERT_TRUE(expr->execute(vm.getRootContext(), &value));
 	ASSERT_EQ(value, QValue::Float(0.4f));
 
 	delete expr;
@@ -130,7 +126,6 @@ TEST(VMachine, Indices)
 TEST(VMachine, Select)
 {
 	VMachine vm;
-	Context* ctx(new SimpleContext(&vm));
 
 	QImage* imageA = new QImage(&vm, 100, 100, QColor(&vm, 1.f, 1.f, 1.f, 1.f));
 	QImage* imageB = new QImage(&vm, 100, 100, QColor(&vm, 0.f, 0.f, 0.f, 0.f));
@@ -145,7 +140,7 @@ TEST(VMachine, Select)
 		nullptr,
 		{ 0, 0 }
 	);
-	ASSERT_TRUE(stm->execute(ctx));
+	ASSERT_TRUE(stm->execute(vm.getRootContext()));
 
 	QColor color(&vm);
 	for (int32_t y = 0; y < 100; ++y)
@@ -163,7 +158,6 @@ TEST(VMachine, Select)
 TEST(VMachine, MathExpressions)
 {
 	VMachine vm;
-	Context* ctx(new SimpleContext(&vm));
 
 	// (8 + (5 - 3)) / 2 * 4
 	VExpression* expr = new MulExpr(
@@ -186,7 +180,7 @@ TEST(VMachine, MathExpressions)
 
 	QValue value;
 	int32_t i;
-	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_TRUE(expr->execute(vm.getRootContext(), &value));
 	ASSERT_TRUE(value.getInteger(&i));
 	ASSERT_EQ(i, 20);
 
@@ -200,7 +194,7 @@ TEST(VMachine, MathExpressions)
 	);
 
 	float f;
-	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_TRUE(expr->execute(vm.getRootContext(), &value));
 	ASSERT_TRUE(value.getFloat(&f));
 	ASSERT_FLOAT_EQ(f, 12.9f);
 
@@ -225,7 +219,7 @@ TEST(VMachine, MathExpressions)
 	);
 
 	bool b;
-	ASSERT_TRUE(expr->execute(ctx, &value));
+	ASSERT_TRUE(expr->execute(vm.getRootContext(), &value));
 	ASSERT_TRUE(value.getBool(&b));
 	ASSERT_TRUE(b);
 
@@ -235,7 +229,7 @@ TEST(VMachine, MathExpressions)
 TEST(VMachine, DefineInput)
 {
 	VMachine vm;
-	Context* ctx(new SimpleContext(&vm));
+	Context* ctx = new SimpleContext(&vm);
 	VStatement* stm = new DefineInputStm("foo", new ConstantExpr(QValue::Nil(), { 0,0 }), { 0,0 });
 	Result res = stm->execute(ctx);
 	ASSERT_FALSE(res);
@@ -275,7 +269,7 @@ TEST(VMachine, DefineInput)
 TEST(VMachine, DefineOutput)
 {
 	VMachine vm;
-	Context* ctx(new SimpleContext(&vm));
+	Context* ctx = new SimpleContext(&vm);
 	VStatement* stm = new DefineOutputStm("foo", nullptr, { 0,0 });
 	Result res = stm->execute(ctx);
 	ASSERT_FALSE(res);
@@ -315,7 +309,6 @@ TEST(VMachine, DefineOutput)
 TEST(VMachine, Branch)
 {
 	VMachine vm;
-	Context* ctx(new SimpleContext(&vm));
 	bool trueCalled = false;
 	bool falseCalled = false;
 	QValue trueFunc = QValue::Function(&vm, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
@@ -330,7 +323,7 @@ TEST(VMachine, Branch)
 	});
 
 	VStatement* stm = new BranchStm(new ConstantExpr(QValue::Integer(123), { 0,0 }), nullptr, nullptr, { 0,0 });
-	Result res = stm->execute(ctx);
+	Result res = stm->execute(vm.getRootContext());
 	ASSERT_FALSE(res);
 	ASSERT_EQ(res.getErr(), "line 0:0: Subexpression must return a boolean within a Branch");
 
@@ -343,7 +336,7 @@ TEST(VMachine, Branch)
 		{ 0,0 }
 	);
 
-	ASSERT_TRUE(stm->execute(ctx));
+	ASSERT_TRUE(stm->execute(vm.getRootContext()));
 	EXPECT_FALSE(trueCalled);
 	EXPECT_TRUE(falseCalled);
 
@@ -358,7 +351,7 @@ TEST(VMachine, Branch)
 		{ 0,0 }
 	);
 
-	ASSERT_TRUE(stm->execute(ctx));
+	ASSERT_TRUE(stm->execute(vm.getRootContext()));
 	EXPECT_TRUE(trueCalled);
 	EXPECT_FALSE(falseCalled);
 

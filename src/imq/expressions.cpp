@@ -756,6 +756,8 @@ namespace imq
 			return res;
 		}
 
+		ScopedRoot destRoot(gc, &dest);
+
 		QSelection* selection = nullptr;
 		res = source->selection(context, dest, &selection);
 		if (!res)

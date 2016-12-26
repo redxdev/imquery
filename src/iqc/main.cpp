@@ -13,6 +13,7 @@
 #include <imq/errors.h>
 #include <imq/cast.h>
 #include <imq/platform.h>
+#include <imq/gc.h>
 
 using namespace imq;
 
@@ -26,8 +27,14 @@ Result iqc_stop(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 
 struct InputArg
 {
+	InputArg(VMachine* vm, std::string name, QValue value)
+		: name(name), value(value), scope(vm->getGC(), &value)
+	{
+	}
+
 	std::string name;
 	QValue value;
+	ScopedRoot scope;
 };
 
 struct IOPair
@@ -108,14 +115,12 @@ std::vector<InputArg> parseInputs(VMachine* vm, QueryParser* parser, const std::
 		if (!res)
 			throw IOPairException("Input parser - " + res.getErr());
 
-		InputArg arg;
-		arg.name = pair.name;
-
-		res = expr->execute(vm->getRootContext(), &arg.value);
+		QValue value;
+		res = expr->execute(vm->getRootContext(), &value);
 		if (!res)
 			throw IOPairException("Input parser - " + res.getErr());
 
-		results.push_back(arg);
+		results.push_back(InputArg(vm, pair.name, value));
 	}
 
 	return results;
