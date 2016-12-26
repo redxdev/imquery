@@ -96,7 +96,6 @@ std::vector<IOPair> parseIOPairs(const std::vector<std::string>& strings)
 	return results;
 }
 
-/* on hold until we have string qvalue support
 std::vector<InputArg> parseInputs(VMachine* vm, QueryParser* parser, const std::vector<std::string>& inputStrings)
 {
 	auto pairs = parseIOPairs(inputStrings);
@@ -121,9 +120,8 @@ std::vector<InputArg> parseInputs(VMachine* vm, QueryParser* parser, const std::
 
 	return results;
 }
-*/
 
-bool execute(VMachine* vm, VBlock* block, const std::vector<IOPair>& outputs, bool bDebugMode)
+bool execute(VMachine* vm, VBlock* block, const std::vector<IOPair>& outputs, QueryParser* parser)
 {
 	if (block)
 	{
@@ -150,9 +148,6 @@ bool execute(VMachine* vm, VBlock* block, const std::vector<IOPair>& outputs, bo
 
 	vm->getRootContext()->setValue("exit", QValue::Function(vm, iqc_stop));
 
-	QueryParser parser;
-	parser.setDebugMode(bDebugMode);
-
 	Result res;
 	QValue lastResult;
 
@@ -165,7 +160,7 @@ bool execute(VMachine* vm, VBlock* block, const std::vector<IOPair>& outputs, bo
 		if (line.empty())
 			continue;
 
-		res = parser.parseString(line, &block);
+		res = parser->parseString(line, &block);
 		if (!res)
 		{
 			std::cout << "parse error: " << res.getErr() << std::endl;
@@ -223,13 +218,22 @@ int main(int argc, char** argv)
 	}
 
 	VMachine vm;
+	Result res = register_stdlib(&vm);
+	if (!res)
+	{
+		std::cerr << "Unable to register stdlib: " << res.getErr() << std::endl;
+		return EXIT_FAILURE;
+	}
 
-	std::vector<IOPair> inputs;
+	QueryParser parser;
+	parser.setDebugMode(debugArg.getValue());
+
+	std::vector<InputArg> inputs;
 	std::vector<IOPair> outputs;
 
 	try
 	{
-		inputs = parseIOPairs(inputArg.getValue());
+		inputs = parseInputs(&vm, &parser, inputArg.getValue());
 		outputs = parseIOPairs(outputArg.getValue());
 	}
 	catch (const IOPairException& e)
@@ -238,33 +242,15 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 	}
 
-	for (auto pair : inputs)
+	for (auto input : inputs)
 	{
-		std::cout << "Loading input " << pair.name << " from " << pair.value << std::endl;
-
-		QImage* img;
-		Result res = QImage::loadFromFile(&vm, pair.value.data(), &img);
-		if (!res)
-		{
-			std::cerr << "Unable to load input " << pair.name << ": " << res.getErr() << std::endl;
-			return EXIT_FAILURE;
-		}
-
-		vm.getRootContext()->setInput(pair.name, QValue::Object(img));
+		vm.getRootContext()->setInput(input.name, input.value);
 	}
 
 	VBlock* block = nullptr;
 
-	Result res = register_stdlib(&vm);
-	if (!res)
-	{
-		std::cerr << "Unable to register stdlib: " << res.getErr() << std::endl;
-		return EXIT_FAILURE;
-	}
-
 	if (fileArg.isSet())
 	{
-		QueryParser parser;
 		res = parser.parseFile(fileArg.getValue(), &block);
 		if (!res)
 		{
@@ -273,5 +259,5 @@ int main(int argc, char** argv)
 		}
 	}
 
-	return execute(&vm, block, outputs, debugArg.getValue()) ? EXIT_SUCCESS : EXIT_FAILURE;
+	return execute(&vm, block, outputs, &parser) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
