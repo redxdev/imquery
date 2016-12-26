@@ -2,9 +2,8 @@ local environment = require "environment"
 
 workspace "imquery"
     configurations{ "Debug", "Release" }
-	startproject "testimq"
-    filter "system:not windows"
-        buildoptions "-std=c++11"
+    startproject "testimq"
+    flags { "C++11" }
     filter "system:windows"
         defines {"_CRT_SECURE_NO_WARNINGS" }
 
