@@ -43,6 +43,17 @@ namespace imq
 		return true;
 	}
 
+	size_t ScriptFunction::GC_getSize() const
+	{
+		size_t sz = sizeof(ScriptFunction);
+		for (auto name : argNames)
+		{
+			sz += sizeof(String) + getStringSize(name);
+		}
+
+		return sz;
+	}
+
 	void ScriptFunction::GC_markChildren()
 	{
 		outerCtx->GC_mark();

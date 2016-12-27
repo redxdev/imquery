@@ -6,7 +6,6 @@
 
 namespace imq
 {
-
 	class GCTraceable
 	{
 	public:
@@ -18,6 +17,9 @@ namespace imq
 	{
 	public:
 		virtual ~GCObject();
+
+		// This should be overridden to get the size of just this object.
+		virtual size_t GC_getSize() const = 0;
 
 		virtual void GC_mark() override final;
 		

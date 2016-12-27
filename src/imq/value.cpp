@@ -44,6 +44,11 @@ namespace imq
 		return func(vm, argCount, args, result);
 	}
 
+	size_t QSimpleFunction::GC_getSize() const
+	{
+		return sizeof(QSimpleFunction);
+	}
+
 	QBoundFunction::QBoundFunction(VMachine* vm, QObject* obj, QFunctionPtr func)
 		: QSimpleFunction(vm, func), obj(obj)
 	{
@@ -51,6 +56,11 @@ namespace imq
 
 	QBoundFunction::~QBoundFunction()
 	{
+	}
+
+	size_t QBoundFunction::GC_getSize() const
+	{
+		return sizeof(QBoundFunction);
 	}
 
 	void QBoundFunction::GC_markChildren()
@@ -1462,6 +1472,17 @@ namespace imq
 			func->GC_mark();
 			break;
 		}
+	}
+
+	size_t QValue::GC_getSize() const
+	{
+		size_t sz = sizeof(QValue);
+		if (valueType == Type::String)
+		{
+			sz += getCStringSize(s);
+		}
+
+		return sz;
 	}
 
 	QValue& QValue::operator=(const QValue& other)

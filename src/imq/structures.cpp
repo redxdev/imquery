@@ -7,7 +7,7 @@
 
 namespace imq
 {
-	IMQ_DEFINE_TYPE(QTableEntry);
+	IMQ_DEFINE_TYPE_WITH_SIZE_FIELDS_CUSTOM(QTableEntry, fields, key.GC_getSize() + value.GC_getSize() - sizeof(QValue) * 2);
 
 	QTableEntry::QTableEntry(VMachine* vm)
 		: QObject(vm)
@@ -128,6 +128,17 @@ namespace imq
 	}
 
 	IMQ_DEFINE_TYPE(QTable);
+
+	size_t QTable::GC_getSize() const
+	{
+		size_t sz = sizeof(QTable) + fields.GC_getSize() - sizeof(ObjectFieldHelper);
+		for (auto entry : map)
+		{
+			sz += entry.first.GC_getSize() + entry.second.GC_getSize();
+		}
+
+		return sz;
+	}
 
 	QTable::QTable(VMachine* vm)
 		: QObject(vm)
@@ -332,6 +343,17 @@ namespace imq
 	}
 
 	IMQ_DEFINE_TYPE(QList);
+
+	size_t QList::GC_getSize() const
+	{
+		size_t sz = sizeof(QList) + fields.GC_getSize() - sizeof(ObjectFieldHelper);
+		for (auto val : vec)
+		{
+			sz += val.GC_getSize();
+		}
+
+		return sz;
+	}
 
 	QList::QList(VMachine* vm)
 		: QObject(vm)

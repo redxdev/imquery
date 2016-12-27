@@ -39,6 +39,8 @@ namespace imq
 
 		virtual Result execute(VMachine* vm, int32_t argCount, QValue* args, QValue* result) override;
 
+		virtual size_t GC_getSize() const override;
+
 	private:
 		QFunctionPtr func;
 	};
@@ -48,6 +50,8 @@ namespace imq
 	public:
 		QBoundFunction(VMachine* vm, QObject* obj, QFunctionPtr func);
 		virtual ~QBoundFunction();
+
+		virtual size_t GC_getSize() const override;
 
 	protected:
 
@@ -140,6 +144,8 @@ namespace imq
 		Result opGreaterEq(const QValue& rhs, QValue* result) const;
 
 		virtual void GC_mark() override;
+
+		size_t GC_getSize() const;
 
     private:
 		Type valueType;

@@ -16,7 +16,7 @@ namespace imq
 {
 	// QColor
 
-	IMQ_DEFINE_TYPE(QColor);
+	IMQ_DEFINE_TYPE_WITH_SIZE_FIELDS(QColor, fields);
 
 	QColor::QColor(VMachine* vm)
 		: QObject(vm),
@@ -593,7 +593,7 @@ namespace imq
 
 	// QImage
 
-	IMQ_DEFINE_TYPE(QImage);
+	IMQ_DEFINE_TYPE_WITH_SIZE_FIELDS_CUSTOM(QImage, fields, ((size_t) width * height * sizeof(float) * 4));
 
 	Result QImage::loadFromFile(VMachine* vm, const char* filename, QImage** result)
 	{

@@ -200,4 +200,20 @@ namespace imq
 		return found->second(value);
 	}
 
+	size_t ObjectFieldHelper::GC_getSize() const
+	{
+		size_t sz = sizeof(ObjectFieldHelper);
+		for (auto entry : getters)
+		{
+			sz += sizeof(String) + getStringSize(entry.first) + sizeof(std::function<Result(QValue*)>);
+		}
+
+		for (auto entry : setters)
+		{
+			sz += sizeof(String) + getStringSize(entry.first) + sizeof(std::function<Result(const QValue&)>);
+		}
+
+		return sz;
+	}
+
 }

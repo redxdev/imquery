@@ -28,7 +28,7 @@ public:
 	}
 };
 
-IMQ_DEFINE_TYPE(ATestObject);
+IMQ_DEFINE_TYPE_WITH_SIZE(ATestObject);
 
 class BTestObject : public QObject
 {
@@ -52,7 +52,7 @@ public:
 	}
 };
 
-IMQ_DEFINE_TYPE(BTestObject);
+IMQ_DEFINE_TYPE_WITH_SIZE(BTestObject);
 
 TEST(QObject, Cast)
 {

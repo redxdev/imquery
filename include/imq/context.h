@@ -65,6 +65,7 @@ namespace imq
 		virtual Result returnContext(const QValue& value) override;
 		virtual bool getReturnValue(QValue* result) const override;
 
+		virtual size_t GC_getSize() const override;
 		virtual void GC_markChildren() override;
 
 	protected:
@@ -95,6 +96,7 @@ namespace imq
 		virtual Result returnContext(const QValue& value) override;
 		virtual bool getReturnValue(QValue* result) const override;
 
+		virtual size_t GC_getSize() const override;
 		virtual void GC_markChildren() override;
 
 		void setInput(const String& key, const QValue& value);
@@ -136,6 +138,7 @@ namespace imq
 		virtual Result returnContext(const QValue& value) override;
 		virtual bool getReturnValue(QValue* result) const override;
 
+		virtual size_t GC_getSize() const override;
 		virtual void GC_markChildren() override;
 
 	protected:

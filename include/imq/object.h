@@ -107,10 +107,36 @@ namespace imq
 	private: static imq::ObjectRegistry __objreg_##name; \
 	public: virtual imq::TypeIndex getTypeIndex() const override {return __objreg_##name.getTypeIndex();} \
 	static imq::TypeIndex getStaticTypeIndex() {return __objreg_##name.getTypeIndex();} \
-	virtual imq::String getTypeString() const override {return #name;}
+	virtual imq::String getTypeString() const override {return #name;} \
+	virtual size_t GC_getSize() const override;
+
 #define IMQ_DEFINE_TYPE(name) \
 	static_assert(std::is_base_of<imq::QObject, name>::value, "IMQ_DEFINE_TYPE is only valid for QObject types."); \
 	imq::ObjectRegistry name::__objreg_##name;
+
+#define IMQ_DEFINE_TYPE_WITH_CUSTOM(name, val) \
+	IMQ_DEFINE_TYPE(name); \
+	size_t name::GC_getSize() const {return (val);}
+
+#define IMQ_DEFINE_TYPE_WITH_FIELDS_CUSTOM(name, fields, val) \
+	IMQ_DEFINE_TYPE(name); \
+	size_t name::GC_getSize() const {return fields.GC_getSize() - sizeof(imq::ObjectFieldHelper) + (val);}
+
+#define IMQ_DEFINE_TYPE_WITH_SIZE(name) \
+	IMQ_DEFINE_TYPE(name); \
+	size_t name::GC_getSize() const {return sizeof(name);}
+
+#define IMQ_DEFINE_TYPE_WITH_SIZE_FIELDS(name, fields) \
+	IMQ_DEFINE_TYPE(name); \
+	size_t name::GC_getSize() const {return sizeof(name) + fields.GC_getSize() - sizeof(imq::ObjectFieldHelper);}
+
+#define IMQ_DEFINE_TYPE_WITH_SIZE_CUSTOM(name, val) \
+	IMQ_DEFINE_TYPE(name); \
+	size_t name::GC_getSize() const {return sizeof(name) + (val);}
+
+#define IMQ_DEFINE_TYPE_WITH_SIZE_FIELDS_CUSTOM(name, fields, val) \
+	IMQ_DEFINE_TYPE(name); \
+	size_t name::GC_getSize() const {return sizeof(name) + fields.GC_getSize() - sizeof(imq::ObjectFieldHelper) + (val);}
 
 	class ObjectFieldHelper
 	{
@@ -120,6 +146,8 @@ namespace imq
 
 		Result handleGet(QObject* obj, const String& name, QValue* result);
 		Result handleSet(QObject* obj, const String& name, const QValue& value);
+
+		size_t GC_getSize() const;
 
 	private:
 		std::unordered_map<String, std::function<Result(QValue*)>> getters;

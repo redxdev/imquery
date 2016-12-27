@@ -154,6 +154,18 @@ namespace imq
 		return false;
 	}
 
+	size_t SimpleContext::GC_getSize() const
+	{
+		// TODO: this is a very rough estimate of the size of the unordered_map
+		size_t sz = sizeof(SimpleContext);
+		for (auto entry : values)
+		{
+			sz += sizeof(String) + getStringSize(entry.first) + entry.second.GC_getSize();
+		}
+
+		return sz;
+	}
+
 	void SimpleContext::GC_markChildren()
 	{
 		for (auto entry : values)
@@ -313,6 +325,28 @@ namespace imq
 	bool RootContext::getReturnValue(QValue* result) const
 	{
 		return false;
+	}
+
+	size_t RootContext::GC_getSize() const
+	{
+		// TODO: this is a very rough estimate of the size of the unordered_map
+		size_t sz = sizeof(RootContext);
+		for (auto entry : values)
+		{
+			sz += sizeof(String) + getStringSize(entry.first) + entry.second.GC_getSize();
+		}
+
+		for (auto entry : inputs)
+		{
+			sz += sizeof(String) + getStringSize(entry.first) + entry.second.GC_getSize();
+		}
+
+		for (auto entry : outputs)
+		{
+			sz += sizeof(String) + getStringSize(entry.first) + entry.second.GC_getSize();
+		}
+
+		return sz;
 	}
 
 	void RootContext::GC_markChildren()
@@ -498,6 +532,18 @@ namespace imq
 		}
 
 		return parent->getReturnValue(result);
+	}
+
+	size_t SubContext::GC_getSize() const
+	{
+		// TODO: this is a very rough estimate of the size of the unordered_map
+		size_t sz = sizeof(SubContext);
+		for (auto entry : values)
+		{
+			sz += sizeof(String) + getStringSize(entry.first) + entry.second.GC_getSize();
+		}
+
+		return sz;
 	}
 
 	void SubContext::GC_markChildren()
