@@ -103,12 +103,20 @@ namespace imq
 		TypeIndex typeIndex;
 	};
 
-#define IMQ_DECLARE_TYPE(name) \
+#define __IMQ_DECLARE_TYPE(name) \
 	private: static imq::ObjectRegistry __objreg_##name; \
 	public: virtual imq::TypeIndex getTypeIndex() const override {return __objreg_##name.getTypeIndex();} \
 	static imq::TypeIndex getStaticTypeIndex() {return __objreg_##name.getTypeIndex();} \
 	virtual imq::String getTypeString() const override {return #name;} \
 	virtual size_t GC_getSize() const override;
+
+#define IMQ_DECLARE_TYPE(name) \
+	__IMQ_DECLARE_TYPE(name) \
+	virtual bool GC_isDynamic() const override {return false;}
+
+#define IMQ_DECLARE_TYPE_DYNAMIC(name) \
+	__IMQ_DECLARE_TYPE(name) \
+	virtual bool GC_isDynamic() const override {return true;}
 
 #define IMQ_DEFINE_TYPE(name) \
 	static_assert(std::is_base_of<imq::QObject, name>::value, "IMQ_DEFINE_TYPE is only valid for QObject types."); \

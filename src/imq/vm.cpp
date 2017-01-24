@@ -125,6 +125,8 @@ namespace imq
 					if (!res)
 						return res;
 
+					context->getVM()->getGC()->collect();
+
 					return true;
 				}
 			}
@@ -159,7 +161,6 @@ namespace imq
 		gc = new GarbageCollector();
 		rootContext = new RootContext(this);
 		gc->addRoot(rootContext);
-		gc->manage(rootContext);
 	}
 
 	VMachine::~VMachine()

@@ -195,7 +195,7 @@ namespace imq
 		fields.getter("clear", [&](QValue* result) {
 			*result = QValue::Function(getVM(), this, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
 				if (argCount != 0)
-					return errors::args_count("QList.clear", 0, argCount);
+					return errors::args_count("QTable.clear", 0, argCount);
 
 				map.clear();
 				return true;

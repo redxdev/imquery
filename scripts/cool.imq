@@ -1,0 +1,4 @@
+in input = image();
+out output = image(input.w, input.h);
+output: ((color.each((v) => sin(v * 2 * pi)) + 1) / 2 + {0.,1.}).clamp() from input;
+

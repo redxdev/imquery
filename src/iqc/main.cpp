@@ -195,8 +195,6 @@ bool execute(VMachine* vm, VBlock* block, const std::vector<IOPair>& outputs, Qu
 		}
 
 		delete block;
-
-		vm->getGC()->collect(true);
 	}
 
 	return true;
@@ -207,7 +205,9 @@ int main(int argc, char** argv)
 	TCLAP::CmdLine cmd("Interactive frontend to imquery", ' ', IMQ_VERSION_STR);
 
 	TCLAP::ValueArg<std::string> fileArg("f", "file", "The script file to load.", false, "", "string", cmd);
-	TCLAP::SwitchArg debugArg("d", "debug", "Enable parser debug mode", cmd, false);
+	TCLAP::SwitchArg parserDebugArg("p", "parser-debug", "Enable parser debug mode", cmd, false);
+	TCLAP::SwitchArg gcDebugArg("g", "gc-debug", "Enable gc debug mode", cmd, false);
+	TCLAP::ValueArg<std::string> gcModeArg("m", "gc-mode", "Change the garbage collection mode. Valid values are Barriers, Always, and NoBarriers (default).", false, "", "string", cmd);
 
 	TCLAP::MultiArg<std::string> inputArg("i", "input", "Inputs, in the form name=filepath", false, "string", cmd);
 	TCLAP::MultiArg<std::string> outputArg("o", "output", "Outputs, in the form name=filepath", false, "string", cmd);
@@ -223,6 +223,29 @@ int main(int argc, char** argv)
 	}
 
 	VMachine vm;
+	vm.getGC()->setDebugMode(gcDebugArg.getValue());
+
+	if (gcModeArg.isSet())
+	{
+		if (gcModeArg.getValue() == "Barriers")
+		{
+			vm.getGC()->setCollectionMode(GCCollectionMode::Barriers);
+		}
+		else if (gcModeArg.getValue() == "NoBarriers")
+		{
+			vm.getGC()->setCollectionMode(GCCollectionMode::NoBarriers);
+		}
+		else if (gcModeArg.getValue() == "Always")
+		{
+			vm.getGC()->setCollectionMode(GCCollectionMode::Always);
+		}
+		else
+		{
+			std::cerr << "error: invalid garbage collection mode \"" << gcModeArg.getValue() << "\"";
+			return EXIT_FAILURE;
+		}
+	}
+
 	Result res = register_stdlib(&vm);
 	if (!res)
 	{
@@ -231,7 +254,7 @@ int main(int argc, char** argv)
 	}
 
 	QueryParser parser;
-	parser.setDebugMode(debugArg.getValue());
+	parser.setDebugMode(parserDebugArg.getValue());
 
 	std::vector<InputArg> inputs;
 	std::vector<IOPair> outputs;

@@ -14,9 +14,6 @@ namespace imq
 	class QValue;
 	class VMachine;
 
-	// Result QFunction(int32_t argCount, QValue* args, QValue* result);
-	//typedef std::function<Result(VMachine*, int32_t, QValue*, QValue*)> QFunction;
-
 	typedef std::function<Result(VMachine*, int32_t, QValue*, QValue*)> QFunctionPtr;
 
 	class QFunction : public GCObject
@@ -40,6 +37,7 @@ namespace imq
 		virtual Result execute(VMachine* vm, int32_t argCount, QValue* args, QValue* result) override;
 
 		virtual size_t GC_getSize() const override;
+		virtual bool GC_isDynamic() const override { return false; }
 
 	private:
 		QFunctionPtr func;
@@ -52,6 +50,7 @@ namespace imq
 		virtual ~QBoundFunction();
 
 		virtual size_t GC_getSize() const override;
+		virtual bool GC_isDynamic() const override { return false; }
 
 	protected:
 

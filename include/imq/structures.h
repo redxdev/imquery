@@ -66,7 +66,7 @@ namespace imq
 
 	class QTable : public QObject
 	{
-		IMQ_DECLARE_TYPE(QTable);
+		IMQ_DECLARE_TYPE_DYNAMIC(QTable);
 
 	public:
 		QTable(VMachine* vm);
@@ -120,7 +120,7 @@ namespace imq
 
 	class QList : public QObject
 	{
-		IMQ_DECLARE_TYPE(QList);
+		IMQ_DECLARE_TYPE_DYNAMIC(QList);
 
 	public:
 		QList(VMachine* vm);

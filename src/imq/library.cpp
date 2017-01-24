@@ -22,6 +22,7 @@ namespace imq
 		IMQ_LIB_SUB(register_io);
 		IMQ_LIB_SUB(register_math);
 		IMQ_LIB_SUB(register_conversion);
+		IMQ_LIB_SUB(register_gc);
 
 		return true;
 	}
@@ -684,6 +685,117 @@ namespace imq
 		IMQ_LIB_FUNC("isnan",		convert_isnan);
 
 		IMQ_LIB_FUNC("typename",	convert_typename);
+
+		return true;
+	}
+
+	static Result gc_memory(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 0)
+			return errors::args_count("gc_memory", 0, 0, argCount);
+
+		*result = QValue::Integer((int32_t)vm->getGC()->getTrackedMemory());
+
+		return true;
+	}
+
+	static Result gc_managed(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 0)
+			return errors::args_count("gc_managed", 0, argCount);
+
+		*result = QValue::Integer((int32_t)vm->getGC()->getManagedCount());
+		return true;
+	}
+
+	static Result gc_barrier(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 0)
+			return errors::args_count("gc_barrier", 0, argCount);
+
+		*result = QValue::Integer((int32_t)vm->getGC()->getCollectionBarrier());
+		return true;
+	}
+
+	static Result gc_collect(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount > 1)
+			return errors::args_count("gc_collect", 0, 1, argCount);
+
+		bool val = false;
+
+		if (argCount == 1)
+		{
+			if (!args[0].getBool(&val))
+			{
+				return errors::args_type("gc_collect", 0, "Bool", args[0]);
+			}
+		}
+
+		*result = QValue::Bool(vm->getGC()->collect(val));
+		return true;
+	}
+
+	static Result gc_mode(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount > 1)
+			return errors::args_count("gc_mode", 0, 1, argCount);
+
+		if (argCount == 0)
+		{
+			switch (vm->getGC()->getCollectionMode())
+			{
+			default:
+				*result = QValue::String("Unknown");
+				return true;
+
+			case GCCollectionMode::Barriers:
+				*result = QValue::String("Barriers");
+				return true;
+
+			case GCCollectionMode::NoBarriers:
+				*result = QValue::String("NoBarriers");
+				return true;
+
+			case GCCollectionMode::Always:
+				*result = QValue::String("Always");
+				return true;
+			}
+		}
+
+		String val;
+		if (!args[0].getString(&val))
+		{
+			return errors::args_type("gc_mode", 0, "String", args[0]);
+		}
+
+		if (val == "Barriers")
+		{
+			vm->getGC()->setCollectionMode(GCCollectionMode::Barriers);
+		}
+		else if (val == "NoBarriers")
+		{
+			vm->getGC()->setCollectionMode(GCCollectionMode::NoBarriers);
+		}
+		else if (val == "Always")
+		{
+			vm->getGC()->setCollectionMode(GCCollectionMode::Always);
+		}
+		else
+		{
+			return errors::args_invalid("gc_mode", 0, "Expected a string containing one of 'Barriers', 'NoBarriers', or 'Always'");
+		}
+
+		return true;
+	}
+
+	IMQ_LIB(register_gc)
+	{
+		IMQ_LIB_FUNC("gc_memory",	gc_memory);
+		IMQ_LIB_FUNC("gc_managed",	gc_managed);
+		IMQ_LIB_FUNC("gc_barrier",  gc_barrier);
+		IMQ_LIB_FUNC("gc_collect",	gc_collect);
+		IMQ_LIB_FUNC("gc_mode",     gc_mode);
 
 		return true;
 	}

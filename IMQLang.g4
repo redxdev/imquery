@@ -327,7 +327,7 @@ addExpr returns [VExpression* expr]
 mulExpr returns [VExpression* expr]
     :   first=notExpr       {$expr = $first.expr;}
     (
-        MULTIPLY b=notExpr  {$expr = createNodeFromToken<MulExpr>($first.start, $expr, $n.expr);}
+        MULTIPLY n=notExpr  {$expr = createNodeFromToken<MulExpr>($first.start, $expr, $n.expr);}
     |   DIVIDE n=notExpr    {$expr = createNodeFromToken<DivExpr>($first.start, $expr, $n.expr);}
     |   MODULUS n=notExpr   {$expr = createNodeFromToken<ModExpr>($first.start, $expr, $n.expr);}
     )*

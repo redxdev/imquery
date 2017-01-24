@@ -41,6 +41,8 @@ namespace imq
 
 	Result QSimpleFunction::execute(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
+		ScopedRoot thisRoot(vm->getGC(), this);
+
 		return func(vm, argCount, args, result);
 	}
 

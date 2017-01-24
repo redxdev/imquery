@@ -19,6 +19,7 @@ namespace imq
 		virtual Result execute(VMachine* vm, int32_t argCount, QValue* args, QValue* result) override;
 
 		virtual size_t GC_getSize() const override;
+		virtual bool GC_isDynamic() const override { return false; }
 
 	protected:
 

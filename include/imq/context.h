@@ -38,6 +38,9 @@ namespace imq
 		bool isContextReturnedFrom() const;
 
 		VMachine* getVM() const;
+
+		virtual bool GC_isDynamic() const override { return true; }
+
 	private:
 		VMachine* vm;
 	};

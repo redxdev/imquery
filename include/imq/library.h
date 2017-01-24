@@ -30,4 +30,5 @@ namespace imq
 	IMQ_LIB(register_io);
 	IMQ_LIB(register_math);
 	IMQ_LIB(register_conversion);
+	IMQ_LIB(register_gc);
 }

@@ -25,6 +25,8 @@ namespace imq
 		subContext->setReturnable(true);
 		ScopedRoot ctxRoot(vm->getGC(), subContext);
 
+		ScopedRoot thisRoot(vm->getGC(), this);
+
 		for (int32_t i = 0; i < argCount; ++i)
 		{
 			Result res = subContext->setValue(argNames[i], args[i]);

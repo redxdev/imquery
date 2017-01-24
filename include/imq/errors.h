@@ -75,6 +75,8 @@ namespace imq
 		IMQ_ERROR_DEF(args_type, "Invalid type for argument #" << (argIndex + 1) << " to " << funcName << " (expected " << expected << ", got " << QValue::getTypeString(val.getType()) << ")", const String& funcName, int32_t argIndex, const String& expected, const QValue& val);
 
 		IMQ_ERROR_DEF(args_bounds, "Argument #" << (argIndex + 1) << " to " << funcName << " is out of bounds - " << msg, const String& funcName, int32_t argIndex, const String& msg);
+
+		IMQ_ERROR_DEF(args_invalid, "Argument #" << (argIndex + 1) << " to " << funcName << " is invalid - " << msg, const String& funcName, int32_t argIndex, const String& msg);
 		
 		IMQ_ERROR_DEF(return_type, "Invalid return type (expected " << expected << ", got " << actual << ")", const String& expected, const String& actual);
 		IMQ_ERROR_DEF(return_type, "Invalid return type (expected " << expected << ", got " << QValue::getTypeString(val.getType()) << ")", const String& expected, const QValue& val);
