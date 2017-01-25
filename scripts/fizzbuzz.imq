@@ -1,0 +1,20 @@
+print("How many numbers to check?");
+count = integer(getline());
+
+for i = 1; i <= count; i = i + 1; {
+	text = "";
+	
+	if i % 3 == 0 {
+		text = "Fizz";
+	}
+	
+	if i % 5 == 0 {
+		text = text + "Buzz";
+	}
+	
+	if text == "" {
+		text = i;
+	}
+	
+	print(text);
+}

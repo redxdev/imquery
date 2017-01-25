@@ -184,9 +184,22 @@ namespace imq
 		return true;
 	}
 
+	static Result io_getline(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 0)
+			return errors::args_count("getline", 0, argCount);
+
+		String line;
+		std::getline(std::cin, line);
+
+		*result = QValue::String(line);
+		return true;
+	}
+
 	IMQ_LIB(register_io)
 	{
-		IMQ_LIB_FUNC("print", io_print);
+		IMQ_LIB_FUNC("print",   io_print);
+		IMQ_LIB_FUNC("getline", io_getline);
 
 		return true;
 	}

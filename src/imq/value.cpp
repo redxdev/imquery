@@ -473,7 +473,16 @@ namespace imq
 		case Type::String:
 		{
 			size_t pos;
-			int32_t val = std::stoi(s, &pos);
+			int32_t val;
+			try
+			{
+				val = std::stoi(s, &pos);
+			}
+			catch (std::invalid_argument&)
+			{
+				return false;
+			}
+
 			if (pos != strlen(s))
 				return false;
 
@@ -505,7 +514,15 @@ namespace imq
 		case Type::String:
 		{
 			size_t pos;
-			float val = std::stof(s, &pos);
+			float val;
+			try
+			{
+				val = std::stof(s, &pos);
+			}
+			catch (std::invalid_argument&)
+			{
+				return false;
+			}
 			if (pos != strlen(s))
 				return false;
 

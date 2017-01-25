@@ -11,6 +11,7 @@ grammar IMQLang;
     #include "platform.h"
     #include "vm.h"
 
+	#include <sstream>
     #include <string>
     #include <memory>
     #include <vector>
@@ -28,16 +29,7 @@ grammar IMQLang;
       generatedVNodes.push_back(val);
       return val;
     }
-}
-
-@lexer::header {
-    #include "platform.h"
-
-    #include <sstream>
-    #include <string>
-}
-
-@lexer::members {
+	
     String parseEscapedString(const String& text)
     {
       bool bEscaped = false;
@@ -82,6 +74,13 @@ grammar IMQLang;
 
       return ss.str();
     }
+}
+
+@lexer::header {
+    #include "platform.h"
+
+    #include <sstream>
+    #include <string>
 }
 
 ////
@@ -373,7 +372,7 @@ const_value returns [QValue val]
     |   FLOAT       {$val = QValue::Float(std::stof($FLOAT.text));}
     |   NAN_VALUE   {$val = QValue::Float(std::nanf(""));}
     |   NIL         {$val = QValue::Nil();}
-    |   STRING      {$val = QValue::String($STRING.text);}
+    |   STRING      {$val = QValue::String(parseEscapedString($STRING.text));}
     |   boolean     {$val = QValue::Bool($boolean.val);}
     ;
 
@@ -669,9 +668,6 @@ NIL
 STRING
     :   ('"' ('\\\\' | '\\"' | ~('\n' | '\r'))*? '"'
     |   '\'' ('\\\\' | '\\\'' | ~('\n' | '\r'))*? '\'')
-        {
-            setText(parseEscapedString(getText()));
-        }
     ;
 
 FLOAT
