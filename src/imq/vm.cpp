@@ -125,6 +125,9 @@ namespace imq
 					if (!res)
 						return res;
 
+					// We need to hold lastResult as a root so it doesn't get cleaned up before we return it.
+					ScopedRoot resultRoot(context->getVM()->getGC(), lastResult);
+
 					context->getVM()->getGC()->collect();
 
 					return true;
