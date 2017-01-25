@@ -19,4 +19,6 @@ namespace imq
 	{
 		return (strlen(str) + 1) * sizeof(char);
 	}
+
+	CString getIMQVersion();
 }

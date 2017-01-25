@@ -202,7 +202,7 @@ bool execute(VMachine* vm, VBlock* block, const std::vector<IOPair>& outputs, Qu
 
 int main(int argc, char** argv)
 {
-	TCLAP::CmdLine cmd("Interactive frontend to imquery", ' ', IMQ_VERSION_STR);
+	TCLAP::CmdLine cmd("Interactive frontend to imquery", ' ', getIMQVersion());
 
 	TCLAP::ValueArg<std::string> fileArg("f", "file", "The script file to load.", false, "", "string", cmd);
 	TCLAP::SwitchArg parserDebugArg("p", "parser-debug", "Enable parser debug mode", cmd, false);
