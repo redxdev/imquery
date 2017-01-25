@@ -20,8 +20,7 @@ into this
 ## Dependencies
 
 imquery depends on [ANTLR](http://www.antlr.org/) for parsing. Download or build the ANTLR 4.6
-(minimum) jar. At the time of this writing, the cpp runtime is too new to be included in an
-ANTLR distribution, so you may need to build antlr from source.
+jar and install the 4.6 Cpp runtime. ANTLR's source code is available [here](https://github.com/antlr/antlr4)
 
 Additionally, you will have to build the cpp runtime for antlr.
 

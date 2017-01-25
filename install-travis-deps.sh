@@ -61,7 +61,7 @@ then
     echo "Downloading antlr4..."
     git clone https://github.com/antlr/antlr4.git antlr4
     cd antlr4
-    git checkout 0eb27279def5388a64abcc87a84ace067bb83dd4 # https://github.com/antlr/antlr4/commit/0eb27279def5388a64abcc87a84ace067bb83dd4
+    git checkout 4.6
     echo "Building antlr4 jar..."
     mvn package -DskipTests=true
     echo "Building antlr4 cpp runtime..."

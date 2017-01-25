@@ -89,7 +89,7 @@ namespace imq
 		bool collect(bool force = false);
 
 	private:
-		bool bDebugMode;
+		bool bDebugMode = false;
 
 		GCCollectionMode collectionMode = GCCollectionMode::NoBarriers;
 
