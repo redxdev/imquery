@@ -3,7 +3,7 @@
 #include <string>
 #include <cstring>
 
-#define IMQ_VERSION_STR ("0.2")
+#define IMQ_VERSION_STR ("0.3")
 
 namespace imq
 {
