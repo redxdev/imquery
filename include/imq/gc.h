@@ -14,14 +14,14 @@
 
 namespace imq
 {
-	class GCTraceable
+	class IMQ_API GCTraceable
 	{
 	public:
 		virtual ~GCTraceable();
 		virtual void GC_mark() = 0;
 	};
 
-	class GCObject : public GCTraceable
+	class IMQ_API GCObject : public GCTraceable
 	{
 	public:
 		virtual ~GCObject();
@@ -43,7 +43,7 @@ namespace imq
 		bool GC_bMarked = false;
 	};
 
-	enum class GCCollectionMode
+	enum class IMQ_API GCCollectionMode
 	{
 		// Disable barrier functionality altogether and always run collections.
 		NoBarriers,
@@ -66,7 +66,7 @@ namespace imq
 	If too many collection cycles happen in a short period of time, the collection barrier is raised to a new value. On the other hand, if the barrier isn't reached within a certain number of
 	collect() calls, the barrier is lowered.
 	*/
-	class GarbageCollector
+	class IMQ_API GarbageCollector
 	{
 	public:
 		GarbageCollector();
@@ -106,7 +106,7 @@ namespace imq
 		size_t bbufNext = 0;
 	};
 
-	class ScopedRoot
+	class IMQ_API ScopedRoot
 	{
 	public:
 		ScopedRoot(GarbageCollector* gc, GCTraceable* root);

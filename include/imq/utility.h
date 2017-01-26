@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <ostream>
 
+#include "platform.h"
+
 namespace imq
 {
 	namespace utility
@@ -23,11 +25,11 @@ namespace imq
 		}
 	}
 
-	struct VLocation
+	struct IMQ_API VLocation
 	{
 		int32_t line;
 		int32_t col;
 	};
 
-	std::ostream& operator<<(std::ostream& os, const VLocation& loc);
+	IMQ_API std::ostream& operator<<(std::ostream& os, const VLocation& loc);
 }

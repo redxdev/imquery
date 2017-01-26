@@ -16,7 +16,7 @@ namespace imq
 
 	typedef std::function<Result(VMachine*, int32_t, QValue*, QValue*)> QFunctionPtr;
 
-	class QFunction : public GCObject
+	class IMQ_API QFunction : public GCObject
 	{
 	public:
 		QFunction(VMachine* vm);
@@ -28,7 +28,7 @@ namespace imq
 		VMachine* vm;
 	};
 
-	class QSimpleFunction : public QFunction
+	class IMQ_API QSimpleFunction : public QFunction
 	{
 	public:
 		QSimpleFunction(VMachine* vm, QFunctionPtr func);
@@ -43,7 +43,7 @@ namespace imq
 		QFunctionPtr func;
 	};
 
-	class QBoundFunction : public QSimpleFunction
+	class IMQ_API QBoundFunction : public QSimpleFunction
 	{
 	public:
 		QBoundFunction(VMachine* vm, QObject* obj, QFunctionPtr func);
@@ -60,7 +60,7 @@ namespace imq
 		QObject* obj;
 	};
 
-    class QValue : public GCTraceable
+    class IMQ_API QValue : public GCTraceable
     {
     public:
 		friend struct std::hash<imq::QValue>;
@@ -125,8 +125,8 @@ namespace imq
 		bool toFloat(QValue* result) const;
 		bool toString(QValue* result) const;
 
-		friend bool operator==(const QValue& a, const QValue& b);
-		friend bool operator!=(const QValue& a, const QValue& b);
+		bool operator==(const QValue& b) const;
+		bool operator!=(const QValue& b) const;
 
 		Result opAdd(const QValue& rhs, QValue* result) const;
 		Result opSub(const QValue& rhs, QValue* result) const;
@@ -159,7 +159,4 @@ namespace imq
 			QFunction* func;
 		};
     };
-
-	bool operator==(const QValue& a, const QValue& b);
-	bool operator!=(const QValue& a, const QValue& b);
 }

@@ -14,7 +14,7 @@ namespace imq
 {
 	class VMachine;
 
-	class QTableEntry : public QObject
+	class IMQ_API QTableEntry : public QObject
 	{
 		IMQ_DECLARE_TYPE(QTableEntry);
 		
@@ -48,7 +48,7 @@ namespace imq
 		QValue value;
 	};
 
-	class QTableIterator : public QIterator
+	class IMQ_API QTableIterator : public QIterator
 	{
 	public:
 		QTableIterator(VMachine* vm, const std::unordered_map<QValue, QValue, std::hash<QValue>>::iterator& begin, const std::unordered_map<QValue, QValue, std::hash<QValue>>::iterator& end);
@@ -64,7 +64,7 @@ namespace imq
 		std::unordered_map<QValue, QValue, std::hash<QValue>>::iterator end;
 	};
 
-	class QTable : public QObject
+	class IMQ_API QTable : public QObject
 	{
 		IMQ_DECLARE_TYPE_DYNAMIC(QTable);
 
@@ -103,7 +103,7 @@ namespace imq
 		std::unordered_map<QValue, QValue, std::hash<QValue>> map;
 	};
 
-	class QListIterator : public QIterator
+	class IMQ_API QListIterator : public QIterator
 	{
 	public:
 		QListIterator(const std::vector<QValue>::iterator& begin, const std::vector<QValue>::iterator& end);
@@ -118,7 +118,7 @@ namespace imq
 		std::vector<QValue>::iterator end;
 	};
 
-	class QList : public QObject
+	class IMQ_API QList : public QObject
 	{
 		IMQ_DECLARE_TYPE_DYNAMIC(QList);
 

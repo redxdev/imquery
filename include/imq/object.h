@@ -12,7 +12,7 @@ namespace imq
 
 	class QValue;
 
-	class QSelection
+	class IMQ_API QSelection
 	{
 	public:
 		virtual ~QSelection();
@@ -23,7 +23,7 @@ namespace imq
 		virtual Result apply(const QValue& value, int32_t coordCount, QValue* coords) = 0;
 	};
 
-	class QIterator
+	class IMQ_API QIterator
 	{
 	public:
 		virtual ~QIterator();
@@ -33,13 +33,13 @@ namespace imq
 		virtual QValue getCurrentValue() const = 0;
 	};
 
-	enum class OperationOrder
+	enum class IMQ_API OperationOrder
 	{
 		LHS, // object is on the left-hand side
 		RHS // object is on the right-hand side
 	};
 
-	class QObject : public GCObject
+	class IMQ_API QObject : public GCObject
 	{
 	public:
 		QObject(VMachine* vm);
@@ -88,7 +88,7 @@ namespace imq
 	};
 
 	// Do not use yourself - use the IMQ_DECLARE_TYPE and IMQ_DEFINE_TYPE macros.
-	class ObjectRegistry
+	class IMQ_API ObjectRegistry
 	{
 	public:
 		static TypeIndex createTypeIndex();
@@ -105,8 +105,8 @@ namespace imq
 
 #define __IMQ_DECLARE_TYPE(name) \
 	private: static imq::ObjectRegistry __objreg_##name; \
-	public: virtual imq::TypeIndex getTypeIndex() const override {return __objreg_##name.getTypeIndex();} \
-	static imq::TypeIndex getStaticTypeIndex() {return __objreg_##name.getTypeIndex();} \
+	public: virtual imq::TypeIndex getTypeIndex() const override; \
+	static imq::TypeIndex getStaticTypeIndex(); \
 	virtual imq::String getTypeString() const override {return #name;} \
 	virtual size_t GC_getSize() const override;
 
@@ -120,7 +120,9 @@ namespace imq
 
 #define IMQ_DEFINE_TYPE(name) \
 	static_assert(std::is_base_of<imq::QObject, name>::value, "IMQ_DEFINE_TYPE is only valid for QObject types."); \
-	imq::ObjectRegistry name::__objreg_##name;
+	imq::ObjectRegistry name::__objreg_##name; \
+	imq::TypeIndex name::getTypeIndex() const {return __objreg_##name.getTypeIndex();} \
+	imq::TypeIndex name::getStaticTypeIndex() {return __objreg_##name.getTypeIndex();}
 
 #define IMQ_DEFINE_TYPE_WITH_CUSTOM(name, val) \
 	IMQ_DEFINE_TYPE(name); \
@@ -146,7 +148,7 @@ namespace imq
 	IMQ_DEFINE_TYPE(name); \
 	size_t name::GC_getSize() const {return sizeof(name) + fields.GC_getSize() - sizeof(imq::ObjectFieldHelper) + (val);}
 
-	class ObjectFieldHelper
+	class IMQ_API ObjectFieldHelper
 	{
 	public:
 		void getter(const String& name, std::function<Result(QValue*)> getFunc);

@@ -12,7 +12,7 @@ namespace imq
 {
 	class VMachine;
 
-	class Context : public GCObject
+	class IMQ_API Context : public GCObject
 	{
 	public:
 		Context(VMachine* vm);
@@ -47,7 +47,7 @@ namespace imq
 
 	// A simple form of context. This stores values in an unordered_map and allows both read and write access.
 	// This type of context is generally used as the root context.
-	class SimpleContext : public Context
+	class IMQ_API SimpleContext : public Context
 	{
 	public:
 		SimpleContext(VMachine* vm);
@@ -80,7 +80,7 @@ namespace imq
 		QValue returnValue;
 	};
 
-	class RootContext : public Context
+	class IMQ_API RootContext : public Context
 	{
 	public:
 		RootContext(VMachine* vm);
@@ -118,7 +118,7 @@ namespace imq
 	};
 
 	// A context that has a parent and passes undefined get/deletes to it.
-	class SubContext : public Context
+	class IMQ_API SubContext : public Context
 	{
 	public:
 		SubContext(VMachine* vm, Context* parent);
@@ -154,7 +154,7 @@ namespace imq
 		QValue returnValue;
 	};
 
-	class RestrictedSubContext : public SubContext
+	class IMQ_API RestrictedSubContext : public SubContext
 	{
 	public:
 		RestrictedSubContext(VMachine* vm, Context* parent);

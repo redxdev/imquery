@@ -9,7 +9,7 @@
 #include "utility.h"
 
 #define IMQ_ERROR_DEF(errName, fmt, ...) \
-	inline Result errName(__VA_ARGS__) \
+	inline IMQ_API Result errName(__VA_ARGS__) \
 	{ \
 		std::stringstream __ss; \
 		__ss << fmt; \

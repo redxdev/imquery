@@ -9,7 +9,7 @@ namespace imq
 {
 	class VMachine;
 
-	class QColor : public QObject
+	class IMQ_API QColor : public QObject
 	{
 		IMQ_DECLARE_TYPE(QColor);
 
@@ -69,7 +69,7 @@ namespace imq
 		float alpha;
 	};
 
-	class QImage : public QObject
+	class IMQ_API QImage : public QObject
 	{
 		IMQ_DECLARE_TYPE(QImage);
 
@@ -121,7 +121,7 @@ namespace imq
 		float* data = nullptr;
 	};
 
-	class QImageSelection : public QSelection
+	class IMQ_API QImageSelection : public QSelection
 	{
 	public:
 		QImageSelection(Context* parent, QImage* source, QImage* dest);

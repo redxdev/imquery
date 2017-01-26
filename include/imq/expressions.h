@@ -8,7 +8,7 @@
 
 namespace imq
 {
-	class ConstantExpr : public VExpression
+	class IMQ_API ConstantExpr : public VExpression
 	{
 	public:
 		ConstantExpr(const QValue& value, const VLocation& loc);
@@ -21,7 +21,7 @@ namespace imq
 		QValue value;
 	};
 
-	class ColorExpr : public VExpression
+	class IMQ_API ColorExpr : public VExpression
 	{
 	public:
 		ColorExpr(VExpression* rExpr, VExpression* gExpr, VExpression* bExpr, VExpression* aExpr, const VLocation& loc);
@@ -37,7 +37,7 @@ namespace imq
 		VExpression* aExpr;
 	};
 
-	class ListExpr : public VExpression
+	class IMQ_API ListExpr : public VExpression
 	{
 	public:
 		ListExpr(const std::vector<VExpression*> values, const VLocation& loc);
@@ -50,7 +50,7 @@ namespace imq
 		std::vector<VExpression*> values;
 	};
 
-	class TableExpr : public VExpression
+	class IMQ_API TableExpr : public VExpression
 	{
 	public:
 		TableExpr(const std::vector<std::tuple<VExpression*, VExpression*>> values, const VLocation& loc);
@@ -63,7 +63,7 @@ namespace imq
 		std::vector<std::tuple<VExpression*, VExpression*>> values;
 	};
 
-	class RetrieveVariableExpr : public VExpression
+	class IMQ_API RetrieveVariableExpr : public VExpression
 	{
 	public:
 		RetrieveVariableExpr(const String& variable, const VLocation& loc);
@@ -76,7 +76,7 @@ namespace imq
 		String variable;
 	};
 
-	class RetrieveFieldExpr : public VExpression
+	class IMQ_API RetrieveFieldExpr : public VExpression
 	{
 	public:
 		RetrieveFieldExpr(VExpression* objExpr, const String& field, const VLocation& loc);
@@ -90,7 +90,7 @@ namespace imq
 		String field;
 	};
 
-	class RetrieveIndexExpr : public VExpression
+	class IMQ_API RetrieveIndexExpr : public VExpression
 	{
 	public:
 		RetrieveIndexExpr(VExpression* objExpr, VExpression* indexExpr, const VLocation& loc);
@@ -104,7 +104,7 @@ namespace imq
 		VExpression* indexExpr;
 	};
 
-	class CallFunctionExpr : public VExpression
+	class IMQ_API CallFunctionExpr : public VExpression
 	{
 	public:
 		CallFunctionExpr(VExpression* funcExpr, int32_t argC, VExpression** args, const VLocation& loc);
@@ -119,7 +119,7 @@ namespace imq
 		VExpression** args;
 	};
 
-	class SetVariableStm : public VStatement
+	class IMQ_API SetVariableStm : public VStatement
 	{
 	public:
 		SetVariableStm(const String& variable, VExpression* valueExpr, const VLocation& loc);
@@ -133,7 +133,7 @@ namespace imq
 		VExpression* valueExpr;
 	};
 
-	class SetFieldStm : public VStatement
+	class IMQ_API SetFieldStm : public VStatement
 	{
 	public:
 		SetFieldStm(VExpression* objExpr, const String& field, VExpression* valueExpr, const VLocation& loc);
@@ -148,7 +148,7 @@ namespace imq
 		VExpression* valueExpr;
 	};
 
-	class SetIndexStm : public VStatement
+	class IMQ_API SetIndexStm : public VStatement
 	{
 	public:
 		SetIndexStm(VExpression* objExpr, VExpression* indexExpr, VExpression* valueExpr, const VLocation& loc);
@@ -163,7 +163,7 @@ namespace imq
 		VExpression* valueExpr;
 	};
 
-	class DeleteVariableStm : public VStatement
+	class IMQ_API DeleteVariableStm : public VStatement
 	{
 	public:
 		DeleteVariableStm(const String& variable, const VLocation& loc);
@@ -176,7 +176,7 @@ namespace imq
 		String variable;
 	};
 
-	class SelectStm : public VStatement
+	class IMQ_API SelectStm : public VStatement
 	{
 	public:
 		SelectStm(VExpression* destExpr, VExpression* srcExpr, VExpression* calcExpr, VExpression* whereExpr, VExpression* elseExpr, int32_t coordCount, VExpression** coordsExpr, const VLocation& loc);
@@ -196,7 +196,7 @@ namespace imq
 		int32_t coordCount;
 	};
 
-	class DefineInputStm : public VStatement
+	class IMQ_API DefineInputStm : public VStatement
 	{
 	public:
 		DefineInputStm(const String& name, VExpression* valueExpr, const VLocation& loc);
@@ -210,7 +210,7 @@ namespace imq
 		VExpression* valueExpr;
 	};
 
-	class DefineOutputStm : public VStatement
+	class IMQ_API DefineOutputStm : public VStatement
 	{
 	public:
 		DefineOutputStm(const String& name, VExpression* valueExpr, const VLocation& loc);
@@ -224,7 +224,7 @@ namespace imq
 		VExpression* valueExpr;
 	};
 
-	class BranchStm : public VStatement
+	class IMQ_API BranchStm : public VStatement
 	{
 	public:
 		BranchStm(VExpression* checkExpr, VStatement* trueStm, VStatement* falseStm, const VLocation& loc);
@@ -239,7 +239,7 @@ namespace imq
 		VStatement* falseStm;
 	};
 
-	class ForLoopStm : public VStatement
+	class IMQ_API ForLoopStm : public VStatement
 	{
 	public:
 		ForLoopStm(VStatement* initStm, VExpression* checkExpr, VStatement* incrStm, VStatement* execStm, const VLocation& loc);
@@ -255,7 +255,7 @@ namespace imq
 		VStatement* execStm;
 	};
 
-	class WhileLoopStm : public VStatement
+	class IMQ_API WhileLoopStm : public VStatement
 	{
 	public:
 		WhileLoopStm(VExpression* checkExpr, VStatement* execStm, const VLocation& loc);
@@ -269,7 +269,7 @@ namespace imq
 		VStatement* execStm;
 	};
 
-	class InfiniteLoopStm : public VStatement
+	class IMQ_API InfiniteLoopStm : public VStatement
 	{
 	public:
 		InfiniteLoopStm(VStatement* execStm, const VLocation& loc);
@@ -282,7 +282,7 @@ namespace imq
 		VStatement* execStm;
 	};
 
-	class ForEachStm : public VStatement
+	class IMQ_API ForEachStm : public VStatement
 	{
 	public:
 		ForEachStm(const String& varName, VExpression* iterExpr, VStatement* execStm, const VLocation& loc);
@@ -297,7 +297,7 @@ namespace imq
 		VStatement* execStm;
 	};
 
-	class BreakStm : public VStatement
+	class IMQ_API BreakStm : public VStatement
 	{
 	public:
 		BreakStm(const VLocation& loc);
@@ -307,7 +307,7 @@ namespace imq
 		virtual Result execute(Context* context) override;
 	};
 
-	class ReturnStm : public VStatement
+	class IMQ_API ReturnStm : public VStatement
 	{
 	public:
 		ReturnStm(VExpression* valueExpr, const VLocation& loc);
@@ -320,7 +320,7 @@ namespace imq
 		VExpression* valueExpr;
 	};
 
-	class NoOpStm : public VStatement
+	class IMQ_API NoOpStm : public VStatement
 	{
 	public:
 		NoOpStm(const VLocation& loc);
@@ -330,7 +330,7 @@ namespace imq
 		virtual Result execute(Context* context) override;
 	};
 
-	class TernaryExpr : public VExpression
+	class IMQ_API TernaryExpr : public VExpression
 	{
 	public:
 		TernaryExpr(VExpression* checkExpr, VExpression* trueExpr, VExpression* falseExpr, const VLocation& loc);

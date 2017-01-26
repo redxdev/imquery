@@ -24,7 +24,7 @@ namespace imq
 		bool bDebugMode;
 	};
 
-	class QueryParser
+	class IMQ_API QueryParser
 	{
 	public:
 		Result parseString(const String& data, VBlock** result) const;

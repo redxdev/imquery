@@ -2,7 +2,7 @@
 
 namespace imq
 {
-	class Result
+	class IMQ_API Result
 	{
 	public:
 		Result()

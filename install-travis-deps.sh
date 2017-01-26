@@ -67,10 +67,11 @@ then
     echo "Building antlr4 cpp runtime..."
     cd runtime/Cpp
     cmake .
-    make antlr4_static
+    make antlr4_shared
     cd ../../..
 else
     echo "Using cached antlr4 build..."
 fi
+cp antlr4/runtime/Cpp/dist/libantlr4-runtime.so.4.6 /usr/lib
 
 cd ..

@@ -10,7 +10,7 @@
 
 namespace imq
 {
-	class ScriptFunction : public QFunction
+	class IMQ_API ScriptFunction : public QFunction
 	{
 	public:
 		ScriptFunction(const String& funcName, Context* outerCtx, const std::shared_ptr<VBlock> block, const std::vector<String>& argNames);
@@ -35,7 +35,7 @@ namespace imq
 		std::vector<String> argNames;
 	};
 
-	class DefineFunctionExpr : public VExpression
+	class IMQ_API DefineFunctionExpr : public VExpression
 	{
 	public:
 		DefineFunctionExpr(const String& funcName, VBlock* block, const std::vector<String>& argNames, const VLocation& loc);

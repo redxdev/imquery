@@ -1554,12 +1554,12 @@ namespace imq
 		return *this;
 	}
 
-	bool operator==(const QValue& a, const QValue& b)
+	bool QValue::operator==(const QValue& b) const
 	{
-		if (a.valueType != b.valueType)
+		if (this->valueType != b.valueType)
 			return false;
 
-		switch (a.valueType)
+		switch (this->valueType)
 		{
 		default:
 			return false;
@@ -1568,27 +1568,27 @@ namespace imq
 			return true;
 
 		case QValue::Type::Bool:
-			return a.b == b.b;
+			return this->b == b.b;
 
 		case QValue::Type::Integer:
-			return a.i == b.i;
+			return this->i == b.i;
 
 		case QValue::Type::Float:
-			return a.f == b.f;
+			return this->f == b.f;
 
 		case QValue::Type::String:
-			return strcmp(a.s, b.s) == 0;
+			return strcmp(this->s, b.s) == 0;
 
 		case QValue::Type::Function:
-			return a.func == b.func;
+			return this->func == b.func;
 
 		case QValue::Type::Object:
-			return a.obj->equals(b.obj);
+			return this->obj->equals(b.obj);
 		}
 	}
 
-	bool operator!=(const QValue& a, const QValue& b)
+	bool QValue::operator!=(const QValue& b) const
 	{
-		return !(a == b);
+		return !(*this == b);
 	}
 }

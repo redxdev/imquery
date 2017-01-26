@@ -11,7 +11,7 @@
 
 namespace imq
 {
-	class VNode
+	class IMQ_API VNode
 	{
 	public:
 		VNode(const VLocation& loc);
@@ -32,7 +32,7 @@ namespace imq
 		bool bErrorState = false;
 	};
 
-	class VStatement : public VNode
+	class IMQ_API VStatement : public VNode
 	{
 	public:
 		VStatement(const VLocation& loc);
@@ -41,7 +41,7 @@ namespace imq
 		virtual Result execute(Context* context) = 0;
 	};
 
-	class VExpression : public VNode
+	class IMQ_API VExpression : public VNode
 	{
 	public:
 		VExpression(const VLocation& loc);
@@ -50,7 +50,7 @@ namespace imq
 		virtual Result execute(Context* context, QValue* result) = 0;
 	};
 
-	class VExpressionAsStatement : public VStatement
+	class IMQ_API VExpressionAsStatement : public VStatement
 	{
 	public:
 		VExpressionAsStatement(VExpression* expression, const VLocation& loc);
@@ -65,7 +65,7 @@ namespace imq
 		VExpression* expression;
 	};
 
-	class VBlock : public VStatement
+	class IMQ_API VBlock : public VStatement
 	{
 	public:
 		VBlock(int32_t count, VStatement** statements, const VLocation loc);
@@ -85,7 +85,7 @@ namespace imq
 		QValue* lastResult;
 	};
 
-	class VMachine
+	class IMQ_API VMachine
 	{
 	public:
 		VMachine();

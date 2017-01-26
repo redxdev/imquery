@@ -8,7 +8,7 @@ workspace "imquery"
         defines {"_CRT_SECURE_NO_WARNINGS" }
 
 project "imq"
-    kind "StaticLib"
+    kind "SharedLib"
     language "C++"
     targetdir "bin/%{cfg.buildcfg}"
     files {
@@ -25,7 +25,7 @@ project "imq"
     }
     includedirs {"include/imq", "grammar", environment.ANTLR_CPP_PATH}
     links {environment.ANTLR_LIB}
-    defines {"_SCL_SECURE_NO_WARNINGS"}
+    defines {"_SCL_SECURE_NO_WARNINGS", "IMQ_SHARED_LIB", "IMQ_SHARED_LIB_BUILD"}
 
     prebuildcommands {
         "{ECHO} Cleaning grammar",

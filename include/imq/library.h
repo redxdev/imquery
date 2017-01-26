@@ -6,6 +6,7 @@
 #include "result.h"
 
 #define IMQ_LIB(loadName) imq::Result loadName(imq::VMachine* vm)
+#define IMQ_LIB_STD(loadName) IMQ_API imq::Result loadName(imq::VMachine* vm)
 #define IMQ_LIB_FUNC(name, func) \
 	{ \
 		Result res = vm->getRootContext()->setValue(name, QValue::Function(vm, func)); \
@@ -24,11 +25,11 @@
 
 namespace imq
 {
-	IMQ_LIB(register_stdlib);
-	IMQ_LIB(register_system);
-	IMQ_LIB(register_image);
-	IMQ_LIB(register_io);
-	IMQ_LIB(register_math);
-	IMQ_LIB(register_conversion);
-	IMQ_LIB(register_gc);
+	IMQ_LIB_STD(register_stdlib);
+	IMQ_LIB_STD(register_system);
+	IMQ_LIB_STD(register_image);
+	IMQ_LIB_STD(register_io);
+	IMQ_LIB_STD(register_math);
+	IMQ_LIB_STD(register_conversion);
+	IMQ_LIB_STD(register_gc);
 }

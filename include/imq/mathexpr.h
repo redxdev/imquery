@@ -5,7 +5,7 @@
 
 namespace imq
 {
-	class TwoOperatorMathExpr : public VExpression
+	class IMQ_API TwoOperatorMathExpr : public VExpression
 	{
 	public:
 		TwoOperatorMathExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
@@ -19,7 +19,7 @@ namespace imq
 		VExpression* rhsExpr;
 	};
 
-	class OneOperatorMathExpr : public VExpression
+	class IMQ_API OneOperatorMathExpr : public VExpression
 	{
 	public:
 		OneOperatorMathExpr(VExpression* expr, const VLocation& loc);
@@ -32,7 +32,7 @@ namespace imq
 		VExpression* expr;
 	};
 
-	class AddExpr : public TwoOperatorMathExpr
+	class IMQ_API AddExpr : public TwoOperatorMathExpr
 	{
 	public:
 		AddExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
@@ -42,7 +42,7 @@ namespace imq
 		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
 	};
 
-	class SubExpr : public TwoOperatorMathExpr
+	class IMQ_API SubExpr : public TwoOperatorMathExpr
 	{
 	public:
 		SubExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
@@ -52,7 +52,7 @@ namespace imq
 		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
 	};
 
-	class MulExpr : public TwoOperatorMathExpr
+	class IMQ_API MulExpr : public TwoOperatorMathExpr
 	{
 	public:
 		MulExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
@@ -62,7 +62,7 @@ namespace imq
 		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
 	};
 
-	class DivExpr : public TwoOperatorMathExpr
+	class IMQ_API DivExpr : public TwoOperatorMathExpr
 	{
 	public:
 		DivExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
@@ -72,7 +72,7 @@ namespace imq
 		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
 	};
 
-	class ModExpr : public TwoOperatorMathExpr
+	class IMQ_API ModExpr : public TwoOperatorMathExpr
 	{
 	public:
 		ModExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
@@ -82,7 +82,7 @@ namespace imq
 		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
 	};
 
-	class AndExpr : public TwoOperatorMathExpr
+	class IMQ_API AndExpr : public TwoOperatorMathExpr
 	{
 	public:
 		AndExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
@@ -92,7 +92,7 @@ namespace imq
 		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
 	};
 
-	class OrExpr : public TwoOperatorMathExpr
+	class IMQ_API OrExpr : public TwoOperatorMathExpr
 	{
 	public:
 		OrExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
@@ -102,7 +102,7 @@ namespace imq
 		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
 	};
 
-	class NegateExpr : public OneOperatorMathExpr
+	class IMQ_API NegateExpr : public OneOperatorMathExpr
 	{
 	public:
 		NegateExpr(VExpression* expr, const VLocation& loc);
@@ -112,7 +112,7 @@ namespace imq
 		virtual Result operate(const QValue& value, QValue* result) override;
 	};
 
-	class NotExpr : public OneOperatorMathExpr
+	class IMQ_API NotExpr : public OneOperatorMathExpr
 	{
 	public:
 		NotExpr(VExpression* expr, const VLocation& loc);
@@ -122,7 +122,7 @@ namespace imq
 		virtual Result operate(const QValue& value, QValue* result) override;
 	};
 
-	class EqualExpr : public TwoOperatorMathExpr
+	class IMQ_API EqualExpr : public TwoOperatorMathExpr
 	{
 	public:
 		EqualExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
@@ -132,7 +132,7 @@ namespace imq
 		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
 	};
 
-	class NotEqualExpr : public TwoOperatorMathExpr
+	class IMQ_API NotEqualExpr : public TwoOperatorMathExpr
 	{
 	public:
 		NotEqualExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
@@ -142,7 +142,7 @@ namespace imq
 		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
 	};
 
-	class LessExpr : public TwoOperatorMathExpr
+	class IMQ_API LessExpr : public TwoOperatorMathExpr
 	{
 	public:
 		LessExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
@@ -152,7 +152,7 @@ namespace imq
 		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
 	};
 
-	class LessEqExpr : public TwoOperatorMathExpr
+	class IMQ_API LessEqExpr : public TwoOperatorMathExpr
 	{
 	public:
 		LessEqExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
@@ -162,7 +162,7 @@ namespace imq
 		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
 	};
 
-	class GreaterExpr : public TwoOperatorMathExpr
+	class IMQ_API GreaterExpr : public TwoOperatorMathExpr
 	{
 	public:
 		GreaterExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);
@@ -172,7 +172,7 @@ namespace imq
 		virtual Result operate(const QValue& lhs, const QValue& rhs, QValue* result) override;
 	};
 
-	class GreaterEqExpr : public TwoOperatorMathExpr
+	class IMQ_API GreaterEqExpr : public TwoOperatorMathExpr
 	{
 	public:
 		GreaterEqExpr(VExpression* lhs, VExpression* rhs, const VLocation& loc);

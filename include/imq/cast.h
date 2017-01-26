@@ -43,7 +43,7 @@ namespace imq
 		}
 	}
 
-	inline bool checkTypesEqual(const QValue& a, const QValue& b)
+	IMQ_API inline bool checkTypesEqual(const QValue& a, const QValue& b)
 	{
 		if (a.getType() != b.getType())
 			return false;
