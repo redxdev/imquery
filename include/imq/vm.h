@@ -93,6 +93,12 @@ namespace imq
 
 		RootContext* getRootContext() const;
 
+		// Working directories will always be converted to be absolute.
+		bool setWorkingDirectory(const String& newDir);
+		const String& getWorkingDirectory() const;
+
+		String buildPath(const String& path) const;
+
 		Result execute(VBlock* block);
 
 		GarbageCollector* getGC();
@@ -100,5 +106,6 @@ namespace imq
 	private:
 		RootContext* rootContext;
 		GarbageCollector* gc;
+		String workingDirectory;
 	};
 }

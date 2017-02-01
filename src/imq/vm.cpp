@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "errors.h"
+#include "thirdparty/filesystem/path.h"
 
 namespace imq
 {
@@ -161,6 +162,7 @@ namespace imq
 
 	VMachine::VMachine()
 	{
+		setWorkingDirectory(".");
 		gc = new GarbageCollector();
 		rootContext = new RootContext(this);
 		gc->addRoot(rootContext);
@@ -182,6 +184,46 @@ namespace imq
 	RootContext* VMachine::getRootContext() const
 	{
 		return rootContext;
+	}
+
+	bool VMachine::setWorkingDirectory(const String& newDir)
+	{
+		try
+		{
+			filesystem::path path = filesystem::path(newDir).make_absolute();
+			if (!path.is_directory())
+				return false;
+
+			workingDirectory = path.str();
+			return true;
+		}
+		catch (std::exception&)
+		{
+			return false;
+		}
+	}
+
+	const String& VMachine::getWorkingDirectory() const
+	{
+		return workingDirectory;
+	}
+
+	String VMachine::buildPath(const String& path) const
+	{
+		try
+		{
+			filesystem::path workingPath(workingDirectory);
+			filesystem::path newPath(path);
+
+			if (newPath.is_absolute())
+				return newPath.str();
+			else
+				return (workingPath / newPath).str();
+		}
+		catch (std::exception&)
+		{
+			return path; // uh oh
+		}
 	}
 
 	Result VMachine::execute(VBlock* block)

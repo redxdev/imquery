@@ -18,11 +18,11 @@ namespace imq
 	IMQ_LIB(register_stdlib)
 	{
 		IMQ_LIB_SUB(register_system);
-		IMQ_LIB_SUB(register_image);
+		IMQ_LIB_SUB(register_gc);
+		IMQ_LIB_SUB(register_conversion);
 		IMQ_LIB_SUB(register_io);
 		IMQ_LIB_SUB(register_math);
-		IMQ_LIB_SUB(register_conversion);
-		IMQ_LIB_SUB(register_gc);
+		IMQ_LIB_SUB(register_image);
 
 		return true;
 	}
@@ -48,115 +48,286 @@ namespace imq
 		return true;
 	}
 
-	static Result image_construct(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	static Result gc_memory(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
-		switch (argCount)
-		{
-		default:
-			return errors::args_count("image", "0, 2, or 3", argCount);
+		if (argCount != 0)
+			return errors::args_count("gc_memory", 0, 0, argCount);
 
-		case 0:
-			*result = QValue::Object(new QImage(vm));
-			return true;
+		*result = QValue::Integer((int32_t)vm->getGC()->getTrackedMemory());
 
-		case 2:
-		{
-			int32_t w;
-			int32_t h;
-
-			if (!args[0].getInteger(&w))
-			{
-				return errors::args_type("image", 0, "Integer", args[0]);
-			}
-
-			if (!args[1].getInteger(&h))
-			{
-				return errors::args_type("image", 1, "Integer", args[1]);
-			}
-
-			if (w < 0)
-			{
-				return errors::args_bounds("image", 0, "argument must be >= 0");
-			}
-
-			if (h < 0)
-			{
-				return errors::args_bounds("image", 1, "argument must be >= 0");
-			}
-
-			*result = QValue::Object(new QImage(vm, w, h));
-			return true;
-		}
-
-		case 3:
-		{
-			int32_t w;
-			int32_t h;
-			QObject* obj;
-			QColor* color;
-
-			if (!args[0].getInteger(&w))
-			{
-				return errors::args_type("image", 0, "Integer", args[0]);
-			}
-
-			if (!args[1].getInteger(&h))
-			{
-				return errors::args_type("image", 1, "Integer", args[1]);
-			}
-
-			if (!args[2].getObject(&obj))
-			{
-				return errors::args_type("image", 2, "Object", args[2]);
-			}
-
-			color = objectCast<QColor>(obj);
-			if (!color)
-			{
-				return errors::args_type("image", 2, "Color", "Object");
-			}
-
-			if (w < 0)
-			{
-				return errors::args_bounds("image", 0, "argument must be >= 0");
-			}
-
-			if (h < 0)
-			{
-				return errors::args_bounds("image", 1, "argument must be >= 0");
-			}
-
-			*result = QValue::Object(new QImage(vm, w, h, *color));
-			return true;
-		}
-		}
-	}
-
-	static Result image_load(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount != 1)
-			return errors::args_count("image_load", 1, argCount);
-
-		char* path;
-		if (!args[0].getString(&path))
-		{
-			return errors::args_type("image_load", 0, "String", args[0]);
-		}
-
-		QImage* image;
-
-		Result res = QImage::loadFromFile(vm, path, &image);
-		if (!res)
-			return res;
-
-		*result = QValue::Object(image);
 		return true;
 	}
 
-	IMQ_LIB(register_image)
+	static Result gc_managed(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
-		IMQ_LIB_FUNC("image", image_construct);
-		IMQ_LIB_FUNC("image_load", image_load);
+		if (argCount != 0)
+			return errors::args_count("gc_managed", 0, argCount);
+
+		*result = QValue::Integer((int32_t)vm->getGC()->getManagedCount());
+		return true;
+	}
+
+	static Result gc_barrier(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 0)
+			return errors::args_count("gc_barrier", 0, argCount);
+
+		*result = QValue::Integer((int32_t)vm->getGC()->getCollectionBarrier());
+		return true;
+	}
+
+	static Result gc_collect(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount > 1)
+			return errors::args_count("gc_collect", 0, 1, argCount);
+
+		bool val = false;
+
+		if (argCount == 1)
+		{
+			if (!args[0].getBool(&val))
+			{
+				return errors::args_type("gc_collect", 0, "Bool", args[0]);
+			}
+		}
+
+		*result = QValue::Bool(vm->getGC()->collect(val));
+		return true;
+	}
+
+	static Result gc_mode(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount > 1)
+			return errors::args_count("gc_mode", 0, 1, argCount);
+
+		if (argCount == 0)
+		{
+			switch (vm->getGC()->getCollectionMode())
+			{
+			default:
+				*result = QValue::String("Unknown");
+				return true;
+
+			case GCCollectionMode::Barriers:
+				*result = QValue::String("Barriers");
+				return true;
+
+			case GCCollectionMode::NoBarriers:
+				*result = QValue::String("NoBarriers");
+				return true;
+
+			case GCCollectionMode::Always:
+				*result = QValue::String("Always");
+				return true;
+			}
+		}
+
+		String val;
+		if (!args[0].getString(&val))
+		{
+			return errors::args_type("gc_mode", 0, "String", args[0]);
+		}
+
+		if (val == "Barriers")
+		{
+			vm->getGC()->setCollectionMode(GCCollectionMode::Barriers);
+		}
+		else if (val == "NoBarriers")
+		{
+			vm->getGC()->setCollectionMode(GCCollectionMode::NoBarriers);
+		}
+		else if (val == "Always")
+		{
+			vm->getGC()->setCollectionMode(GCCollectionMode::Always);
+		}
+		else
+		{
+			return errors::args_invalid("gc_mode", 0, "Expected a string containing one of 'Barriers', 'NoBarriers', or 'Always'");
+		}
+
+		return true;
+	}
+
+	IMQ_LIB(register_gc)
+	{
+		IMQ_LIB_FUNC("gc_memory", gc_memory);
+		IMQ_LIB_FUNC("gc_managed", gc_managed);
+		IMQ_LIB_FUNC("gc_barrier", gc_barrier);
+		IMQ_LIB_FUNC("gc_collect", gc_collect);
+		IMQ_LIB_FUNC("gc_mode", gc_mode);
+
+		return true;
+	}
+
+	static Result convert_bool(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("bool", 1, argCount);
+
+		if (args[0].toBool(result))
+			return true;
+		else
+			return errors::conversion(args[0], "Bool");
+	}
+
+	static Result convert_integer(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("integer", 1, argCount);
+
+		if (args[0].toInteger(result))
+			return true;
+		else
+			return errors::conversion(args[0], "Integer");
+	}
+
+	static Result convert_float(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("float", 1, argCount);
+
+		if (args[0].toFloat(result))
+			return true;
+		else
+			return errors::conversion(args[0], "Float");
+	}
+
+	static Result convert_string(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("string", 1, argCount);
+
+		if (args[0].toString(result))
+			return true;
+		else
+			return errors::conversion(args[0], "String");
+	}
+
+	static Result convert_isbool(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("isbool", 1, argCount);
+
+		*result = QValue::Bool(args[0].isBool());
+		return true;
+	}
+
+	static Result convert_isinteger(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("isinteger", 1, argCount);
+
+		*result = QValue::Bool(args[0].isInteger());
+		return true;
+	}
+
+	static Result convert_isfloat(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("isfloat", 1, argCount);
+
+		*result = QValue::Bool(args[0].isFloat());
+		return true;
+	}
+
+	static Result convert_isnumber(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("isnumber", 1, argCount);
+
+		*result = QValue::Bool(args[0].isInteger() || args[0].isFloat());
+		return true;
+	}
+
+	static Result convert_isstring(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("isstring", 1, argCount);
+
+		*result = QValue::Bool(args[0].isString());
+		return true;
+	}
+
+	static Result convert_isobject(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("isobject", 1, argCount);
+
+		*result = QValue::Bool(args[0].isObject());
+		return true;
+	}
+
+	static Result convert_isfunction(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("isfunction", 1, argCount);
+
+		*result = QValue::Bool(args[0].isFunction());
+		return true;
+	}
+
+	static Result convert_sametypes(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 2)
+			return errors::args_count("sametypes", 2, argCount);
+
+		*result = QValue::Bool(checkTypesEqual(args[0], args[1]));
+		return true;
+	}
+
+	static Result convert_isnan(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("isnan", 1, argCount);
+
+		float val;
+		if (!args[0].getFloat(&val))
+		{
+			*result = QValue::Bool(false);
+			return true;
+		}
+
+		*result = QValue::Bool(std::isnan(val));
+		return true;
+	}
+
+	static Result convert_typename(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("typename", 1, argCount);
+
+		if (args[0].getType() == QValue::Type::Object)
+		{
+			QObject* obj;
+			args[0].getObject(&obj);
+			*result = QValue::String(obj->getTypeString());
+			return true;
+		}
+
+		*result = QValue::String(QValue::getTypeString(args[0].getType()));
+		return true;
+	}
+
+	IMQ_LIB(register_conversion)
+	{
+		IMQ_LIB_FUNC("bool", convert_bool);
+		IMQ_LIB_FUNC("integer", convert_integer);
+		IMQ_LIB_FUNC("float", convert_float);
+		IMQ_LIB_FUNC("string", convert_string);
+
+		IMQ_LIB_FUNC("isbool", convert_isbool);
+		IMQ_LIB_FUNC("isinteger", convert_isinteger);
+		IMQ_LIB_FUNC("isfloat", convert_isfloat);
+		IMQ_LIB_FUNC("isnumber", convert_isnumber);
+		IMQ_LIB_FUNC("isstring", convert_isstring);
+		IMQ_LIB_FUNC("isobject", convert_isobject);
+		IMQ_LIB_FUNC("isfunction", convert_isfunction);
+
+		IMQ_LIB_FUNC("sametypes", convert_sametypes);
+
+		IMQ_LIB_FUNC("isnan", convert_isnan);
+
+		IMQ_LIB_FUNC("typename", convert_typename);
 
 		return true;
 	}
@@ -196,10 +367,36 @@ namespace imq
 		return true;
 	}
 
+	static Result io_getcwd(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 0)
+			return errors::args_count("getcwd", 0, argCount);
+
+		*result = QValue::String(vm->getWorkingDirectory());
+		return true;
+	}
+
+	static Result io_buildpath(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("buildpath", 1, argCount);
+
+		String str;
+		if (!args[0].getString(&str))
+		{
+			return errors::args_type("buildpath", 0, "String", args[0]);
+		}
+
+		*result = QValue::String(vm->buildPath(str));
+		return true;
+	}
+
 	IMQ_LIB(register_io)
 	{
-		IMQ_LIB_FUNC("print",   io_print);
-		IMQ_LIB_FUNC("getline", io_getline);
+		IMQ_LIB_FUNC("print",		io_print);
+		IMQ_LIB_FUNC("getline",		io_getline);
+		IMQ_LIB_FUNC("getcwd",		io_getcwd);
+		IMQ_LIB_FUNC("buildpath",	io_buildpath);
 
 		return true;
 	}
@@ -513,302 +710,131 @@ namespace imq
 
 	IMQ_LIB(register_math)
 	{
-		IMQ_LIB_FUNC("abs",		math_abs);
-		IMQ_LIB_FUNC("sin",		math_sin);
-		IMQ_LIB_FUNC("cos",		math_cos);
-		IMQ_LIB_FUNC("tan",		math_tan);
-		IMQ_LIB_FUNC("min",		math_min);
-		IMQ_LIB_FUNC("max",		math_max);
-		IMQ_LIB_FUNC("clamp",	math_clamp);
-		IMQ_LIB_FUNC("pow",		math_pow);
-		IMQ_LIB_FUNC("sqrt",	math_sqrt);
-		IMQ_LIB_FUNC("lerp",	math_lerp);
+		IMQ_LIB_FUNC("abs", math_abs);
+		IMQ_LIB_FUNC("sin", math_sin);
+		IMQ_LIB_FUNC("cos", math_cos);
+		IMQ_LIB_FUNC("tan", math_tan);
+		IMQ_LIB_FUNC("min", math_min);
+		IMQ_LIB_FUNC("max", math_max);
+		IMQ_LIB_FUNC("clamp", math_clamp);
+		IMQ_LIB_FUNC("pow", math_pow);
+		IMQ_LIB_FUNC("sqrt", math_sqrt);
+		IMQ_LIB_FUNC("lerp", math_lerp);
 
-		IMQ_LIB_VAL("pi", QValue::Float((float) M_PI));
+		IMQ_LIB_VAL("pi", QValue::Float((float)M_PI));
 
 		return true;
 	}
 
-	static Result convert_bool(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	static Result image_construct(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
-		if (argCount != 1)
-			return errors::args_count("bool", 1, argCount);
-
-		if (args[0].toBool(result))
-			return true;
-		else
-			return errors::conversion(args[0], "Bool");
-	}
-
-	static Result convert_integer(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount != 1)
-			return errors::args_count("integer", 1, argCount);
-
-		if (args[0].toInteger(result))
-			return true;
-		else
-			return errors::conversion(args[0], "Integer");
-	}
-
-	static Result convert_float(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount != 1)
-			return errors::args_count("float", 1, argCount);
-
-		if (args[0].toFloat(result))
-			return true;
-		else
-			return errors::conversion(args[0], "Float");
-	}
-
-	static Result convert_string(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount != 1)
-			return errors::args_count("string", 1, argCount);
-
-		if (args[0].toString(result))
-			return true;
-		else
-			return errors::conversion(args[0], "String");
-	}
-
-	static Result convert_isbool(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount != 1)
-			return errors::args_count("isbool", 1, argCount);
-
-		*result = QValue::Bool(args[0].isBool());
-		return true;
-	}
-
-	static Result convert_isinteger(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount != 1)
-			return errors::args_count("isinteger", 1, argCount);
-
-		*result = QValue::Bool(args[0].isInteger());
-		return true;
-	}
-
-	static Result convert_isfloat(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount != 1)
-			return errors::args_count("isfloat", 1, argCount);
-
-		*result = QValue::Bool(args[0].isFloat());
-		return true;
-	}
-
-	static Result convert_isnumber(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount != 1)
-			return errors::args_count("isnumber", 1, argCount);
-
-		*result = QValue::Bool(args[0].isInteger() || args[0].isFloat());
-		return true;
-	}
-
-	static Result convert_isstring(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount != 1)
-			return errors::args_count("isstring", 1, argCount);
-
-		*result = QValue::Bool(args[0].isString());
-		return true;
-	}
-
-	static Result convert_isobject(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount != 1)
-			return errors::args_count("isobject", 1, argCount);
-
-		*result = QValue::Bool(args[0].isObject());
-		return true;
-	}
-
-	static Result convert_isfunction(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount != 1)
-			return errors::args_count("isfunction", 1, argCount);
-
-		*result = QValue::Bool(args[0].isFunction());
-		return true;
-	}
-
-	static Result convert_sametypes(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount != 2)
-			return errors::args_count("sametypes", 2, argCount);
-
-		*result = QValue::Bool(checkTypesEqual(args[0], args[1]));
-		return true;
-	}
-
-	static Result convert_isnan(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount != 1)
-			return errors::args_count("isnan", 1, argCount);
-
-		float val;
-		if (!args[0].getFloat(&val))
+		switch (argCount)
 		{
-			*result = QValue::Bool(false);
+		default:
+			return errors::args_count("image", "0, 2, or 3", argCount);
+
+		case 0:
+			*result = QValue::Object(new QImage(vm));
+			return true;
+
+		case 2:
+		{
+			int32_t w;
+			int32_t h;
+
+			if (!args[0].getInteger(&w))
+			{
+				return errors::args_type("image", 0, "Integer", args[0]);
+			}
+
+			if (!args[1].getInteger(&h))
+			{
+				return errors::args_type("image", 1, "Integer", args[1]);
+			}
+
+			if (w < 0)
+			{
+				return errors::args_bounds("image", 0, "argument must be >= 0");
+			}
+
+			if (h < 0)
+			{
+				return errors::args_bounds("image", 1, "argument must be >= 0");
+			}
+
+			*result = QValue::Object(new QImage(vm, w, h));
 			return true;
 		}
 
-		*result = QValue::Bool(std::isnan(val));
-		return true;
-	}
-
-	static Result convert_typename(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount != 1)
-			return errors::args_count("typename", 1, argCount);
-
-		if (args[0].getType() == QValue::Type::Object)
+		case 3:
 		{
+			int32_t w;
+			int32_t h;
 			QObject* obj;
-			args[0].getObject(&obj);
-			*result = QValue::String(obj->getTypeString());
+			QColor* color;
+
+			if (!args[0].getInteger(&w))
+			{
+				return errors::args_type("image", 0, "Integer", args[0]);
+			}
+
+			if (!args[1].getInteger(&h))
+			{
+				return errors::args_type("image", 1, "Integer", args[1]);
+			}
+
+			if (!args[2].getObject(&obj))
+			{
+				return errors::args_type("image", 2, "Object", args[2]);
+			}
+
+			color = objectCast<QColor>(obj);
+			if (!color)
+			{
+				return errors::args_type("image", 2, "Color", "Object");
+			}
+
+			if (w < 0)
+			{
+				return errors::args_bounds("image", 0, "argument must be >= 0");
+			}
+
+			if (h < 0)
+			{
+				return errors::args_bounds("image", 1, "argument must be >= 0");
+			}
+
+			*result = QValue::Object(new QImage(vm, w, h, *color));
 			return true;
 		}
+		}
+	}
 
-		*result = QValue::String(QValue::getTypeString(args[0].getType()));
+	static Result image_load(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+			return errors::args_count("image_load", 1, argCount);
+
+		char* path;
+		if (!args[0].getString(&path))
+		{
+			return errors::args_type("image_load", 0, "String", args[0]);
+		}
+
+		QImage* image;
+
+		Result res = QImage::loadFromFile(vm, path, &image);
+		if (!res)
+			return res;
+
+		*result = QValue::Object(image);
 		return true;
 	}
 
-	IMQ_LIB(register_conversion)
+	IMQ_LIB(register_image)
 	{
-		IMQ_LIB_FUNC("bool",		convert_bool);
-		IMQ_LIB_FUNC("integer",		convert_integer);
-		IMQ_LIB_FUNC("float",		convert_float);
-		IMQ_LIB_FUNC("string",		convert_string);
-
-		IMQ_LIB_FUNC("isbool",		convert_isbool);
-		IMQ_LIB_FUNC("isinteger",	convert_isinteger);
-		IMQ_LIB_FUNC("isfloat",		convert_isfloat);
-		IMQ_LIB_FUNC("isnumber",	convert_isnumber);
-		IMQ_LIB_FUNC("isstring",	convert_isstring);
-		IMQ_LIB_FUNC("isobject",	convert_isobject);
-		IMQ_LIB_FUNC("isfunction",	convert_isfunction);
-
-		IMQ_LIB_FUNC("sametypes",	convert_sametypes);
-
-		IMQ_LIB_FUNC("isnan",		convert_isnan);
-
-		IMQ_LIB_FUNC("typename",	convert_typename);
-
-		return true;
-	}
-
-	static Result gc_memory(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount != 0)
-			return errors::args_count("gc_memory", 0, 0, argCount);
-
-		*result = QValue::Integer((int32_t)vm->getGC()->getTrackedMemory());
-
-		return true;
-	}
-
-	static Result gc_managed(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount != 0)
-			return errors::args_count("gc_managed", 0, argCount);
-
-		*result = QValue::Integer((int32_t)vm->getGC()->getManagedCount());
-		return true;
-	}
-
-	static Result gc_barrier(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount != 0)
-			return errors::args_count("gc_barrier", 0, argCount);
-
-		*result = QValue::Integer((int32_t)vm->getGC()->getCollectionBarrier());
-		return true;
-	}
-
-	static Result gc_collect(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount > 1)
-			return errors::args_count("gc_collect", 0, 1, argCount);
-
-		bool val = false;
-
-		if (argCount == 1)
-		{
-			if (!args[0].getBool(&val))
-			{
-				return errors::args_type("gc_collect", 0, "Bool", args[0]);
-			}
-		}
-
-		*result = QValue::Bool(vm->getGC()->collect(val));
-		return true;
-	}
-
-	static Result gc_mode(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
-	{
-		if (argCount > 1)
-			return errors::args_count("gc_mode", 0, 1, argCount);
-
-		if (argCount == 0)
-		{
-			switch (vm->getGC()->getCollectionMode())
-			{
-			default:
-				*result = QValue::String("Unknown");
-				return true;
-
-			case GCCollectionMode::Barriers:
-				*result = QValue::String("Barriers");
-				return true;
-
-			case GCCollectionMode::NoBarriers:
-				*result = QValue::String("NoBarriers");
-				return true;
-
-			case GCCollectionMode::Always:
-				*result = QValue::String("Always");
-				return true;
-			}
-		}
-
-		String val;
-		if (!args[0].getString(&val))
-		{
-			return errors::args_type("gc_mode", 0, "String", args[0]);
-		}
-
-		if (val == "Barriers")
-		{
-			vm->getGC()->setCollectionMode(GCCollectionMode::Barriers);
-		}
-		else if (val == "NoBarriers")
-		{
-			vm->getGC()->setCollectionMode(GCCollectionMode::NoBarriers);
-		}
-		else if (val == "Always")
-		{
-			vm->getGC()->setCollectionMode(GCCollectionMode::Always);
-		}
-		else
-		{
-			return errors::args_invalid("gc_mode", 0, "Expected a string containing one of 'Barriers', 'NoBarriers', or 'Always'");
-		}
-
-		return true;
-	}
-
-	IMQ_LIB(register_gc)
-	{
-		IMQ_LIB_FUNC("gc_memory",	gc_memory);
-		IMQ_LIB_FUNC("gc_managed",	gc_managed);
-		IMQ_LIB_FUNC("gc_barrier",  gc_barrier);
-		IMQ_LIB_FUNC("gc_collect",	gc_collect);
-		IMQ_LIB_FUNC("gc_mode",     gc_mode);
+		IMQ_LIB_FUNC("image", image_construct);
+		IMQ_LIB_FUNC("image_load", image_load);
 
 		return true;
 	}

@@ -17,6 +17,10 @@ into this
 
 ![filtered flowers](https://github.com/redxdev/imquery/raw/master/images/readme-output.png)
 
+## Editor
+
+An editor is in development and can be found [here](https://github.com/redxdev/iqed).
+
 ## Dependencies
 
 imquery depends on [ANTLR](http://www.antlr.org/) for parsing. Download or build the ANTLR 4.6
@@ -46,10 +50,12 @@ Once the projects have generated without errors, you may use them to build imque
 
 imquery is made up of three projects:
 
-* imquery - this is a static library that provides the imquery interpreter and standard
+* imq - this is a shared library that provides the imquery interpreter and standard
 libraries.
 * testimq - gtest unit testing.
 * iqc - the imquery command prompt.
+* cimq - a binding of imq to C, for integration into other languages. This is not meant to be a
+full set of bindings, just enough to cover the basics.
 
 ### iqc
 

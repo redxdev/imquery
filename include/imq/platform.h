@@ -34,5 +34,5 @@ namespace imq
 		return (strlen(str) + 1) * sizeof(char);
 	}
 
-	IMQ_API CString getIMQVersion();
+	IMQ_API const CString getIMQVersion();
 }

@@ -2,7 +2,7 @@
 
 namespace imq
 {
-	CString getIMQVersion()
+	const CString getIMQVersion()
 	{
 		return IMQ_VERSION_STR;
 	}

@@ -1,6 +1,7 @@
 #include <imq/image.h>
 #include <imq/value.h>
 #include <imq/errors.h>
+#include <imq/vm.h>
 #include <gtest/gtest.h>
 
 using namespace imq;
@@ -384,14 +385,15 @@ TEST(QImage, GetField)
 
 TEST(QImage, LoadFromFile)
 {
+	VMachine vm;
 	QImage* image;
 	QColor color(nullptr);
 	
-	Result result = QImage::loadFromFile(nullptr, "does_not_exist.png", &image);
+	Result result = QImage::loadFromFile(&vm, "does_not_exist.png", &image);
 	ASSERT_FALSE(result);
 	EXPECT_EQ(result.getErr(), errors::image_load_error("Unable to open file").getErr());
 
-	ASSERT_TRUE(QImage::loadFromFile(nullptr, "images/checkerboard.png", &image));
+	ASSERT_TRUE(QImage::loadFromFile(&vm, "images/checkerboard.png", &image));
 	ASSERT_EQ(image->getWidth(), 10);
 	ASSERT_EQ(image->getHeight(), 10);
 
@@ -437,7 +439,8 @@ TEST(QImage, LoadFromFile)
 
 TEST(QImage, SaveToFile)
 {
-	QImage* image = new QImage(nullptr, 100, 100);
+	VMachine vm;
+	QImage* image = new QImage(&vm, 100, 100);
 	QColor color(nullptr);
 
 	for (int32_t y = 0; y < 100; ++y)
@@ -461,7 +464,7 @@ TEST(QImage, SaveToFile)
 
 	ASSERT_TRUE(image->saveToFile("images/test.png"));
 	delete image;
-	ASSERT_TRUE(QImage::loadFromFile(nullptr, "images/test.png", &image));
+	ASSERT_TRUE(QImage::loadFromFile(&vm, "images/test.png", &image));
 
 	for (int32_t y = 0; y < 100; ++y)
 	{

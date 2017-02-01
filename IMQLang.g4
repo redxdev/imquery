@@ -92,7 +92,7 @@ compileUnit returns [VBlock* block]
     |   statements EOF {$block = createNodeFromToken<VBlock>($statements.start, $statements.count, $statements.stmArr);}
     ;
 
-statements returns [int32_t count, VStatement** stmArr]
+statements returns [size_t count, VStatement** stmArr]
     locals [std::vector<VStatement*> stmList]
     :
     (
@@ -160,7 +160,7 @@ delete_variable_stm returns [VStatement* stm]
     ;
 
 select_stm returns [VStatement* stm]
-    locals [VExpression* whereExpr = nullptr, VExpression* elseExpr = nullptr, int32_t coordsCount = 0, VExpression** coordsExpr = nullptr]
+    locals [VExpression* whereExpr = nullptr, VExpression* elseExpr = nullptr, size_t coordsCount = 0, VExpression** coordsExpr = nullptr]
     :   dest=expression
         (rewrite_coords {$coordsCount = $rewrite_coords.count; $coordsExpr = $rewrite_coords.coords;})?
         COLON calc=expression FROM src=expression
@@ -173,7 +173,7 @@ select_stm returns [VStatement* stm]
         {$stm = createNodeFromToken<SelectStm>($dest.start, $dest.expr, $src.expr, $calc.expr, $whereExpr, $elseExpr, $coordsCount, $coordsExpr);}
     ;
 
-rewrite_coords returns [int32_t count, VExpression** coords]
+rewrite_coords returns [size_t count, VExpression** coords]
     locals [std::vector<VExpression*> coordsList]
     :   LESS
     (
@@ -458,7 +458,7 @@ field [VExpression* subexpr] returns [VExpression* expr]
     )?
     ;
 
-func_parameters returns [int32_t count, VExpression** args]
+func_parameters returns [size_t count, VExpression** args]
     locals [std::vector<VExpression*> exprList]
     :   L_PAREN
     (   first=expression        {$exprList.push_back($first.expr);}

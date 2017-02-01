@@ -17,7 +17,7 @@ matrix:
             - g++-5
             - gcc-5
       env:
-        - CONFIG=debug
+        - CONFIG=debug_x64
         - CONFDIR=Debug
         - COMPILER=gcc
     - compiler: gcc
@@ -29,7 +29,7 @@ matrix:
             - g++-5
             - gcc-5
       env:
-        - CONFIG=release
+        - CONFIG=release_x64
         - CONFDIR=Release
         - COMPILER=gcc
 

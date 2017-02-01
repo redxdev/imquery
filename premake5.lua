@@ -2,6 +2,7 @@ local environment = require "environment"
 
 workspace "imquery"
     configurations{ "Debug", "Release" }
+    platforms { "x32", "x64" }
     startproject "testimq"
     flags { "C++11" }
     filter "system:windows"
@@ -35,7 +36,29 @@ project "imq"
     }
 
     filter "configurations:Debug"
-	libdirs {environment.ANTLR_DEBUG_LIB_DIR}
+        libdirs {environment.ANTLR_DEBUG_LIB_DIR}
+        defines {"DEBUG"}
+        symbols "On"
+
+    filter "configurations:Release"
+        libdirs {environment.ANTLR_RELEASE_LIB_DIR}
+        defines {"NDEBUG"}
+        optimize "On"
+        
+project "cimq"
+    kind "SharedLib"
+    language "C++"
+    targetdir "bin/%{cfg.buildcfg}"
+    files {
+        "include/cimq/**.h",
+        "src/cimq/**.cpp"
+    }
+    includedirs {"include/cimq", "include", "grammar", environment.ANTLR_CPP_PATH}
+    links {"imq", environment.ANTLR_LIB}
+    defines {"_SCL_SECURE_NO_WARNINGS", "CIMQ_SHARED_LIB", "CIMQ_SHARED_LIB_BUILD"}
+    
+    filter "configurations:Debug"
+        libdirs {environment.ANTLR_DEBUG_LIB_DIR}
         defines {"DEBUG"}
         symbols "On"
 

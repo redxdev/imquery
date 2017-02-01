@@ -238,7 +238,7 @@ namespace imq
 			return "<?>";
 
 		case Type::Nil:
-			return "";
+			return "nil";
 			
 		case Type::Bool:
 			return b ? "true" : "false";

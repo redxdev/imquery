@@ -600,7 +600,8 @@ namespace imq
 		int width;
 		int height;
 		int comp;
-		unsigned char* data = stbi_load(filename, &width, &height, &comp, 4);
+		String path = vm->buildPath(filename);
+		unsigned char* data = stbi_load(path.data(), &width, &height, &comp, 4);
 		if (data == nullptr)
 		{
 			return errors::image_load_error(stbi_failure_reason());
@@ -884,7 +885,8 @@ namespace imq
 			out[idx] = (unsigned char)(data[idx] * 255);
 		}
 
-		int res = stbi_write_png(filename, width, height, 4, out, 4 * width * sizeof(unsigned char));
+		String path = getVM()->buildPath(filename);
+		int res = stbi_write_png(path.data(), width, height, 4, out, 4 * width * sizeof(unsigned char));
 		delete[] out;
 
 		if (res == 0)

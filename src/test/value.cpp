@@ -114,7 +114,7 @@ TEST(QValue, ToString)
 	VMachine vm;
 	QValue value;
 
-	ASSERT_EQ(value.asString(), "");
+	ASSERT_EQ(value.asString(), "nil");
 	
 	value = QValue::Bool(false);
 	ASSERT_EQ(value.asString(), "false");
