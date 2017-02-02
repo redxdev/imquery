@@ -824,7 +824,7 @@ namespace imq
 
 	bool QImage::setPixel(int32_t x, int32_t y, const QColor& color)
 	{
-		if (x < 0 || y < 0 || x > width || y > height)
+		if (x < 0 || y < 0 || x >= width || y >= height)
 		{
 			return false;
 		}
@@ -839,7 +839,7 @@ namespace imq
 
 	bool QImage::getPixel(int32_t x, int32_t y, QColor* result) const
 	{
-		if (x < 0 || y < 0 || x > width || y > height)
+		if (x < 0 || y < 0 || x >= width || y >= height)
 		{
 			return false;
 		}
