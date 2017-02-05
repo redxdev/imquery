@@ -55,6 +55,7 @@ namespace imq
 		IMQ_ERROR_DEF(image_save_error, "Image save error - unable to save image file " << filename, const String& filename);
 
 		IMQ_ERROR_DEF(vm_generic_error, "line " << loc << ": " << msg, const VLocation& loc, const String& msg);
+		IMQ_ERROR_DEF(vm_from_call_error, "function call at " << loc << ": " << submsg, const VLocation& loc, const String& submsg);
 		IMQ_ERROR_DEF(vm_invalid_block, "Invalid block.");
 
 		IMQ_ERROR_DEF(selection_apply_error, "Unable to apply selection - " << msg, const String& msg);

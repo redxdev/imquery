@@ -469,7 +469,7 @@ namespace imq
 		delete[] argValues;
 		if (!res)
 		{
-			return errors::vm_generic_error(getLocation(), res.getErr());
+			return errors::vm_from_call_error(getLocation(), res.getErr());
 		}
 
 		return true;
