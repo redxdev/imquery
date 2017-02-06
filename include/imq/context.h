@@ -144,6 +144,9 @@ namespace imq
 		virtual size_t GC_getSize() const override;
 		virtual void GC_markChildren() override;
 
+		bool isClosedOver() const;
+		void close();
+
 	protected:
 		Context* parent;
 		std::unordered_map<String, QValue> values;
@@ -152,6 +155,10 @@ namespace imq
 		bool bReturnable = false;
 		bool bReturned = false;
 		QValue returnValue;
+
+		// This is an optimization - if the context hasn't been closed over then we can delete it freely instead of
+		// waiting for garbage collection to pick it up.
+		bool bClosedOver = false;
 	};
 
 	class IMQ_API RestrictedSubContext : public SubContext
@@ -165,5 +172,16 @@ namespace imq
 
 		virtual Result setValue(const String& key, const QValue& value) override;
 		virtual Result deleteValue(const String& key) override;
+	};
+
+	// This automatically deletes a context (if it hasn't been closed over) at the end of a scope.
+	class IMQ_API ScopedContext
+	{
+	public:
+		ScopedContext(SubContext* ctx);
+		~ScopedContext();
+
+	private:
+		SubContext* context;
 	};
 }

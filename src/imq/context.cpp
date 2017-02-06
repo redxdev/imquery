@@ -18,6 +18,10 @@ namespace imq
 
 	Context::~Context()
 	{
+		if (vm != nullptr)
+		{
+			vm->getGC()->unmanage(this);
+		}
 	}
 
 	bool Context::isContextReturnedFrom() const
@@ -554,6 +558,16 @@ namespace imq
 		}
 	}
 
+	bool SubContext::isClosedOver() const
+	{
+		return bClosedOver;
+	}
+
+	void SubContext::close()
+	{
+		bClosedOver = true;
+	}
+
 	RestrictedSubContext::RestrictedSubContext(VMachine* vm, Context* parent)
 		: SubContext(vm, parent)
 	{
@@ -577,4 +591,18 @@ namespace imq
 	{
 		return errors::context_no_delete_access();
 	}
+
+	ScopedContext::ScopedContext(SubContext* ctx)
+	{
+		context = ctx;
+	}
+
+	ScopedContext::~ScopedContext()
+	{
+		if (!context->isClosedOver())
+		{
+			delete context;
+		}
+	}
+
 }

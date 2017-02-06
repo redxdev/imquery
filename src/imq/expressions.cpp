@@ -952,7 +952,8 @@ namespace imq
 		if (!checkExpr)
 			return errors::vm_generic_error(getLocation(), "Invalid check subexpression for Branch");
 
-		Context* subContext(new SubContext(context->getVM(), context));
+		SubContext* subContext(new SubContext(context->getVM(), context));
+		ScopedContext scope(subContext);
 		auto gc = context->getVM()->getGC();
 		gc->manage(subContext);
 		ScopedRoot ctxRoot(gc, subContext);
@@ -1013,7 +1014,8 @@ namespace imq
 			return errors::vm_generic_error(getLocation(), "Invalid check subexpression for For");
 		}
 
-		Context* subContext(new SubContext(context->getVM(), context));
+		SubContext* subContext(new SubContext(context->getVM(), context));
+		ScopedContext scope(subContext);
 		subContext->setBreakable(true);
 		auto gc = context->getVM()->getGC();
 		gc->manage(subContext);

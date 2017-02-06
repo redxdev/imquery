@@ -21,7 +21,8 @@ namespace imq
 		if (!block)
 			return true;
 
-		Context* subContext(new SubContext(vm, outerCtx));
+		SubContext* subContext(new SubContext(vm, outerCtx));
+		ScopedContext scope(subContext);
 		subContext->setReturnable(true);
 		ScopedRoot ctxRoot(vm->getGC(), subContext);
 
