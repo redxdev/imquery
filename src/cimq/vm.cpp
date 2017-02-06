@@ -135,3 +135,23 @@ imqValue* imqGetOutput(imqVMachine* vm, const imqString key)
 
 	return reinterpret_cast<imqValue*>(new QValue(found->second));
 }
+
+bool imqSetValue(imqVMachine* vm, const imqString key, imqValue* value)
+{
+	Result res = reinterpret_cast<VMachine*>(vm)->getRootContext()->setValue(key, QValue(*reinterpret_cast<QValue*>(value)));
+	return res.isOk();
+}
+
+imqValue* imqGetValue(imqVMachine* vm, const imqString key)
+{
+	QValue val;
+	Result res = reinterpret_cast<VMachine*>(vm)->getRootContext()->getValue(key, &val);
+	if (res)
+	{
+		return reinterpret_cast<imqValue*>(new QValue(val));
+	}
+	else
+	{
+		return nullptr;
+	}
+}

@@ -8,7 +8,6 @@ extern "C"
 #endif
 
 	struct imqValue;
-	struct imqFunction;
 	struct imqObject;
 
 	enum imqType
@@ -29,7 +28,6 @@ extern "C"
 	CIMQ_API imqValue* imqIntegerValue(int val);
 	CIMQ_API imqValue* imqFloatValue(float val);
 	CIMQ_API imqValue* imqStringValue(const imqString val);
-	CIMQ_API imqValue* imqFunctionValue(imqFunction* val);
 	CIMQ_API imqValue* imqObjectValue(imqObject* val);
 
 	CIMQ_API imqType imqGetValueType(imqValue* value);
@@ -45,7 +43,6 @@ extern "C"
 	CIMQ_API bool imqGetNumberAsInteger(imqValue* value, int* result);
 	CIMQ_API bool imqGetNumberAsFloat(imqValue* value, float* result);
 	CIMQ_API bool imqGetString(imqValue* value, imqString* result);
-	CIMQ_API bool imqGetFunction(imqValue* value, imqFunction** result);
 	CIMQ_API bool imqGetObject(imqValue* value, imqObject** result);
 
 	CIMQ_API imqValue* imqToBool(imqValue* value);

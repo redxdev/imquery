@@ -34,11 +34,6 @@ imqValue* imqStringValue(const imqString val)
 	return reinterpret_cast<imqValue*>(new QValue(QValue::String(val)));
 }
 
-imqValue* imqFunctionValue(imqFunction* val)
-{
-	return reinterpret_cast<imqValue*>(new QValue(QValue::Function(reinterpret_cast<QFunction*>(val))));
-}
-
 imqValue* imqObjectValue(imqObject* val)
 {
 	return reinterpret_cast<imqValue*>(new QValue(QValue::Object(reinterpret_cast<QObject*>(val))));
@@ -95,18 +90,6 @@ bool imqGetNumberAsFloat(imqValue* value, float* result)
 bool imqGetString(imqValue* value, imqString* result)
 {
 	return reinterpret_cast<QValue*>(value)->getString(result);
-}
-
-bool imqGetFunction(imqValue* value, imqFunction** result)
-{
-	QFunction* r;
-	bool b = reinterpret_cast<QValue*>(value)->getFunction(&r);
-	if (b)
-	{
-		*result = reinterpret_cast<imqFunction*>(r);
-	}
-
-	return b;
 }
 
 bool imqGetObject(imqValue* value, imqObject** result)
