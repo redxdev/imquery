@@ -13,3 +13,5 @@ images/test.png
 grammar/
 deps/
 dist/
+*.vspx
+*.diagsession

@@ -1,0 +1,27 @@
+# This script creates an outline around objects found in an image.
+in input = image();
+in threshold = 0.4;
+out output = image(input.w, input.h);
+
+# No inbuilt 'magnitude' function yet, so just implementing it here.
+# We ignore alpha for this.
+func mag(col) {
+    return (col.r + col.g + col.b) / 3.;
+}
+
+# _very_ simple edge detection function
+func is_edge(col, x, y, img) {
+    if x >= 1 and x < img.w - 1 and y >= 1 and y < img.h - 1 {
+        m = mag(col);
+        val = abs(m - mag(img.pixel(x-1,y))) + abs(m - mag(img.pixel(x+1,y))) + abs(m - mag(img.pixel(x,y-1))) + abs(m - mag(img.pixel(x,y+1)));
+        if val / 4. > threshold {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+output: {1,1,0} from input where is_edge(color, x, y, input);
+
+threshold;
