@@ -1,6 +1,6 @@
 # This script creates an outline around objects found in an image.
 in input = image();
-in threshold = 0.4;
+in threshold = 0.1;
 out output = image(input.w, input.h);
 
 # No inbuilt 'magnitude' function yet, so just implementing it here.
@@ -23,5 +23,3 @@ func is_edge(col, x, y, img) {
 }
 
 output: {1,1,0} from input where is_edge(color, x, y, input);
-
-threshold;
