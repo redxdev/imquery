@@ -226,6 +226,12 @@ namespace imq
 			return errors::context_output_set();
 		}
 
+		auto found = values.find(key);
+		if (found == values.end())
+			objSize += sizeof(String) + getStringSize(key) + value.GC_getSize();
+		else
+			objSize += value.GC_getSize() - found->second.GC_getSize();
+
 		values[key] = value;
 		return true;
 	}
@@ -245,6 +251,8 @@ namespace imq
 		auto found = values.find(key);
 		if (found == values.end())
 			return errors::context_undefined_value(key);
+
+		objSize -= sizeof(String) + getStringSize(key) + found->second.GC_getSize();
 
 		values.erase(key);
 		return true;
@@ -270,6 +278,8 @@ namespace imq
 			return true;
 		}
 
+		objSize += sizeof(String) + getStringSize(key) + value.GC_getSize();
+
 		inputs[key] = value;
 		return true;
 	}
@@ -286,6 +296,8 @@ namespace imq
 		{
 			return errors::context_output_set();
 		}
+
+		objSize += sizeof(String) + getStringSize(key) + value.GC_getSize();
 
 		outputs[key] = value;
 		return true;
@@ -333,24 +345,7 @@ namespace imq
 
 	size_t RootContext::GC_getSize() const
 	{
-		// TODO: this is a very rough estimate of the size of the unordered_map
-		size_t sz = sizeof(RootContext);
-		for (auto entry : values)
-		{
-			sz += sizeof(String) + getStringSize(entry.first) + entry.second.GC_getSize();
-		}
-
-		for (auto entry : inputs)
-		{
-			sz += sizeof(String) + getStringSize(entry.first) + entry.second.GC_getSize();
-		}
-
-		for (auto entry : outputs)
-		{
-			sz += sizeof(String) + getStringSize(entry.first) + entry.second.GC_getSize();
-		}
-
-		return sz;
+		return sizeof(RootContext) + objSize;
 	}
 
 	void RootContext::GC_markChildren()
@@ -373,11 +368,23 @@ namespace imq
 
 	void RootContext::setInput(const String& key, const QValue& value)
 	{
+		auto found = inputs.find(key);
+		if (found == inputs.end())
+			objSize += sizeof(String) + getStringSize(key) + value.GC_getSize();
+		else
+			objSize += value.GC_getSize() - found->second.GC_getSize();
+
 		inputs[key] = value;
 	}
 
 	void RootContext::setOutput(const String& key, const QValue& value)
 	{
+		auto found = outputs.find(key);
+		if (found == outputs.end())
+			objSize += sizeof(String) + getStringSize(key) + value.GC_getSize();
+		else
+			objSize += value.GC_getSize() - found->second.GC_getSize();
+
 		outputs[key] = value;
 	}
 
@@ -396,6 +403,8 @@ namespace imq
 		inputs.clear();
 		outputs.clear();
 		values.clear();
+
+		objSize = 0;
 	}
 
 	SubContext::SubContext(VMachine* vm, Context* parent)
@@ -442,6 +451,12 @@ namespace imq
 			return parent->setValue(key, value);
 		}
 
+		auto found = values.find(key);
+		if (found == values.end())
+			objSize += sizeof(String) + getStringSize(key) + value.GC_getSize();
+		else
+			objSize += value.GC_getSize() - found->second.GC_getSize();
+
 		values[key] = value;
 		return true;
 	}
@@ -456,6 +471,8 @@ namespace imq
 			else
 				return errors::context_undefined_value(key);
 		}
+
+		objSize -= sizeof(String) + getStringSize(key) + found->second.GC_getSize();
 
 		values.erase(found);
 		return true;
@@ -538,26 +555,6 @@ namespace imq
 		return parent->getReturnValue(result);
 	}
 
-	size_t SubContext::GC_getSize() const
-	{
-		// TODO: this is a very rough estimate of the size of the unordered_map
-		size_t sz = sizeof(SubContext);
-		for (auto entry : values)
-		{
-			sz += sizeof(String) + getStringSize(entry.first) + entry.second.GC_getSize();
-		}
-
-		return sz;
-	}
-
-	void SubContext::GC_markChildren()
-	{
-		for (auto entry : values)
-		{
-			entry.second.GC_mark();
-		}
-	}
-
 	bool SubContext::isClosedOver() const
 	{
 		return bClosedOver;
@@ -566,6 +563,19 @@ namespace imq
 	void SubContext::close()
 	{
 		bClosedOver = true;
+	}
+
+	size_t SubContext::GC_getSize() const
+	{
+		return sizeof(SubContext) + objSize;
+	}
+
+	void SubContext::GC_markChildren()
+	{
+		for (auto entry : values)
+		{
+			entry.second.GC_mark();
+		}
 	}
 
 	RestrictedSubContext::RestrictedSubContext(VMachine* vm, Context* parent)
@@ -592,7 +602,7 @@ namespace imq
 		return errors::context_no_delete_access();
 	}
 
-	ScopedContext::ScopedContext(SubContext* ctx)
+	ScopedContext::ScopedContext(Context* ctx)
 	{
 		context = ctx;
 	}

@@ -7,6 +7,8 @@ namespace imq
 	ScriptFunction::ScriptFunction(const String& funcName, Context* outerCtx, const std::shared_ptr<VBlock> block, const std::vector<String>& argNames)
 		: QFunction(outerCtx->getVM()), funcName(funcName), outerCtx(outerCtx), block(block), argNames(argNames)
 	{
+		// we are closing over the outer context
+		outerCtx->close();
 	}
 
 	ScriptFunction::~ScriptFunction()

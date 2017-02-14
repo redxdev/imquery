@@ -37,6 +37,9 @@ namespace imq
 		virtual bool getReturnValue(QValue* result) const = 0;
 		bool isContextReturnedFrom() const;
 
+		virtual bool isClosedOver() const { return false; }
+		virtual void close() {}
+
 		VMachine* getVM() const;
 
 		virtual bool GC_isDynamic() const override { return true; }
@@ -46,7 +49,8 @@ namespace imq
 	};
 
 	// A simple form of context. This stores values in an unordered_map and allows both read and write access.
-	// This type of context is generally used as the root context.
+	// This type of context is really only used for testing since it can't have a parent. See SubContext if you
+	// want to create a new context while still having access to the context hierarchy.
 	class IMQ_API SimpleContext : public Context
 	{
 	public:
@@ -115,6 +119,8 @@ namespace imq
 		std::unordered_map<String, QValue> values;
 		std::unordered_map<String, QValue> inputs;
 		std::unordered_map<String, QValue> outputs;
+
+		size_t objSize = 0;
 	};
 
 	// A context that has a parent and passes undefined get/deletes to it.
@@ -144,8 +150,8 @@ namespace imq
 		virtual size_t GC_getSize() const override;
 		virtual void GC_markChildren() override;
 
-		bool isClosedOver() const;
-		void close();
+		virtual bool isClosedOver() const override;
+		virtual void close() override;
 
 	protected:
 		Context* parent;
@@ -159,6 +165,8 @@ namespace imq
 		// This is an optimization - if the context hasn't been closed over then we can delete it freely instead of
 		// waiting for garbage collection to pick it up.
 		bool bClosedOver = false;
+
+		size_t objSize = 0;
 	};
 
 	class IMQ_API RestrictedSubContext : public SubContext
@@ -178,10 +186,10 @@ namespace imq
 	class IMQ_API ScopedContext
 	{
 	public:
-		ScopedContext(SubContext* ctx);
+		ScopedContext(Context* ctx);
 		~ScopedContext();
 
 	private:
-		SubContext* context;
+		Context* context;
 	};
 }

@@ -91,7 +91,7 @@ namespace imq
 	private:
 		bool bDebugMode = false;
 
-		GCCollectionMode collectionMode = GCCollectionMode::NoBarriers;
+		GCCollectionMode collectionMode = GCCollectionMode::Barriers;
 
 		std::unordered_set<GCTraceable*> roots;
 		std::unordered_set<GCObject*> managed;
