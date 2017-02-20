@@ -1421,4 +1421,45 @@ namespace imq
 
 		return true;
 	}
+
+	ExportStm::ExportStm(const String& key, VExpression* exportExpr, const VLocation& loc)
+		: VStatement(loc), key(key), exportExpr(exportExpr)
+	{
+	}
+
+	ExportStm::~ExportStm()
+	{
+		if (!getErrorState())
+		{
+			delete exportExpr;
+		}
+	}
+
+	String ExportStm::getName() const
+	{
+		return "Export";
+	}
+
+	Result ExportStm::execute(Context* context)
+	{
+		if (!exportExpr)
+		{
+			return errors::vm_generic_error(getLocation(), "Invalid export subexpression for Export");
+		}
+
+		QValue value;
+		Result res = exportExpr->execute(context, &value);
+		if (!res)
+		{
+			return res;
+		}
+
+		res = context->exportValue(key, value);
+		if (!res)
+		{
+			return res;
+		}
+
+		return true;
+	}
 }

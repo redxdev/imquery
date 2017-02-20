@@ -23,6 +23,8 @@ namespace imq
 		virtual Result setValue(const String& key, const QValue& value) = 0;
 		virtual Result deleteValue(const String& key) = 0;
 
+		virtual Result exportValue(const String& key, const QValue& value) = 0;
+
 		virtual Result registerInput(const String& key, const QValue& value) = 0;
 		virtual Result registerOutput(const String& key, const QValue& value) = 0;
 
@@ -61,6 +63,7 @@ namespace imq
 		virtual Result getValue(const String& key, QValue* result) const override;
 		virtual Result setValue(const String& key, const QValue& value) override;
 		virtual Result deleteValue(const String& key) override;
+		virtual Result exportValue(const String& key, const QValue& value) override;
 		virtual Result registerInput(const String& key, const QValue& value) override;
 		virtual Result registerOutput(const String& key, const QValue& value) override;
 		virtual Result setBreakable(bool bValue) override;
@@ -92,6 +95,7 @@ namespace imq
 		virtual Result getValue(const String& key, QValue* result) const override;
 		virtual Result setValue(const String& key, const QValue& value) override;
 		virtual Result deleteValue(const String& key) override;
+		virtual Result exportValue(const String& key, const QValue& value) override;
 		virtual Result registerInput(const String& key, const QValue& value) override;
 		virtual Result registerOutput(const String& key, const QValue& value) override;
 		virtual Result setBreakable(bool bValue) override;
@@ -136,6 +140,7 @@ namespace imq
 		virtual Result getValue(const String& key, QValue* result) const override;
 		virtual Result setValue(const String& key, const QValue& value) override;
 		virtual Result deleteValue(const String& key) override;
+		virtual Result exportValue(const String& key, const QValue& value) override;
 		virtual Result registerInput(const String& key, const QValue& value) override;
 		virtual Result registerOutput(const String& key, const QValue& value) override;
 		virtual Result setBreakable(bool bValue) override;
@@ -180,6 +185,7 @@ namespace imq
 
 		virtual Result setValue(const String& key, const QValue& value) override;
 		virtual Result deleteValue(const String& key) override;
+		virtual Result exportValue(const String& key, const QValue& value) override;
 	};
 
 	// This automatically deletes a context (if it hasn't been closed over) at the end of a scope.

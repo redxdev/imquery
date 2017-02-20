@@ -344,4 +344,18 @@ namespace imq
 		VExpression* trueExpr;
 		VExpression* falseExpr;
 	};
+
+	class IMQ_API ExportStm : public VStatement
+	{
+	public:
+		ExportStm(const String& key, VExpression* exportExpr, const VLocation& loc);
+		virtual ~ExportStm();
+
+		virtual String getName() const override;
+		virtual Result execute(Context* context) override;
+
+	private:
+		String key;
+		VExpression* exportExpr;
+	};
 }

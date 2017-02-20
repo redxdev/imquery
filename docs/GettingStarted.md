@@ -652,3 +652,32 @@ properties are just lists:
     > for myVar in [! 1 = 2, 3 = 4].values { print(myVar); }
     2
     4
+
+## Libraries
+
+__This section is under construction__
+
+Outside of the imquery standard library which is automatically made available (at least in iqc),
+you might at times want to either write your own or use someone else's libraries.
+
+### Composite Scripts
+
+### Importing Libraries
+
+## Creating Libraries
+
+A library is a normal imquery script with a series of exports. An export looks like this:
+
+    export func hello_world() {
+        print('Hello world!');
+    }
+
+or like this:
+
+    export foo = 'bar';
+    
+Prepending `export` to a function or variable definition allows the use of that function or
+variable from within another script.
+
+If you use it in a script that isn't being imported as a library, `export` will simply define
+a global variable, no matter what scope you are in. 

@@ -18,7 +18,7 @@ namespace imq
 	Result ScriptFunction::execute(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != argNames.size())
-			return errors::args_count(funcName, argNames.size(), argCount);
+			return errors::args_count(funcName, (int32_t) argNames.size(), argCount);
 
 		if (!block)
 			return true;

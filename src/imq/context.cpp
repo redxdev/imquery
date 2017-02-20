@@ -77,6 +77,11 @@ namespace imq
 		return true;
 	}
 
+	Result SimpleContext::exportValue(const String& key, const QValue& value)
+	{
+		return errors::context_not_exportable();
+	}
+
 	Result SimpleContext::registerInput(const String& key, const QValue& value)
 	{
 		return errors::context_root_flags();
@@ -256,6 +261,11 @@ namespace imq
 
 		values.erase(key);
 		return true;
+	}
+
+	Result RootContext::exportValue(const String& key, const QValue& value)
+	{
+		return setValue(key, value);
 	}
 
 	Result RootContext::registerInput(const String& key, const QValue& value)
@@ -478,6 +488,11 @@ namespace imq
 		return true;
 	}
 
+	Result SubContext::exportValue(const String& key, const QValue& value)
+	{
+		return parent->exportValue(key, value);
+	}
+
 	Result SubContext::registerInput(const String& key, const QValue& value)
 	{
 		return errors::context_root_flags();
@@ -600,6 +615,11 @@ namespace imq
 	Result RestrictedSubContext::deleteValue(const String& key)
 	{
 		return errors::context_no_delete_access();
+	}
+
+	Result RestrictedSubContext::exportValue(const String& key, const QValue& value)
+	{
+		return errors::context_not_exportable();
 	}
 
 	ScopedContext::ScopedContext(Context* ctx)

@@ -144,7 +144,8 @@ define_output_stm returns [VStatement* stm]
     ;
 
 set_variable_stm returns [VStatement* stm]
-    :   IDENT EQUAL expression {$stm = createNodeFromToken<SetVariableStm>($IDENT, $IDENT.text, $expression.expr);}
+    :   EXPORT IDENT EQUAL expression {$stm = createNodeFromToken<ExportStm>($EXPORT, $IDENT.text, $expression.expr);}
+    |   IDENT EQUAL expression {$stm = createNodeFromToken<SetVariableStm>($IDENT, $IDENT.text, $expression.expr);}
     ;
 
 set_field_stm returns [VStatement* stm]
@@ -259,16 +260,20 @@ return_stm returns [VStatement* stm]
     ;
 
 define_function_stm returns [VStatement* stm]
-    locals [VBlock* block = nullptr]
-    :   FUNCTION IDENT func_parameters_def L_BRACE
+    locals [VBlock* block = nullptr, DefineFunctionExpr* defExpr = nullptr, bool exportFunc = false]
+    :   (EXPORT {$exportFunc = true;})? FUNCTION IDENT func_parameters_def L_BRACE
         (statements {$block = createNodeFromToken<VBlock>($statements.start, $statements.count, $statements.stmArr);})?
         R_BRACE
         {
-            $stm = createNodeFromToken<SetVariableStm>(
-                $FUNCTION,
-                $IDENT.text,
-                createNodeFromToken<DefineFunctionExpr>($FUNCTION, $IDENT.text, $block, $func_parameters_def.argNames)
-            );
+            $defExpr = createNodeFromToken<DefineFunctionExpr>($FUNCTION, $IDENT.text, $block, $func_parameters_def.argNames);
+            if ($exportFunc)
+            {
+                $stm = createNodeFromToken<ExportStm>($EXPORT, $IDENT.text, $defExpr);
+            }
+            else
+            {
+                $stm = createNodeFromToken<SetVariableStm>($FUNCTION, $IDENT.text, $defExpr);
+            }
         }
     ;
 
@@ -499,6 +504,14 @@ func_parameters_def returns [std::vector<std::string> argNames]
 
 SEMICOLON
     :   ';'
+    ;
+
+EXPORT
+    :   'export'
+    ;
+
+IMPORT
+    :   'import'
     ;
 
 FUNCTION
