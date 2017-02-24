@@ -635,4 +635,123 @@ namespace imq
 		}
 	}
 
+	ImportContext::ImportContext(VMachine* vm, Context* parent)
+		: Context(vm), parent(parent)
+	{
+	}
+
+	ImportContext::~ImportContext()
+	{
+	}
+
+	bool ImportContext::hasValue(const String& key) const
+	{
+		return exports.find(key) != exports.end() || parent->hasValue(key);
+	}
+
+	Result ImportContext::getValue(const String& key, QValue* result) const
+	{
+		auto found = exports.find(key);
+		if (found == exports.end())
+		{
+			if (parent)
+				return parent->getValue(key, result);
+			else
+				return errors::context_undefined_value(key);
+		}
+
+		*result = found->second;
+		return true;
+	}
+
+	Result ImportContext::setValue(const String& key, const QValue& value)
+	{
+		return errors::context_no_write_access();
+	}
+
+	Result ImportContext::deleteValue(const String& key)
+	{
+		return errors::context_no_delete_access();
+	}
+
+	Result ImportContext::exportValue(const String& key, const QValue& value)
+	{
+		auto found = exports.find(key);
+		if (found == exports.end())
+			objSize += sizeof(String) + getStringSize(key) + value.GC_getSize();
+		else
+			objSize += value.GC_getSize() - found->second.GC_getSize();
+
+		exports[key] = value;
+		return true;
+	}
+
+	Result ImportContext::registerInput(const String& key, const QValue& value)
+	{
+		return errors::context_root_flags();
+	}
+
+	Result ImportContext::registerOutput(const String& key, const QValue& value)
+	{
+		return errors::context_root_flags();
+	}
+
+	Result ImportContext::setBreakable(bool bValue)
+	{
+		return errors::context_not_breakable();
+	}
+
+	bool ImportContext::isBreakable() const
+	{
+		return false;
+	}
+
+	Result ImportContext::breakContext()
+	{
+		return errors::context_not_breakable();
+	}
+
+	bool ImportContext::isContextBroken() const
+	{
+		return false;
+	}
+
+	Result ImportContext::setReturnable(bool bValue)
+	{
+		return errors::context_not_returnable();
+	}
+
+	bool ImportContext::isReturnable() const
+	{
+		return false;
+	}
+
+	Result ImportContext::returnContext(const QValue& value)
+	{
+		return errors::context_not_returnable();
+	}
+
+	bool ImportContext::getReturnValue(QValue* result) const
+	{
+		return false;
+	}
+
+	size_t ImportContext::GC_getSize() const
+	{
+		return sizeof(SimpleContext) + objSize;
+	}
+
+	void ImportContext::GC_markChildren()
+	{
+		for (auto entry : exports)
+		{
+			entry.second.GC_mark();
+		}
+	}
+
+	const std::unordered_map<String, QValue>& ImportContext::getExports() const
+	{
+		return exports;
+	}
+
 }

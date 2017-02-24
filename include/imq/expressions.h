@@ -358,4 +358,17 @@ namespace imq
 		String key;
 		VExpression* exportExpr;
 	};
+
+	class IMQ_API ImportStm : public VStatement
+	{
+	public:
+		ImportStm(const String& path, const VLocation& loc);
+		virtual ~ImportStm();
+
+		virtual String getName() const override;
+		virtual Result execute(Context* context) override;
+
+	private:
+		String path;
+	};
 }

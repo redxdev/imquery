@@ -198,4 +198,37 @@ namespace imq
 	private:
 		Context* context;
 	};
+
+	class IMQ_API ImportContext : public Context
+	{
+	public:
+		ImportContext(VMachine* vm, Context* parent);
+		virtual ~ImportContext();
+
+		virtual bool hasValue(const String& key) const override;
+		virtual Result getValue(const String& key, QValue* result) const override;
+		virtual Result setValue(const String& key, const QValue& value) override;
+		virtual Result deleteValue(const String& key) override;
+		virtual Result exportValue(const String& key, const QValue& value) override;
+		virtual Result registerInput(const String& key, const QValue& value) override;
+		virtual Result registerOutput(const String& key, const QValue& value) override;
+		virtual Result setBreakable(bool bValue) override;
+		virtual bool isBreakable() const override;
+		virtual Result breakContext() override;
+		virtual bool isContextBroken() const override;
+		virtual Result setReturnable(bool bValue) override;
+		virtual bool isReturnable() const override;
+		virtual Result returnContext(const QValue& value) override;
+		virtual bool getReturnValue(QValue* result) const override;
+
+		virtual size_t GC_getSize() const override;
+		virtual void GC_markChildren() override;
+
+		const std::unordered_map<String, QValue>& getExports() const;
+
+	protected:
+		Context* parent;
+		std::unordered_map<String, QValue> exports;
+		size_t objSize = 0;
+	};
 }

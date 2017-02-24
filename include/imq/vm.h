@@ -106,10 +106,15 @@ namespace imq
 
 		GarbageCollector* getGC();
 
+		String registerImportPath(const String& path);
+		bool hasImportPath(const String& path);
+
 	private:
 		RootContext* rootContext;
 		GarbageCollector* gc;
 		String workingDirectory;
 		std::vector<String> searchPaths;
+
+		std::unordered_set<String> importPaths;
 	};
 }

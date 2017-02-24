@@ -4,6 +4,7 @@
 #include "image.h"
 #include "errors.h"
 #include "structures.h"
+#include "parser.h"
 
 namespace imq
 {
@@ -1458,6 +1459,58 @@ namespace imq
 		if (!res)
 		{
 			return res;
+		}
+
+		return true;
+	}
+
+	ImportStm::ImportStm(const String& path, const VLocation& loc)
+		: VStatement(loc), path(path)
+	{
+	}
+
+	ImportStm::~ImportStm()
+	{
+	}
+
+	String ImportStm::getName() const
+	{
+		return "Import";
+	}
+
+	Result ImportStm::execute(Context* context)
+	{
+		if (context->getVM()->hasImportPath(path))
+			return true;
+
+		String fullPath = context->getVM()->registerImportPath(path);
+		ImportContext* importCtx = new ImportContext(context->getVM(), context);
+		ScopedRoot importScope(context->getVM()->getGC(), importCtx);
+
+		SubContext* subCtx = new SubContext(context->getVM(), importCtx);
+		ScopedRoot subScope(context->getVM()->getGC(), subCtx);
+
+		QueryParser parser;
+		VBlock* block = nullptr;
+		Result res = parser.parseFile(fullPath, &block);
+		if (!res)
+		{
+			return errors::vm_generic_error(getLocation(), res.getErr());
+		}
+
+		res = block->execute(subCtx);
+		if (!res)
+		{
+			return errors::import_err(fullPath, res.getErr());
+		}
+
+		for (auto entry : importCtx->getExports())
+		{
+			res = context->exportValue(entry.first, entry.second);
+			if (!res)
+			{
+				return errors::vm_generic_error(getLocation(), res.getErr());
+			}
 		}
 
 		return true;

@@ -113,7 +113,8 @@ statements returns [size_t count, VStatement** stmArr]
     ;
 
 statement returns [VStatement* stm]
-    :   define_input_stm SEMICOLON      {$stm = $define_input_stm.stm;}
+    :   import_script_stm SEMICOLON     {$stm = $import_script_stm.stm;}
+    |   define_input_stm SEMICOLON      {$stm = $define_input_stm.stm;}
     |   define_output_stm SEMICOLON     {$stm = $define_output_stm.stm;}
     |   set_variable_stm SEMICOLON      {$stm = $set_variable_stm.stm;}
     |   set_field_stm SEMICOLON         {$stm = $set_field_stm.stm;}
@@ -130,6 +131,10 @@ statement returns [VStatement* stm]
     |   define_function_stm             {$stm = $define_function_stm.stm;} // ^^
     |   expression SEMICOLON            {$stm = createNodeFromToken<VExpressionAsStatement>($expression.start, $expression.expr);}
     |   SEMICOLON                       {$stm = nullptr;} //{$stm = createNodeFromToken<NoOpStm>($SEMICOLON);}
+    ;
+
+import_script_stm returns [VStatement* stm]
+    :   IMPORT STRING {$stm = createNodeFromToken<ImportStm>($IMPORT, parseEscapedString($STRING.text));}
     ;
 
 define_input_stm returns [VStatement* stm]

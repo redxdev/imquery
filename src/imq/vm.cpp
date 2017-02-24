@@ -258,4 +258,17 @@ namespace imq
 	{
 		return gc;
 	}
+
+	String VMachine::registerImportPath(const String& path)
+	{
+		String newPath = buildPath(path);
+		importPaths.insert(newPath);
+		return newPath;
+	}
+
+	bool VMachine::hasImportPath(const String& path)
+	{
+		String newPath = buildPath(path);
+		return importPaths.find(newPath) != importPaths.end();
+	}
 }

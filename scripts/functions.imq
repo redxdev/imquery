@@ -1,0 +1,6 @@
+# This script contains some useful functions you can import.
+
+# Get the magnitude of a color (ignoring alpha)
+export func mag(col) {
+	return (col.r + col.g + col.b) / 3.;
+}
