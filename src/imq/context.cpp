@@ -591,6 +591,8 @@ namespace imq
 		{
 			entry.second.GC_mark();
 		}
+
+		parent->GC_mark();
 	}
 
 	RestrictedSubContext::RestrictedSubContext(VMachine* vm, Context* parent)
@@ -747,6 +749,8 @@ namespace imq
 		{
 			entry.second.GC_mark();
 		}
+
+		parent->GC_mark();
 	}
 
 	const std::unordered_map<String, QValue>& ImportContext::getExports() const
