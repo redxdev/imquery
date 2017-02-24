@@ -8,6 +8,7 @@
 #include "gc.h"
 
 #include <ostream>
+#include <vector>
 
 namespace imq
 {
