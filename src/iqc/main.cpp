@@ -212,6 +212,8 @@ int main(int argc, char** argv)
 	TCLAP::MultiArg<std::string> inputArg("i", "input", "Inputs, in the form name=filepath", false, "string", cmd);
 	TCLAP::MultiArg<std::string> outputArg("o", "output", "Outputs, in the form name=filepath", false, "string", cmd);
 
+	TCLAP::MultiArg<std::string> searchPathArg("s", "search-path", "Search paths", false, "string", cmd);
+
 	try
 	{
 		cmd.parse(argc, argv);
@@ -243,6 +245,15 @@ int main(int argc, char** argv)
 		{
 			std::cerr << "error: invalid garbage collection mode \"" << gcModeArg.getValue() << "\"";
 			return EXIT_FAILURE;
+		}
+	}
+
+	if (searchPathArg.isSet())
+	{
+		auto searchPaths = searchPathArg.getValue();
+		for (auto path : searchPaths)
+		{
+			vm.addSearchPath(path);
 		}
 	}
 

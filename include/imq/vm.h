@@ -97,7 +97,9 @@ namespace imq
 		bool setWorkingDirectory(const String& newDir);
 		const String& getWorkingDirectory() const;
 
-		String buildPath(const String& path) const;
+		void addSearchPath(const String& path);
+
+		String buildPath(const String& path, bool useSearchPaths = true) const;
 
 		Result execute(VBlock* block);
 
@@ -107,5 +109,6 @@ namespace imq
 		RootContext* rootContext;
 		GarbageCollector* gc;
 		String workingDirectory;
+		std::vector<String> searchPaths;
 	};
 }

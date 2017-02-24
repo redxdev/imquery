@@ -5,6 +5,7 @@
 
 #include "errors.h"
 #include "thirdparty/filesystem/path.h"
+#include "thirdparty/filesystem/resolver.h"
 
 namespace imq
 {
@@ -208,17 +209,36 @@ namespace imq
 		return workingDirectory;
 	}
 
-	String VMachine::buildPath(const String& path) const
+	void VMachine::addSearchPath(const String& path)
+	{
+		searchPaths.push_back(path);
+	}
+
+	String VMachine::buildPath(const String& path, bool useSearchPaths) const
 	{
 		try
 		{
-			filesystem::path workingPath(workingDirectory);
 			filesystem::path newPath(path);
 
 			if (newPath.is_absolute())
 				return newPath.str();
+			else if (useSearchPaths)
+			{
+				filesystem::resolver resolver;
+				resolver.append(filesystem::path(workingDirectory));
+
+				for (auto searchPath : searchPaths)
+				{
+					resolver.append(filesystem::path(searchPath));
+				}
+
+				return resolver.resolve(newPath).str();
+			}
 			else
+			{
+				filesystem::path workingPath(workingDirectory);
 				return (workingPath / newPath).str();
+			}
 		}
 		catch (std::exception&)
 		{
