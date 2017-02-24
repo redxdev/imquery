@@ -155,3 +155,8 @@ imqValue* imqGetValue(imqVMachine* vm, const imqString key)
 		return nullptr;
 	}
 }
+
+CIMQ_API void imqVMAddSearchPath(imqVMachine* vm, const imqString path)
+{
+	reinterpret_cast<VMachine*>(vm)->addSearchPath(path);
+}

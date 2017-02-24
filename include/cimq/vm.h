@@ -42,6 +42,8 @@ extern "C"
 	CIMQ_API bool imqSetValue(imqVMachine* vm, const imqString key, imqValue* value);
 	CIMQ_API imqValue* imqGetValue(imqVMachine* vm, const imqString key);
 
+	CIMQ_API void imqVMAddSearchPath(imqVMachine* vm, const imqString path);
+
 #ifdef __cplusplus
 }
 #endif
