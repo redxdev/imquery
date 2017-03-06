@@ -181,6 +181,11 @@ namespace imq
 		{
 			entry.second.GC_mark();
 		}
+
+		if (bReturned)
+		{
+			returnValue.GC_mark();
+		}
 	}
 
 	RootContext::RootContext(VMachine* vm)
@@ -593,6 +598,11 @@ namespace imq
 		}
 
 		parent->GC_mark();
+
+		if (bReturned)
+		{
+			returnValue.GC_mark();
+		}
 	}
 
 	RestrictedSubContext::RestrictedSubContext(VMachine* vm, Context* parent)
