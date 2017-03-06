@@ -157,5 +157,7 @@ namespace imq
 		ObjectFieldHelper fields;
 
 		std::vector<QValue> vec;
+
+		size_t objSize = 0;
 	};
 }

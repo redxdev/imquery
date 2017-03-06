@@ -356,13 +356,7 @@ namespace imq
 
 	size_t QList::GC_getSize() const
 	{
-		size_t sz = sizeof(QList) + fields.GC_getSize() - sizeof(ObjectFieldHelper);
-		for (auto val : vec)
-		{
-			sz += val.GC_getSize();
-		}
-
-		return sz;
+		return sizeof(QList) + fields.GC_getSize() - sizeof(ObjectFieldHelper) + objSize;
 	}
 
 	QList::QList(VMachine* vm)
@@ -375,6 +369,7 @@ namespace imq
 		: QObject(other.getVM())
 	{
 		vec = other.vec;
+		objSize = other.objSize;
 
 		initializeObject();
 	}
@@ -382,6 +377,11 @@ namespace imq
 	QList::QList(VMachine* vm, const std::vector<QValue>& vec)
 		: QObject(vm), vec(vec)
 	{
+		for (auto value : vec)
+		{
+			objSize += value.GC_getSize();
+		}
+
 		initializeObject();
 	}
 
@@ -392,6 +392,7 @@ namespace imq
 	QList& QList::operator=(const QList& other)
 	{
 		vec = other.vec;
+		objSize = other.objSize;
 		return *this;
 	}
 
@@ -411,6 +412,7 @@ namespace imq
 
 				case 1:
 					vec.push_back(args[0]);
+					objSize += args[0].GC_getSize();
 					return true;
 
 				case 2:
@@ -420,6 +422,7 @@ namespace imq
 						return errors::args_type("QList.insert", 1, "Integer", args[1]);
 
 					vec.insert(vec.begin() + (size_t)index, args[0]);
+					objSize += args[0].GC_getSize();
 					return true;
 				}
 				}
@@ -440,6 +443,7 @@ namespace imq
 				if (index < 0 || index >= (int32_t)vec.size())
 					return errors::index_out_of_range(args[0]);
 
+				objSize -= vec[index].GC_getSize();
 				vec.erase(vec.begin() + index);
 				return true;
 			});
@@ -453,6 +457,7 @@ namespace imq
 					return errors::args_count("QList.clear", 0, argCount);
 
 				vec.clear();
+				objSize = 0;
 				return true;
 			});
 			return true;
@@ -528,6 +533,7 @@ namespace imq
 		if (i < 0 || i >= (int32_t)vec.size())
 			return errors::index_out_of_range(index);
 
+		objSize += value.GC_getSize() - vec[i].GC_getSize();
 		vec[i] = value;
 		return true;
 	}
