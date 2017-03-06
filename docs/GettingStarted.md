@@ -664,6 +664,29 @@ you might at times want to either write your own or use someone else's libraries
 
 ### Importing Libraries
 
+Importing another script (or library) into your current script is easy. Let's say we have a script called `functions.imq`:
+
+    export func hello_world() {
+        print('Hello World!');
+    }
+
+We can write a script that uses anything tagged as `export` with the following:
+
+    import 'functions.imq';
+    hello_world();
+
+#### Gotchas
+
+Note that `import` will always bump any imported functions up to the current script's root context. This means that this is valid:
+
+    if (true) {
+        import 'functions.imq';
+    }
+    hello_world();
+    
+Even though the import is in a separate context (scope), imports happen in the root context for the current script. Emphasis on
+_current script_ - importing script `A` into script `B` will not make exports from `A` available if script `C` imports `B`.
+
 ## Creating Libraries
 
 A library is a normal imquery script with a series of exports. An export looks like this:
