@@ -101,6 +101,8 @@ namespace imq
 		ObjectFieldHelper fields;
 
 		std::unordered_map<QValue, QValue, std::hash<QValue>> map;
+
+		size_t objSize = 0;
 	};
 
 	class IMQ_API QListIterator : public QIterator

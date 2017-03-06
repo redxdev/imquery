@@ -131,13 +131,7 @@ namespace imq
 
 	size_t QTable::GC_getSize() const
 	{
-		size_t sz = sizeof(QTable) + fields.GC_getSize() - sizeof(ObjectFieldHelper);
-		for (auto entry : map)
-		{
-			sz += entry.first.GC_getSize() + entry.second.GC_getSize();
-		}
-
-		return sz;
+		return sizeof(QTable) + fields.GC_getSize() - sizeof(ObjectFieldHelper) + objSize;
 	}
 
 	QTable::QTable(VMachine* vm)
@@ -150,6 +144,7 @@ namespace imq
 		: QObject(other.getVM())
 	{
 		map = other.map;
+		objSize = other.objSize;
 
 		initializeObject();
 	}
@@ -157,6 +152,11 @@ namespace imq
 	QTable::QTable(VMachine* vm, const std::unordered_map<QValue, QValue>& map)
 		: QObject(vm), map(map)
 	{
+		for (auto entry : map)
+		{
+			objSize += entry.first.GC_getSize() + entry.second.GC_getSize();
+		}
+
 		initializeObject();
 	}
 
@@ -186,6 +186,7 @@ namespace imq
 				if (found == map.end())
 					return errors::undefined_index(getTypeString(), args[0]);
 
+				objSize -= found->first.GC_getSize() + found->second.GC_getSize();
 				map.erase(found);
 				return true;
 			});
@@ -198,6 +199,7 @@ namespace imq
 					return errors::args_count("QTable.clear", 0, argCount);
 
 				map.clear();
+				objSize = 0;
 				return true;
 			});
 			return true;
@@ -231,6 +233,7 @@ namespace imq
 	QTable& QTable::operator=(const QTable& other)
 	{
 		map = other.map;
+		objSize = other.objSize;
 		return *this;
 	}
 
@@ -293,6 +296,13 @@ namespace imq
 
 	Result QTable::setIndex(const QValue& index, const QValue& value)
 	{
+		auto found = map.find(index);
+		if (found != map.end())
+		{
+			objSize -= found->first.GC_getSize() + found->second.GC_getSize();
+		}
+
+		objSize += index.GC_getSize() + value.GC_getSize();
 		map[index] = value;
 		return true;
 	}
