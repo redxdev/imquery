@@ -3,7 +3,7 @@
 #include <string>
 #include <cstring>
 
-#define IMQ_VERSION_STR ("0.4.1")
+#define IMQ_VERSION_STR ("0.4.2")
 
 #ifdef _MSC_VER
 	#pragma warning(disable: 4251)
