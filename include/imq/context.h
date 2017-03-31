@@ -158,6 +158,9 @@ namespace imq
 		virtual bool isClosedOver() const override;
 		virtual void close() override;
 
+		// Allows you to bypass setting parent variables.
+		void setRawValue(const String& key, const QValue& value);
+
 	protected:
 		Context* parent;
 		std::unordered_map<String, QValue> values;

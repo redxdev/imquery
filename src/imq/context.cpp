@@ -585,6 +585,17 @@ namespace imq
 		bClosedOver = true;
 	}
 
+	void SubContext::setRawValue(const String& key, const QValue& value)
+	{
+		auto found = values.find(key);
+		if (found == values.end())
+			objSize += sizeof(String) + getStringSize(key) + value.GC_getSize();
+		else
+			objSize += value.GC_getSize() - found->second.GC_getSize();
+
+		values[key] = value;
+	}
+
 	size_t SubContext::GC_getSize() const
 	{
 		return sizeof(SubContext) + objSize;
@@ -616,6 +627,12 @@ namespace imq
 
 	void RestrictedSubContext::setRawValue(const String& key, const QValue& value)
 	{
+		auto found = values.find(key);
+		if (found == values.end())
+			objSize += sizeof(String) + getStringSize(key) + value.GC_getSize();
+		else
+			objSize += value.GC_getSize() - found->second.GC_getSize();
+
 		values[key] = value;
 	}
 

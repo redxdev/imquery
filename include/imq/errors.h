@@ -90,6 +90,9 @@ namespace imq
 		IMQ_ERROR_DEF(conversion, "Unable to convert " << QValue::getTypeString(value.getType()) << " to " << targetType, const QValue& value, const String& targetType);
 
 		IMQ_ERROR_DEF(import_err, path << ": " << err, const String& path, const String& err);
+
+		IMQ_ERROR_DEF(generic_script_message, msg, const String& msg);
+		IMQ_ERROR_DEF(generic_script, "generic error");
 	}
 }
 

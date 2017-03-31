@@ -1,0 +1,45 @@
+# Fibonacci
+
+# Recursive
+func fib_recur(n) {
+    if n < 3 {
+        return 1;
+    }
+
+    return fib_recur(n - 1) + fib_recur(n - 2);
+}
+
+func fib_iterate(n) {
+    x = 0;
+    y = 1;
+    z = 1;
+    for i = 0; i < n; i = i + 1; {
+        x = y;
+        y = z;
+        z = x + y;
+    }
+
+    return x;
+}
+
+asking = true;
+method = nil;
+while asking {
+    print("Enter 'recur' or 'iterate':");
+    str = getline();
+    if str == "recur" {
+        asking = false;
+        method = fib_recur;
+    }
+    else if str == "iterate" {
+        asking = false;
+        method = fib_iterate;
+    }
+}
+
+print("Enter the value of n:");
+n = integer(getline());
+
+print("fib(" + n + ") = ...");
+result = method(n);
+print(result);

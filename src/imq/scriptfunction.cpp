@@ -32,9 +32,7 @@ namespace imq
 
 		for (int32_t i = 0; i < argCount; ++i)
 		{
-			Result res = subContext->setValue(argNames[i], args[i]);
-			if (!res)
-				return res;
+			subContext->setRawValue(argNames[i], args[i]);
 		}
 
 		Result res = block->execute(subContext);

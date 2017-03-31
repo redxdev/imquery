@@ -41,9 +41,33 @@ namespace imq
 		return obj->copyObject(result);
 	}
 
+	static Result system_error(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		switch (argCount)
+		{
+		default:
+			return errors::args_count("error", 0, 1, argCount);
+
+		case 0:
+			return errors::generic_script();
+
+		case 1:
+		{
+			QValue strValue;
+			if (!args[0].toString(&strValue))
+				return errors::args_type("error", 0, "String", args[0]);
+
+			String str;
+			strValue.getString(&str);
+			return errors::generic_script_message(str);
+		}
+		}
+	}
+
 	IMQ_LIB(register_system)
 	{
 		IMQ_LIB_FUNC("copy", system_copy);
+		IMQ_LIB_FUNC("error", system_error);
 
 		return true;
 	}
