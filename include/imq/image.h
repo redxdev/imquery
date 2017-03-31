@@ -138,7 +138,8 @@ namespace imq
 		QImage* source;
 		QImage* dest;
 		QColor* color;
-		int32_t index;
+		int32_t xCoord;
+		int32_t yCoord;
 		RestrictedSubContext* context;
 	};
 }

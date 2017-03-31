@@ -921,7 +921,7 @@ namespace imq
 	}
 
 	QImageSelection::QImageSelection(Context* parent, QImage* source, QImage* dest)
-		: source(source), dest(dest), index(0)
+		: source(source), dest(dest), xCoord(0), yCoord(0)
 	{
 		context = new RestrictedSubContext(parent->getVM(), parent);
 		context->setBreakable(true);
@@ -948,12 +948,18 @@ namespace imq
 
 	bool QImageSelection::isValid() const
 	{
-		return index < source->width * source->height;
+		return xCoord >= 0 && xCoord < source->width && yCoord >= 0 && yCoord < source->height;
 	}
 
 	void QImageSelection::next()
 	{
-		++index;
+		++xCoord;
+		if (xCoord == source->width)
+		{
+			xCoord = 0;
+			++yCoord;
+		}
+
 		updateContext();
 	}
 
@@ -971,7 +977,8 @@ namespace imq
 			return errors::selection_apply_error("expected a QColor");
 		}
 
-		int32_t rewrite = index;
+		int32_t xOut = xCoord;
+		int32_t yOut = yCoord;
 		switch (coordCount)
 		{
 		default:
@@ -982,22 +989,23 @@ namespace imq
 
 		case 2:
 		{
-			int32_t x;
-			int32_t y;
-			if (!coords[0].getInteger(&x))
+			if (!coords[0].getInteger(&xOut))
 				return errors::selection_apply_error("x coordinate must be an Integer");
-			if (!coords[1].getInteger(&y))
+			if (!coords[1].getInteger(&yOut))
 				return errors::selection_apply_error("y coordinate must be an Integer");
-			if (x < 0 || x >= dest->width)
-				return errors::selection_apply_error("x coordinate rewrite is out of range at " + std::to_string(x));
-			if (y < 0 || y >= dest->height)
-				return errors::selection_apply_error("y coordinate rewrite is out of range at " + std::to_string(y));
-			rewrite = y * dest->width + x;
 			break;
 		}
 		}
 
-		size_t idx = rewrite * 4;
+		if (dest->width == 0 || dest->height == 0)
+			return errors::selection_apply_error("width or height of destination image is 0");
+
+		if (xOut < 0 || xOut >= dest->width)
+			return errors::selection_apply_error("x coordinate is out of range at " + std::to_string(xOut));
+		if (yOut < 0 || yOut >= dest->height)
+			return errors::selection_apply_error("y coordinate is out of range at " + std::to_string(yOut));
+
+		size_t idx = (yOut * dest->width + xOut) * 4;
 		dest->data[idx] = color->getRed();
 		dest->data[idx + 1] = color->getGreen();
 		dest->data[idx + 2] = color->getBlue();
@@ -1008,16 +1016,16 @@ namespace imq
 
 	void QImageSelection::updateContext()
 	{
-		if (index < source->width * source->height)
+		if (isValid())
 		{
-			size_t idx = index * 4;
+			size_t idx = (yCoord * source->width + xCoord) * 4;
 			color->setRed(source->data[idx]);
 			color->setGreen(source->data[idx + 1]);
 			color->setBlue(source->data[idx + 2]);
 			color->setAlpha(source->data[idx + 3]);
 
-			context->setRawValue("x", QValue::Integer(index % source->width));
-			context->setRawValue("y", QValue::Integer(index / source->width));
+			context->setRawValue("x", QValue::Integer(xCoord));
+			context->setRawValue("y", QValue::Integer(yCoord));
 		}
 	}
 }
