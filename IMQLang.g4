@@ -150,7 +150,25 @@ define_output_stm returns [VStatement* stm]
 
 set_variable_stm returns [VStatement* stm]
     :   EXPORT IDENT EQUAL expression {$stm = createNodeFromToken<ExportStm>($EXPORT, $IDENT.text, $expression.expr);}
-    |   IDENT EQUAL expression {$stm = createNodeFromToken<SetVariableStm>($IDENT, $IDENT.text, $expression.expr);}
+    |   IDENT
+        (
+             EQUAL expression {$stm = createNodeFromToken<SetVariableStm>($IDENT, $IDENT.text, $expression.expr);}
+	|    PLUS EQUAL expression {$stm = createNodeFromToken<SetVariableStm>($IDENT, $IDENT.text, 
+	                                       createNodeFromToken<AddExpr>($PLUS, createNodeFromToken<RetrieveVariableExpr>($IDENT, $IDENT.text), $expression.expr)
+                                               );}
+        |    MINUS EQUAL expression {$stm = createNodeFromToken<SetVariableStm>($IDENT, $IDENT.text,
+                                               createNodeFromToken<SubExpr>($MINUS, createNodeFromToken<RetrieveVariableExpr>($IDENT, $IDENT.text), $expression.expr)
+                                               );}
+        |    MULTIPLY EQUAL expression {$stm = createNodeFromToken<SetVariableStm>($IDENT, $IDENT.text,
+                                               createNodeFromToken<MulExpr>($MULTIPLY, createNodeFromToken<RetrieveVariableExpr>($IDENT, $IDENT.text), $expression.expr)
+                                               );}
+        |    DIVIDE EQUAL expression {$stm = createNodeFromToken<SetVariableStm>($IDENT, $IDENT.text,
+                                               createNodeFromToken<DivExpr>($DIVIDE, createNodeFromToken<RetrieveVariableExpr>($IDENT, $IDENT.text), $expression.expr)
+                                               );}
+        |    MODULUS EQUAL expression {$stm = createNodeFromToken<SetVariableStm>($IDENT, $IDENT.text,
+                                               createNodeFromToken<ModExpr>($MODULUS, createNodeFromToken<RetrieveVariableExpr>($IDENT, $IDENT.text), $expression.expr)
+                                               );}
+	)
     ;
 
 set_field_stm returns [VStatement* stm]
