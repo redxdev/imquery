@@ -77,11 +77,44 @@ namespace imq
 		return true;
 	}
 
+	static Result system_try(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+		{
+			return errors::args_count("try", 1, argCount);
+		}
+
+		QFunction* func = nullptr;
+		if (!args[0].getFunction(&func))
+		{
+			return errors::args_type("try", 0, "Function", args[0]);
+		}
+
+		QValue funcResult;
+		Result res = func->execute(vm, 0, nullptr, &funcResult);
+		std::vector<QValue> list;
+		if (res)
+		{
+			list.push_back(QValue::Bool(true));
+			list.push_back(funcResult);
+		}
+		else
+		{
+			list.push_back(QValue::Bool(false));
+			list.push_back(QValue::String(res.getErr()));
+		}
+
+		*result = QValue::Object(new QList(vm, list));
+
+		return true;
+	}
+
 	IMQ_LIB(register_system)
 	{
 		IMQ_LIB_FUNC("copy", system_copy);
 		IMQ_LIB_FUNC("error", system_error);
 		IMQ_LIB_FUNC("hash", system_hash);
+		IMQ_LIB_FUNC("try", system_try);
 
 		return true;
 	}

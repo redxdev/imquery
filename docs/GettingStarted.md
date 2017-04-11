@@ -653,6 +653,43 @@ properties are just lists:
     2
     4
 
+## Error Handling
+
+Generally, an error will instantly stop execution of a script:
+
+    > print(foo); print('hello world!');
+    runtime error: line 1:6: Unknown variable "foo"
+
+Here, since `foo` isn't defined yet, execution stops as soon as we try to access it. Sometimes, however, we want
+to see if a function completes successfully without stopping execution. For that, we have the `try` function.
+`try` will stop any error from propogating upward to the virtual machine, and it lets you know what the error
+is if there was one. It accepts a function as an argument, and tries to call it. The return value of `try` is
+always a two-item list - the first will be a boolean of whether the call succeeded, and the second is either the
+error text or the return value of the function itself.
+
+For example, this is what it looks like when a function succeeds:
+
+    > func myFunc() {return 'hello world!';}
+    > try(myFunc);
+    [true, "hello world!"]
+
+And if a function fails...
+
+    > func myFunc() {print(foo);}
+    > try(myFunc);
+    [false, "line 1:21: Unknown variable "foo""]
+
+`try` cannot pass arguments to a function.
+
+    > func myFunc(name) {return "Hello, " + name;}
+    > try(myFunc);
+    [false, "Wrong number of arguments to myFunc (expected 1, got 0)"]
+
+Instead, pass a lambda to try with the appropriate arguments:
+
+    > try(() => myFunc('Foo'));
+    [true, "Hello, Foo"]
+
 ## Libraries
 
 __This section is under construction__
@@ -661,6 +698,8 @@ Outside of the imquery standard library which is automatically made available (a
 you might at times want to either write your own or use someone else's libraries.
 
 ### Composite Scripts
+
+TODO
 
 ### Importing Libraries
 
