@@ -61,7 +61,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Memory leak of VBlock objects due to parser errors has been fixed
 - Allow fieldExpr on the left side of set_field_stm and set_index_stm
 
-## [0.1.0] - 2016-12-11
+## 0.1.0 - 2016-12-11
 ### Added
 - Initial release
 
