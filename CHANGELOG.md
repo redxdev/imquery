@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Shorthand math operators (`+=`, `-=`, `*=`, `/=`, `%=`)
 - This changelog
 - `error` function
+- `hash` function
 
 ### Changed
 - Fixed function subcontexts setting the wrong variables as arguments due to a parent context having another variable named the same way.

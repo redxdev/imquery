@@ -12,6 +12,7 @@
 #include "structures.h"
 #include "cast.h"
 #include "value.h"
+#include "hash.h"
 
 namespace imq
 {
@@ -64,10 +65,23 @@ namespace imq
 		}
 	}
 
+	static Result system_hash(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+		{
+			return errors::args_count("hash", 1, argCount);
+		}
+
+		std::size_t value = std::hash<QValue>()(args[0]);
+		*result = QValue::Integer((int32_t)value);
+		return true;
+	}
+
 	IMQ_LIB(register_system)
 	{
 		IMQ_LIB_FUNC("copy", system_copy);
 		IMQ_LIB_FUNC("error", system_error);
+		IMQ_LIB_FUNC("hash", system_hash);
 
 		return true;
 	}
