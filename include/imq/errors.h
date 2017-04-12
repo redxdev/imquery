@@ -54,6 +54,7 @@ namespace imq
 
 		IMQ_ERROR_DEF(image_load_error, "Image load error - " << reason, const String& reason);
 		IMQ_ERROR_DEF(image_save_error, "Image save error - unable to save image file " << filename, const String& filename);
+		IMQ_ERROR_DEF(image_pixel_range, "Pixel out of range at " << x << "," << y, int32_t x, int32_t y);
 
 		IMQ_ERROR_DEF(vm_generic_error, "line " << loc << ": " << msg, const VLocation& loc, const String& msg);
 		IMQ_ERROR_DEF(vm_from_call_error, "function call at " << loc << ": " << submsg, const VLocation& loc, const String& submsg);

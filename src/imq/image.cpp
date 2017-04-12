@@ -700,7 +700,7 @@ namespace imq
 					QColor col(getVM());
 					bool res = getPixel(x, y, &col);
 					if (!res)
-						return errors::func_generic_error("Unable to get pixel");
+						return errors::image_pixel_range(x, y);
 
 					*result = QValue::Object(new QColor(col));
 					return true;
@@ -717,7 +717,7 @@ namespace imq
 
 					bool res = setPixel(x, y, *col);
 					if (!res)
-						return errors::func_generic_error("Unable to set pixel");
+						return errors::image_pixel_range(x, y);
 
 					*result = QValue::Nil();
 					return true;
