@@ -71,6 +71,19 @@ namespace imq
 		fields.getter("alpha", [&](QValue* result) { *result = QValue::Float(alpha); return true; });
 		fields.getter("a", [&](QValue* result) { *result = QValue::Float(alpha); return true; });
 
+		fields.getter("mag", [&](QValue* result) {
+			*result = QValue::Function(getVM(), this, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
+				if (argCount != 0)
+				{
+					return errors::args_count("QColor.mag", 0, argCount);
+				}
+
+				*result = QValue::Float(std::sqrt(red * red + green * green + blue * blue));
+				return true;
+			});
+			return true;
+		});
+
 		fields.getter("clamp", [&](QValue* result) {
 			*result = QValue::Function(getVM(), this, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
 				if (argCount != 0)

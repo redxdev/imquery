@@ -3,17 +3,11 @@ in input = image();
 in threshold = 0.1;
 out output = image(input.w, input.h);
 
-# No inbuilt 'magnitude' function yet, so just implementing it here.
-# We ignore alpha for this.
-func mag(col) {
-	return sqrt(pow(col.r,2) + pow(col.g,2) + pow(col.b,2));
-}
-
 # _very_ simple edge detection function
 func is_edge(col, x, y, img) {
     if x >= 1 and x < img.w - 1 and y >= 1 and y < img.h - 1 {
-        m = mag(col);
-        val = abs(m - mag(img.pixel(x-1,y))) + abs(m - mag(img.pixel(x+1,y))) + abs(m - mag(img.pixel(x,y-1))) + abs(m - mag(img.pixel(x,y+1)));
+        m = col.mag();
+        val = abs(m - img.pixel(x-1,y).mag()) + abs(m - img.pixel(x+1,y).mag()) + abs(m - img.pixel(x,y-1).mag()) + abs(m - img.pixel(x,y+1).mag());
         if val / 4. > threshold {
             return true;
         }
