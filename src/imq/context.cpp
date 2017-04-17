@@ -535,7 +535,12 @@ namespace imq
 
 	bool SubContext::isContextBroken() const
 	{
-		return (bBreakable && bBroken) || parent->isContextBroken();
+		if (bBreakable)
+		{
+			return bBroken;
+		}
+
+		return parent->isContextBroken();
 	}
 
 	Result SubContext::setReturnable(bool bValue)
@@ -549,7 +554,7 @@ namespace imq
 
 	bool SubContext::isReturnable() const
 	{
-		return bReturned;
+		return bReturnable || parent->isReturnable();
 	}
 
 	Result SubContext::returnContext(const QValue& value)
@@ -566,10 +571,15 @@ namespace imq
 
 	bool SubContext::getReturnValue(QValue* result) const
 	{
-		if (bReturnable && bReturned)
+		if (bReturnable)
 		{
-			*result = returnValue;
-			return true;
+			if (bReturned)
+			{
+				*result = returnValue;
+				return true;
+			}
+			
+			return false;
 		}
 
 		return parent->getReturnValue(result);
