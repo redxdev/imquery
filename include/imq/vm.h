@@ -107,7 +107,8 @@ namespace imq
 		GarbageCollector* getGC();
 
 		String registerImportPath(const String& path);
-		bool hasImportPath(const String& path);
+		bool hasImportPath(const String& path) const;
+		void removeImportPath(const String& path);
 
 	private:
 		RootContext* rootContext;

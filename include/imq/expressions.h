@@ -359,10 +359,32 @@ namespace imq
 		VExpression* exportExpr;
 	};
 
+	struct ImportInputPair
+	{
+		ImportInputPair(String inputName, VExpression* expression)
+			: inputName(inputName), expression(expression)
+		{
+		}
+
+		String inputName;
+		VExpression* expression;
+	};
+
+	struct ImportOutputPair
+	{
+		ImportOutputPair(String outputName, String variableName)
+			: outputName(outputName), variableName(variableName)
+		{
+		}
+
+		String outputName;
+		String variableName;
+	};
+
 	class IMQ_API ImportStm : public VStatement
 	{
 	public:
-		ImportStm(const String& path, const VLocation& loc);
+		ImportStm(const String& path, bool forceImport, const std::vector<ImportInputPair>& inputs, const std::vector<ImportOutputPair>& outputs, const VLocation& loc);
 		virtual ~ImportStm();
 
 		virtual String getName() const override;
@@ -370,5 +392,9 @@ namespace imq
 
 	private:
 		String path;
+		bool bForceImport;
+
+		std::vector<ImportInputPair> inputRewrites;
+		std::vector<ImportOutputPair> outputRewrites;
 	};
 }

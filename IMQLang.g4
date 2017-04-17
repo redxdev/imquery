@@ -134,7 +134,39 @@ statement returns [VStatement* stm]
     ;
 
 import_script_stm returns [VStatement* stm]
-    :   IMPORT STRING {$stm = createNodeFromToken<ImportStm>($IMPORT, parseEscapedString($STRING.text));}
+    locals [std::vector<ImportInputPair> inputs, std::vector<ImportOutputPair> outputs, bool forceImport]
+    :   IMPORT STRING
+        (
+            L_PAREN {$forceImport = true;}
+            (
+                (
+                    fi=import_input_def {$inputs.push_back(ImportInputPair($fi.inputName, $fi.expr));}
+                |   fo=import_output_def {$outputs.push_back(ImportOutputPair($fo.outputName, $fo.variableName));}
+                )
+
+                (
+                    COMMA
+                    (
+                        i=import_input_def {$inputs.push_back(ImportInputPair($i.inputName, $i.expr));}
+                    |   o=import_output_def {$outputs.push_back(ImportOutputPair($o.outputName, $o.variableName));}
+                    )
+                )*
+            )?
+            R_PAREN
+        )?
+        {$stm = createNodeFromToken<ImportStm>($IMPORT, parseEscapedString($STRING.text), $forceImport, $inputs, $outputs);}
+    ;
+
+import_input_def returns [String inputName, VExpression* expr]
+    :   STRING {$inputName = parseEscapedString($STRING.text);}
+        EQUAL
+        expression {$expr = $expression.expr;}
+    ;
+
+import_output_def returns [String variableName, String outputName]
+    :   IDENT {$variableName = $IDENT.text;}
+        EQUAL
+        STRING {$outputName = parseEscapedString($STRING.text);}
     ;
 
 define_input_stm returns [VStatement* stm]

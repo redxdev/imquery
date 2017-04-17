@@ -161,6 +161,8 @@ namespace imq
 		// Allows you to bypass setting parent variables.
 		void setRawValue(const String& key, const QValue& value);
 
+		void setAllowIO(bool bNewValue);
+
 	protected:
 		Context* parent;
 		std::unordered_map<String, QValue> values;
@@ -168,6 +170,7 @@ namespace imq
 		bool bBroken = false;
 		bool bReturnable = false;
 		bool bReturned = false;
+		bool bAllowIO = false;
 		QValue returnValue;
 
 		// This is an optimization - if the context hasn't been closed over then we can delete it freely instead of
@@ -227,11 +230,18 @@ namespace imq
 		virtual size_t GC_getSize() const override;
 		virtual void GC_markChildren() override;
 
+		void setInput(const String& key, const QValue& value);
+		void setOutput(const String& key, const QValue& value);
+
+		const std::unordered_map<String, QValue>& getInputs() const;
+		const std::unordered_map<String, QValue>& getOutputs() const;
 		const std::unordered_map<String, QValue>& getExports() const;
 
 	protected:
 		Context* parent;
 		std::unordered_map<String, QValue> exports;
+		std::unordered_map<String, QValue> inputs;
+		std::unordered_map<String, QValue> outputs;
 		size_t objSize = 0;
 	};
 }

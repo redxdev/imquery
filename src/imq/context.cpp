@@ -500,11 +500,21 @@ namespace imq
 
 	Result SubContext::registerInput(const String& key, const QValue& value)
 	{
+		if (bAllowIO)
+		{
+			return parent->registerInput(key, value);
+		}
+
 		return errors::context_root_flags();
 	}
 
 	Result SubContext::registerOutput(const String& key, const QValue& value)
 	{
+		if (bAllowIO)
+		{
+			return parent->registerOutput(key, value);
+		}
+
 		return errors::context_root_flags();
 	}
 
@@ -606,6 +616,11 @@ namespace imq
 		values[key] = value;
 	}
 
+	void SubContext::setAllowIO(bool bNewValue)
+	{
+		bAllowIO = bNewValue;
+	}
+
 	size_t SubContext::GC_getSize() const
 	{
 		return sizeof(SubContext) + objSize;
@@ -690,17 +705,28 @@ namespace imq
 
 	Result ImportContext::getValue(const String& key, QValue* result) const
 	{
-		auto found = exports.find(key);
-		if (found == exports.end())
+		auto found = inputs.find(key);
+		if (found != inputs.end())
 		{
-			if (parent)
-				return parent->getValue(key, result);
-			else
-				return errors::context_undefined_value(key);
+			*result = found->second;
+			return true;
 		}
 
-		*result = found->second;
-		return true;
+		found = outputs.find(key);
+		if (found != outputs.end())
+		{
+			*result = found->second;
+			return true;
+		}
+
+		found = exports.find(key);
+		if (found != exports.end())
+		{
+			*result = found->second;
+			return true;
+		}
+
+		return parent->getValue(key, result);
 	}
 
 	Result ImportContext::setValue(const String& key, const QValue& value)
@@ -727,12 +753,47 @@ namespace imq
 
 	Result ImportContext::registerInput(const String& key, const QValue& value)
 	{
-		return errors::context_root_flags();
+		auto valFound = exports.find(key);
+		if (valFound != exports.end())
+		{
+			return errors::context_input_overwrite();
+		}
+
+		auto found = inputs.find(key);
+		if (found != inputs.end())
+		{
+			if (!checkTypesEqual(value, found->second))
+			{
+				return errors::context_input_invalid_type(key);
+			}
+
+			// ignore, we've set the input elsewhere
+			return true;
+		}
+
+		objSize += sizeof(String) + getStringSize(key) + value.GC_getSize();
+
+		inputs[key] = value;
+		return true;
 	}
 
 	Result ImportContext::registerOutput(const String& key, const QValue& value)
 	{
-		return errors::context_root_flags();
+		auto valFound = exports.find(key);
+		if (valFound != exports.end())
+		{
+			return errors::context_output_overwrite();
+		}
+
+		if (outputs.find(key) != outputs.end())
+		{
+			return errors::context_output_set();
+		}
+
+		objSize += sizeof(String) + getStringSize(key) + value.GC_getSize();
+
+		outputs[key] = value;
+		return true;
 	}
 
 	Result ImportContext::setBreakable(bool bValue)
@@ -782,12 +843,54 @@ namespace imq
 
 	void ImportContext::GC_markChildren()
 	{
+		for (auto entry : inputs)
+		{
+			entry.second.GC_mark();
+		}
+
+		for (auto entry : outputs)
+		{
+			entry.second.GC_mark();
+		}
+
 		for (auto entry : exports)
 		{
 			entry.second.GC_mark();
 		}
 
 		parent->GC_mark();
+	}
+
+	void ImportContext::setInput(const String& key, const QValue& value)
+	{
+		auto found = inputs.find(key);
+		if (found == inputs.end())
+			objSize += sizeof(String) + getStringSize(key) + value.GC_getSize();
+		else
+			objSize += value.GC_getSize() - found->second.GC_getSize();
+
+		inputs[key] = value;
+	}
+
+	void ImportContext::setOutput(const String& key, const QValue& value)
+	{
+		auto found = outputs.find(key);
+		if (found == outputs.end())
+			objSize += sizeof(String) + getStringSize(key) + value.GC_getSize();
+		else
+			objSize += value.GC_getSize() - found->second.GC_getSize();
+
+		outputs[key] = value;
+	}
+
+	const std::unordered_map<imq::String, imq::QValue>& ImportContext::getInputs() const
+	{
+		return inputs;
+	}
+
+	const std::unordered_map<imq::String, imq::QValue>& ImportContext::getOutputs() const
+	{
+		return outputs;
 	}
 
 	const std::unordered_map<String, QValue>& ImportContext::getExports() const

@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 
 #include "errors.h"
 #include "thirdparty/filesystem/path.h"
@@ -266,9 +267,15 @@ namespace imq
 		return newPath;
 	}
 
-	bool VMachine::hasImportPath(const String& path)
+	bool VMachine::hasImportPath(const String& path) const
 	{
 		String newPath = buildPath(path);
 		return importPaths.find(newPath) != importPaths.end();
+	}
+
+	void VMachine::removeImportPath(const String& path)
+	{
+		String newPath = buildPath(path);
+		importPaths.erase(newPath);
 	}
 }

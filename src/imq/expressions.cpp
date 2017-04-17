@@ -1464,8 +1464,8 @@ namespace imq
 		return true;
 	}
 
-	ImportStm::ImportStm(const String& path, const VLocation& loc)
-		: VStatement(loc), path(path)
+	ImportStm::ImportStm(const String& path, bool forceImport, const std::vector<ImportInputPair>& inputs, const std::vector<ImportOutputPair>& outputs, const VLocation& loc)
+		: VStatement(loc), path(path), bForceImport(forceImport), inputRewrites(inputs), outputRewrites(outputs)
 	{
 	}
 
@@ -1480,7 +1480,7 @@ namespace imq
 
 	Result ImportStm::execute(Context* context)
 	{
-		if (context->getVM()->hasImportPath(path))
+		if (!bForceImport && context->getVM()->hasImportPath(path))
 			return true;
 
 		String fullPath = context->getVM()->registerImportPath(path);
@@ -1489,18 +1489,31 @@ namespace imq
 
 		SubContext* subCtx = new SubContext(context->getVM(), importCtx);
 		ScopedRoot subScope(context->getVM()->getGC(), subCtx);
+		subCtx->setAllowIO(true);
+
+		for (auto inputPair : inputRewrites)
+		{
+			QValue result;
+			Result res = inputPair.expression->execute(context, &result);
+			if (!res)
+				return res;
+
+			importCtx->setInput(inputPair.inputName, result);
+		}
 
 		QueryParser parser;
 		VBlock* block = nullptr;
 		Result res = parser.parseFile(fullPath, &block);
 		if (!res)
 		{
+			context->getVM()->removeImportPath(fullPath);
 			return errors::vm_generic_error(getLocation(), res.getErr());
 		}
 
 		res = block->execute(subCtx);
 		if (!res)
 		{
+			context->getVM()->removeImportPath(fullPath);
 			return errors::import_err(fullPath, res.getErr());
 		}
 
@@ -1511,6 +1524,18 @@ namespace imq
 			{
 				return errors::vm_generic_error(getLocation(), res.getErr());
 			}
+		}
+
+		auto outputs = importCtx->getOutputs();
+		for (auto outputPair : outputRewrites)
+		{
+			auto found = outputs.find(outputPair.outputName);
+			if (found == outputs.end())
+				return errors::vm_generic_error(getLocation(), "cannot rewrite output " + outputPair.outputName);
+
+			res = context->setValue(outputPair.variableName, found->second);
+			if (!res)
+				return errors::vm_generic_error(getLocation(), res.getErr());
 		}
 
 		return true;
