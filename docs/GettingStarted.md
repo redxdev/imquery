@@ -692,14 +692,8 @@ Instead, pass a lambda to try with the appropriate arguments:
 
 ## Libraries
 
-__This section is under construction__
-
 Outside of the imquery standard library which is automatically made available (at least in iqc),
 you might at times want to either write your own or use someone else's libraries.
-
-### Composite Scripts
-
-TODO
 
 ### Importing Libraries
 
@@ -713,6 +707,13 @@ We can write a script that uses anything tagged as `export` with the following:
 
     import 'functions.imq';
     hello_world();
+
+Importing the same file multiple times will not run that file multiple times, _unless_ you add parenthesis to the end
+of the import:
+
+    import 'functions.imq'();
+
+The reason for this is that you are using an import chain (see 'composite scripts' below) rather than an import.
 
 #### Gotchas
 
@@ -742,4 +743,35 @@ Prepending `export` to a function or variable definition allows the use of that 
 variable from within another script.
 
 If you use it in a script that isn't being imported as a library, `export` will simply define
-a global variable, no matter what scope you are in. 
+a global variable, no matter what scope you are in.
+
+## Composite Scripts
+
+'Composite' scripts are scripts that make use of multiple other scripts' outputs. Composite scripts use a form of
+import statement called an _import chain_. What import chains allow you to do is define your own inputs and outputs
+when importing another script. Import chains can even import scripts multiple times in a row.
+
+Here's a bit of a contrived example - here are two scripts, one which removes the blue channel from an image and
+another which removes the red channel.
+
+`noblue.imq`
+
+    in input = image();
+    out output = image(input.w, input.h);
+    output: {color.r, color.g, 0, color.a} from input;
+
+`nored.imq`
+
+    in input = image();
+    out output = image(input.w, input.h);
+    output: {0, color.g, color.b, color.a} from input;
+
+Finally, we have our composite script - this will take the results of `noblue.imq` and run it through `nored.imq`.
+
+    in input = image();
+    out output = nil; # this will be set up by the import chains.
+    import 'noblue.imq' ('input' = input, output = 'output');
+    import 'nored.imq' ('input' = output, output = 'output');
+
+You'll notice that inputs are defined by a string equaling an expression, and outputs are defined by a
+variable equaling a string.

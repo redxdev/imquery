@@ -1,0 +1,3 @@
+in input = image();
+out output = image(input.w, input.h);
+output: {color.r, color.g, 0, color.a} from input;

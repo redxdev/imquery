@@ -307,11 +307,6 @@ namespace imq
 			return errors::context_output_overwrite();
 		}
 
-		if (outputs.find(key) != outputs.end())
-		{
-			return errors::context_output_set();
-		}
-
 		objSize += sizeof(String) + getStringSize(key) + value.GC_getSize();
 
 		outputs[key] = value;
@@ -783,11 +778,6 @@ namespace imq
 		if (valFound != exports.end())
 		{
 			return errors::context_output_overwrite();
-		}
-
-		if (outputs.find(key) != outputs.end())
-		{
-			return errors::context_output_set();
 		}
 
 		objSize += sizeof(String) + getStringSize(key) + value.GC_getSize();

@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `hash` function
 - `try` function
 - `QColor.mag` function
+- import chaining/io rewriting
+- removed restriction on setting outputs multiple times
 
 ### Changed
 - Fixed function subcontexts setting the wrong variables as arguments due to a parent context having another variable named the same way.
