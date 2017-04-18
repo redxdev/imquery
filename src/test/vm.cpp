@@ -291,8 +291,10 @@ TEST(VMachine, DefineOutput)
 	ASSERT_EQ(value, QValue::Integer(123));
 
 	res = stm->execute(rootCtx);
-	ASSERT_FALSE(res);
-	ASSERT_EQ(res.getErr(), "line 0:0: Outputs may not be redefined.");
+	ASSERT_TRUE(res);
+
+	// outputs may be redefined as of 0.5.0
+	//ASSERT_EQ(res.getErr(), "line 0:0: Outputs may not be redefined.");
 
 	delete stm;
 
