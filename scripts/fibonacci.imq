@@ -37,8 +37,13 @@ while asking {
     }
 }
 
-print("Enter the value of n:");
-n = integer(getline());
+asking = true;
+n = nil;
+while asking {
+    print("Enter the value of n:");
+    n = getline();
+    asking = not try(() => {n = integer(n);})[0];
+}
 
 print("fib(" + n + ") = ...");
 result = method(n);
