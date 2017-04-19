@@ -5,7 +5,7 @@ return {
 	GTEST_RELEASE_LIB_DIR = "Release",
     GTEST_LIB = "gtest",
 	
-	ANTLR_CMD = "java -jar antlr4-4.6.jar",
+	ANTLR_CMD = "java -jar antlr4-4.7-complete.jar",
 	ANTLR_CPP_PATH = "path/to/antlr4/runtime/Cpp/runtime/src",
 	ANTLR_DEBUG_LIB_DIR = "path/to/antlr4/runtime/Cpp/runtime/bin/vs-2015/x86/Debug Static",
 	ANTLR_RELEASE_LIB_DIR = "path/to/antlr4/runtime/Cpp/runtime/bin/vs-2015/x86/Release Static",

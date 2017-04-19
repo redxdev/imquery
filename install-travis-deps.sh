@@ -61,7 +61,7 @@ then
     echo "Downloading antlr4..."
     git clone https://github.com/antlr/antlr4.git antlr4
     cd antlr4
-    git checkout 4.6
+    git checkout 4.7
     echo "Building antlr4 jar..."
     mvn package -DskipTests=true
     echo "Building antlr4 cpp runtime..."
@@ -72,6 +72,6 @@ then
 else
     echo "Using cached antlr4 build..."
 fi
-cp antlr4/runtime/Cpp/dist/libantlr4-runtime.so.4.6 /usr/lib
+sudo cp antlr4/runtime/Cpp/dist/libantlr4-runtime.so.4.6 /usr/lib
 
 cd ..
