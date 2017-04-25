@@ -484,12 +484,12 @@ table returns [VExpression* expr]
 
 function_expr returns [VExpression* expr]
     locals [VBlock* block = nullptr]
-    :   func_parameters_def ARROW
+    :   func_parameters_def
     (
         L_BRACE
         (statements {$block = createNodeFromToken<VBlock>($statements.start, $statements.count, $statements.stmArr);})?
         R_BRACE
-    |   expression
+    |   ARROW expression
         {
             $block = createNodeFromToken<VBlock>(
                 $expression.start,

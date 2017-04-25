@@ -31,7 +31,7 @@ namespace imq
 			return;
 
 		auto token = recognizer->getCurrentToken();
-		std::cerr << "line " << token->getLine() << ":" << token->getCharPositionInLine() << ": ambiguity around here - " << configs->toString() << std::endl;
+		std::cerr << "line " << token->getLine() << ":" << token->getCharPositionInLine() << ": ambiguity around here - " << startIndex << " to " << stopIndex << std::endl;
 	}
 
 	const String& SavedErrorListener::getLastMessage() const

@@ -460,20 +460,20 @@ There are two ways to define functions in imq. The first is to define a named fu
 This function when called will print the first argument to the terminal, and then return
 the second and third arguments added together.
 
-The other way to define a function is anonymously. This looks similar to lambda syntax in
-other languages like C#:
+The other way to define a function is as a lambda (otherwise known as an anonymous function, as
+the function is not assigned a name). This looks similar to syntax in other languages like C#:
 
-    foo = (a, b, c) => {
+    foo = (a, b, c) {
         print(a);
         return b + c;
     }; # note the semicolon! this is still setting a variable, which requires a semicolon.
 
-Anonymous functions have the advantage of being expressions - you can define the function right
+Lambdas have the advantage of being expressions - you can define the function right
 inside a calculation. That said, you can still use a named function inside an expression - it
 just has to have been defined somewhere prior.
 
-Anonymous functions also have a shorthand if all they need to do is return the result of a
-single expression:
+Lambdass also have a shorthand (called blockless syntax) if all they need to do is return the
+result of a single expression:
 
     foo = (a, b) => a + b;
 
