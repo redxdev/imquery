@@ -23,8 +23,8 @@ An editor is in development and can be found [here](https://github.com/redxdev/i
 
 ## Dependencies
 
-imquery depends on [ANTLR](http://www.antlr.org/) for parsing. Download or build the ANTLR 4.6
-jar and install the 4.6 Cpp runtime. ANTLR's source code is available [here](https://github.com/antlr/antlr4)
+imquery depends on [ANTLR](http://www.antlr.org/) for parsing. Download or build the ANTLR 4.7
+jar and install the 4.7 Cpp runtime. ANTLR's source code is available [here](https://github.com/antlr/antlr4)
 
 Additionally, you will have to build the cpp runtime for antlr.
 
