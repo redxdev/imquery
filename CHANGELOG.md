@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+### Changed
+- Lambda block syntax now does away with the `=>`, while blockless syntax keeps it.
+- Updated ANTLR to 4.7
 
 ## [0.5.0] - 2017-4-18
 ### Added
