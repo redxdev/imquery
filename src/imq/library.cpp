@@ -28,6 +28,8 @@ namespace imq
 		return true;
 	}
 
+	// copy(obj: Object) : Object
+	// Copies an object and returns the copy, if the object allows copying.
 	static Result system_copy(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -42,6 +44,8 @@ namespace imq
 		return obj->copyObject(result);
 	}
 
+	// error(message?: Any)
+	// Emits an error with the specified message. If no message is specified, a generic error is emitted.
 	static Result system_error(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		switch (argCount)
@@ -65,6 +69,8 @@ namespace imq
 		}
 	}
 
+	// hash(value: Any) : Integer
+	// Calculate the hash of the given value.
 	static Result system_hash(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -77,6 +83,12 @@ namespace imq
 		return true;
 	}
 
+	// try(func: Function) : [result: Boolean, value: Any]
+	// Attempt to call the given function. If an error occurs while calling the function, return `[false, error: string]` where `error`
+	// is the error message. If the call is successful, return `[true, value: Any]` where `value` is the return value of the function.
+	//
+	// If an invalid function is passed to `try` or if a different type is passed, an error will be emitted (as opposed to returning an error
+	// result).
 	static Result system_try(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -119,6 +131,8 @@ namespace imq
 		return true;
 	}
 
+	// gc_memory() : Integer
+	// Get the amount of memory the GC is tracking.
 	static Result gc_memory(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 0)
@@ -129,6 +143,8 @@ namespace imq
 		return true;
 	}
 
+	// gc_managed() : Integer
+	// Get the number of objects the GC is managing.
 	static Result gc_managed(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 0)
@@ -138,6 +154,8 @@ namespace imq
 		return true;
 	}
 
+	// gc_barrier() : Integer
+	// Get the GC's memory barrier.
 	static Result gc_barrier(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 0)
@@ -147,6 +165,11 @@ namespace imq
 		return true;
 	}
 
+	// gc_collect(force?: Boolean) : Boolean
+	// Run a garbage collection cycle. If certain metrics aren't met, this won't actually run garbage collection.
+	// Garbage collection can be forced by passing `true` as the first argument.
+	//
+	// Returns whether a collection cycle was run as the result of this function.
 	static Result gc_collect(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount > 1)
@@ -166,6 +189,15 @@ namespace imq
 		return true;
 	}
 
+	// gc_mode(mode?: String) : String or nil
+	// If `mode` isn't passed, get the name of the mode the GC is in. If `mode` is passed, set the GC mode.
+	//
+	// Available modes:
+	// - `Barriers`: The GC will run a collection cycle when the amount of tracked memory is above a certain threshold (the "barrier").
+	//               The barrier will be moved depending on how often collection cycles are running.
+	// - `NoBarriers`: The GC will always run collection cycles when it is able, and the calculation of barriers will be disabled. This mode is the
+	//                 one that will save the most memory, but at the possible cost of CPU time.
+	// - `Always`: The GC will always run collection cycles when it is able, but it _will_ calculate barriers. This is primarily for debugging purposes.
 	static Result gc_mode(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount > 1)
@@ -230,6 +262,8 @@ namespace imq
 		return true;
 	}
 
+	// bool(value: Any) : Boolean
+	// Convert a value to a boolean if possible, and return the result.
 	static Result convert_bool(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -241,6 +275,8 @@ namespace imq
 			return errors::conversion(args[0], "Bool");
 	}
 
+	// integer(value: Any) : Integer
+	// Convert a value to an integer if possible, and return the result.
 	static Result convert_integer(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -252,6 +288,8 @@ namespace imq
 			return errors::conversion(args[0], "Integer");
 	}
 
+	// float(value: Any) : Float
+	// Convert a value to a float if possible, and return the result.
 	static Result convert_float(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -263,6 +301,8 @@ namespace imq
 			return errors::conversion(args[0], "Float");
 	}
 
+	// string(value: Any) : String
+	// Convert a value to a string if possible, and return the result.
 	static Result convert_string(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -274,6 +314,8 @@ namespace imq
 			return errors::conversion(args[0], "String");
 	}
 
+	// isbool(value: Any) : Boolean
+	// Return whether or not the passed value is a boolean.
 	static Result convert_isbool(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -283,6 +325,8 @@ namespace imq
 		return true;
 	}
 
+	// isinteger(value: Any) : Boolean
+	// Return whether or not the passed value is an integer.
 	static Result convert_isinteger(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -292,6 +336,8 @@ namespace imq
 		return true;
 	}
 
+	// isfloat(value: Any) : Boolean
+	// Return whether or not the passed value is a float.
 	static Result convert_isfloat(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -301,6 +347,8 @@ namespace imq
 		return true;
 	}
 
+	// isnumber(value: Any) : Boolean
+	// Return whether or not the passed value is a float or an integer.
 	static Result convert_isnumber(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -310,6 +358,8 @@ namespace imq
 		return true;
 	}
 
+	// isstring(value: Any) : Boolean
+	// Return whether or not the passed value is a string.
 	static Result convert_isstring(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -319,6 +369,8 @@ namespace imq
 		return true;
 	}
 
+	// isobject(value: Any) : Boolean
+	// Return whether or not the passed value is an object.
 	static Result convert_isobject(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -328,6 +380,8 @@ namespace imq
 		return true;
 	}
 
+	// isfunction(value: Any) : Boolean
+	// Return whether or not the passed value is a function.
 	static Result convert_isfunction(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -337,6 +391,9 @@ namespace imq
 		return true;
 	}
 
+	// sametypes(a: Any, b: Any) : Boolean
+	// Return whether or not the two values have the same types. If both values are object types, then the underlying
+	// interface types are compared.
 	static Result convert_sametypes(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 2)
@@ -346,6 +403,8 @@ namespace imq
 		return true;
 	}
 
+	// isnan(value: Float) : Boolean
+	// Return whether or not the given float is NaN.
 	static Result convert_isnan(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -362,6 +421,8 @@ namespace imq
 		return true;
 	}
 
+	// typename(value: Any) : String
+	// Get the name of the type. This will get the name of the underlying interface for object types.
 	static Result convert_typename(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -403,6 +464,8 @@ namespace imq
 		return true;
 	}
 
+	// print(value...: Any)
+	// Print a string to stdout (with a newline at the end). Arguments will be concatinated.
 	static Result io_print(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		QValue value;
@@ -426,6 +489,8 @@ namespace imq
 		return true;
 	}
 
+	// getline() : String
+	// Get a line from cin.
 	static Result io_getline(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 0)
@@ -438,6 +503,8 @@ namespace imq
 		return true;
 	}
 
+	// getcwd() : String
+	// Get the current working directory.
 	static Result io_getcwd(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 0)
@@ -447,6 +514,9 @@ namespace imq
 		return true;
 	}
 
+	// buildpath(path: String) : String
+	// Try to build a path to an existing file or directory based on the list of search paths passed to the VM.
+	// This is useful if you need a full path to an asset or file.
 	static Result io_buildpath(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -472,6 +542,7 @@ namespace imq
 		return true;
 	}
 
+	// abs(a: Number) : Number
 	static Result math_abs(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -504,6 +575,7 @@ namespace imq
 		}
 	}
 
+	// sin(radians: Number) : Float
 	static Result math_sin(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -517,6 +589,7 @@ namespace imq
 		return true;
 	}
 
+	// cos(radians: Number) : Float
 	static Result math_cos(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -530,6 +603,7 @@ namespace imq
 		return true;
 	}
 
+	// tan(radians: Number) : Float
 	static Result math_tan(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -543,6 +617,7 @@ namespace imq
 		return true;
 	}
 
+	// min(a: Number, b: Number) : Number
 	static Result math_min(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 2)
@@ -583,6 +658,7 @@ namespace imq
 		}
 	}
 
+	// max(a: Number, b: Number) : Number
 	static Result math_max(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 2)
@@ -623,6 +699,7 @@ namespace imq
 		}
 	}
 
+	// clamp(value: Number, low: Number, high: Number) : Number
 	static Result math_clamp(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 3)
@@ -709,6 +786,7 @@ namespace imq
 		}
 	}
 
+	// pow(base: Number, exp: Number) : Float
 	static Result math_pow(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 2)
@@ -733,6 +811,7 @@ namespace imq
 		return true;
 	}
 
+	// sqrt(value: Number) : Float
 	static Result math_sqrt(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
@@ -750,6 +829,9 @@ namespace imq
 		return true;
 	}
 
+	// lerp(x: Any, y: Any, alpha: Float) : Any
+	// `x` and `y` can be any types that implement `opMul` and `opAdd`. The return value will have a type defined by
+	// the `opAdd` implementation for `x`
 	static Result math_lerp(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 3)
@@ -797,6 +879,12 @@ namespace imq
 		return true;
 	}
 
+	// image() : QImage
+	// Construct an empty image.
+	//
+	// image(width: Integer, height: Integer, color?: QColor) : QImage
+	// Construct an image of a specific width and height. If `color` is specified, all pixels will be set to that color. Otherwise, the color defaults to
+	// {0, 0, 0, 1}.
 	static Result image_construct(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		switch (argCount)
@@ -881,6 +969,8 @@ namespace imq
 		}
 	}
 
+	// image_load(path: String) : Qimage
+	// Load an image from a file.
 	static Result image_load(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
 	{
 		if (argCount != 1)
