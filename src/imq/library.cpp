@@ -3,11 +3,14 @@
 #include <iostream>
 #include <cmath>
 #include <algorithm>
+#include <memory>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
 
 #include "errors.h"
+#include "parser.h"
+#include "scriptfunction.h"
 #include "image.h"
 #include "structures.h"
 #include "cast.h"
@@ -121,12 +124,44 @@ namespace imq
 		return true;
 	}
 
+	// compile(code: String) : Function
+	// Parse and compile imquery code from a string. The result will be stored in the returned function, which can be called to execute said code.
+	// The function returned will be a closure over the root context (local variables will not be available).
+	//
+	// Gotcha: This will always close over the root context, even if this is run in an imported file. As such, this function is more for
+	// light metaprogramming and debugging the virtual machine than anything else.
+	static Result system_compile(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 1)
+		{
+			return errors::args_count("compile", 1, argCount);
+		}
+
+		String codeString;
+		if (!args[0].getString(&codeString))
+		{
+			return errors::args_type("compile", 0, "String", args[0]);
+		}
+
+		QueryParser parser;
+		VBlock* block = nullptr;
+		Result res = parser.parseString(codeString, &block);
+		if (!res)
+		{
+			return res;
+		}
+
+		*result = QValue::Function(new ScriptFunction("<anon>", vm->getRootContext(), std::shared_ptr<VBlock>(block), std::vector<String>()));
+		return true;
+	}
+
 	IMQ_LIB(register_system)
 	{
 		IMQ_LIB_FUNC("copy", system_copy);
 		IMQ_LIB_FUNC("error", system_error);
 		IMQ_LIB_FUNC("hash", system_hash);
 		IMQ_LIB_FUNC("try", system_try);
+		IMQ_LIB_FUNC("compile", system_compile);
 
 		return true;
 	}

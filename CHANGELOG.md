@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+### Added
+- `compile` function: Parses a string into a function object that can be called from within imquery.
+
 ### Changed
 - Lambda block syntax now does away with the `=>`, while blockless syntax keeps it.
 - Updated ANTLR to 4.7
