@@ -30,6 +30,7 @@ namespace imq
 	IMQ_LIB_STD(register_gc);
 	IMQ_LIB_STD(register_conversion);
 	IMQ_LIB_STD(register_io);
+	IMQ_LIB_STD(register_string);
 	IMQ_LIB_STD(register_math);
 	IMQ_LIB_STD(register_image);
 }

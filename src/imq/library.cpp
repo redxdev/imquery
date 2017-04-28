@@ -25,6 +25,7 @@ namespace imq
 		IMQ_LIB_SUB(register_gc);
 		IMQ_LIB_SUB(register_conversion);
 		IMQ_LIB_SUB(register_io);
+		IMQ_LIB_SUB(register_string);
 		IMQ_LIB_SUB(register_math);
 		IMQ_LIB_SUB(register_image);
 
@@ -155,6 +156,17 @@ namespace imq
 		return true;
 	}
 
+	// version() : String
+	// Returns the version if imquery.
+	static Result system_version(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 0)
+			return errors::args_count("version", 0, argCount);
+
+		*result = QValue::String(getIMQVersion());
+		return true;
+	}
+
 	IMQ_LIB(register_system)
 	{
 		IMQ_LIB_FUNC("copy", system_copy);
@@ -162,6 +174,7 @@ namespace imq
 		IMQ_LIB_FUNC("hash", system_hash);
 		IMQ_LIB_FUNC("try", system_try);
 		IMQ_LIB_FUNC("compile", system_compile);
+		IMQ_LIB_FUNC("version", system_version);
 
 		return true;
 	}
@@ -573,6 +586,81 @@ namespace imq
 		IMQ_LIB_FUNC("getline",		io_getline);
 		IMQ_LIB_FUNC("getcwd",		io_getcwd);
 		IMQ_LIB_FUNC("buildpath",	io_buildpath);
+
+		return true;
+	}
+
+	// char(code...: Integer) : String
+	// Create a string from character codes. The result may be platform specific.
+	static Result string_char(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount == 0)
+			return errors::args_count("char", "> 0", argCount);
+
+		std::stringstream ss;
+		for (int32_t i = 0; i < argCount; ++i)
+		{
+			int32_t value;
+			if (!args[i].getInteger(&value))
+				return errors::args_type("char", i, "Integer", args[i]);
+
+			char c = (char)value;
+			ss << c;
+		}
+
+		*result = QValue::String(ss.str());
+		return true;
+	}
+
+	// find(haystack: String, needle: String, position?: Integer) : Integer
+	// Find the first occurrence of `needle` in `haystack`. If `position` is specified, the search will start from that position
+	// rather than the start of `haystack`.
+	//
+	// If no match is found, this returns -1.
+	static Result string_find(VMachine* vm, int32_t argCount, QValue* args, QValue* result)
+	{
+		if (argCount != 2 && argCount != 3)
+			return errors::args_count("find", 2, 3, argCount);
+
+		String haystack;
+		String needle;
+		int32_t position = 0;
+
+		QValue haystackValue;
+		QValue needleValue;
+		if (!args[0].toString(&haystackValue))
+			return errors::args_type("find", 0, "String", args[0]);
+
+		if (!args[1].toString(&needleValue))
+			return errors::args_type("find", 1, "String", args[1]);
+
+		haystackValue.getString(&haystack);
+		needleValue.getString(&needle);
+
+		if (argCount == 3)
+		{
+			if (!args[2].getInteger(&position))
+				return errors::args_type("find", 2, "Integer", args[2]);
+		}
+
+		size_t found = haystack.find(needle, (size_t)position);
+		if (found == String::npos)
+		{
+
+			*result = QValue::Integer(-1);
+		}
+		else
+		{
+			*result = QValue::Integer((int32_t)found);
+		}
+
+		return true;
+	}
+
+	IMQ_LIB(register_string)
+	{
+		IMQ_LIB_FUNC("char", string_char);
+		IMQ_LIB_FUNC("find", string_find);
 
 		return true;
 	}

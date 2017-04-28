@@ -315,18 +315,7 @@ namespace imq
 			return res;
 		}
 
-		QObject* obj;
-		if (!value.getObject(&obj))
-		{
-			return errors::vm_generic_error(getLocation(), "Expected valid QObject subexpression for RetrieveField");
-		}
-
-		if (!obj)
-		{
-			return errors::vm_generic_error(getLocation(), "Expected valid QObject subexpression for RetrieveField (found null)");
-		}
-
-		res = obj->getField(field, result);
+		res = value.getField(field, result);
 		if (!res)
 		{
 			return errors::vm_generic_error(getLocation(), res.getErr());
@@ -367,31 +356,21 @@ namespace imq
 			return errors::vm_generic_error(getLocation(), "Invalid index subexpression for RetrieveIndex");
 		}
 
-		QValue value;
-		Result res = objExpr->execute(context, &value);
+		QValue objValue;
+		Result res = objExpr->execute(context, &objValue);
 		if (!res)
 		{
 			return res;
 		}
 
-		QObject* obj;
-		if (!value.getObject(&obj))
-		{
-			return errors::vm_generic_error(getLocation(), "Expected valid QObject subexpression for RetrieveIndex");
-		}
-
-		if (!obj)
-		{
-			return errors::vm_generic_error(getLocation(), "Expected valid QObject subexpression for RetrieveIndex (found null)");
-		}
-
-		res = indexExpr->execute(context, &value);
+		QValue indexValue;
+		res = indexExpr->execute(context, &indexValue);
 		if (!res)
 		{
 			return res;
 		}
 
-		res = obj->getIndex(value, result);
+		res = objValue.getIndex(indexValue, result);
 		if (!res)
 		{
 			return errors::vm_generic_error(getLocation(), res.getErr());
@@ -548,31 +527,21 @@ namespace imq
 			return errors::vm_generic_error(getLocation(), "Invalid value subexpression for SetField");
 		}
 
-		QValue value;
-		Result res = objExpr->execute(context, &value);
+		QValue objValue;
+		Result res = objExpr->execute(context, &objValue);
 		if (!res)
 		{
 			return res;
 		}
 
-		QObject* obj;
-		if (!value.getObject(&obj))
-		{
-			return errors::vm_generic_error(getLocation(), "Expected valid QObject subexpression for SetField");
-		}
-
-		if (!obj)
-		{
-			return errors::vm_generic_error(getLocation(), "Expected valid QObject subexpression for SetField (found null)");
-		}
-
+		QValue value;
 		res = valueExpr->execute(context, &value);
 		if (!res)
 		{
 			return res;
 		}
 
-		res = obj->setField(field, value);
+		res = objValue.setField(field, value);
 		if (!res)
 		{
 			return errors::vm_generic_error(getLocation(), res.getErr());

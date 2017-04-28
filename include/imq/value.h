@@ -142,6 +142,12 @@ namespace imq
 		Result opGreater(const QValue& rhs, QValue* result) const;
 		Result opGreaterEq(const QValue& rhs, QValue* result) const;
 
+		Result getIndex(const QValue& index, QValue* result);
+		Result setIndex(const QValue& index, const QValue& value);
+
+		Result getField(const imq::String& name, QValue* result);
+		Result setField(const imq::String& name, const QValue& value);
+
 		virtual void GC_mark() override;
 
 		size_t GC_getSize() const;

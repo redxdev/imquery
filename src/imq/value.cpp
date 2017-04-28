@@ -1479,6 +1479,70 @@ namespace imq
 		return errors::math_operator_invalid("<???>", "greatereq");
 	}
 
+	Result QValue::getIndex(const QValue& index, QValue* result)
+	{
+		switch (valueType)
+		{
+		default:
+			return errors::undefined_get_index(QValue::getTypeString(valueType));
+
+		case Type::String:
+		{
+			int32_t value;
+			if (!index.getInteger(&value))
+				return errors::invalid_index_type("String", index);
+
+			if (value < 0 || value >= strlen(s))
+				return errors::index_out_of_range(index);
+
+			*result = QValue::String(imq::String(1, s[value]));
+			return true;
+		}
+
+		case Type::Object:
+			return obj->getIndex(index, result);
+		}
+	}
+
+	Result QValue::setIndex(const QValue& index, const QValue& value)
+	{
+		switch (valueType)
+		{
+		default:
+			return errors::undefined_set_index(QValue::getTypeString(valueType));
+
+		case Type::String:
+			return errors::immutable_obj("String");
+
+		case Type::Object:
+			return obj->setIndex(index, value);
+		}
+	}
+
+	Result QValue::getField(const imq::String& name, QValue* result)
+	{
+		switch (valueType)
+		{
+		default:
+			return errors::undefined_get_field(QValue::getTypeString(valueType));
+
+		case Type::Object:
+			return obj->getField(name, result);
+		}
+	}
+
+	Result QValue::setField(const imq::String& name, const QValue& value)
+	{
+		switch (valueType)
+		{
+		default:
+			return errors::undefined_set_field(QValue::getTypeString(valueType));
+
+		case Type::Object:
+			return obj->setField(name, value);
+		}
+	}
+
 	void QValue::GC_mark()
 	{
 		switch (valueType)
