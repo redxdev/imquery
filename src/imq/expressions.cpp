@@ -587,22 +587,11 @@ namespace imq
 			return errors::vm_generic_error(getLocation(), "Invalid value subexpression for SetIndex");
 		}
 
-		QValue value;
-		Result res = objExpr->execute(context, &value);
+		QValue objValue;
+		Result res = objExpr->execute(context, &objValue);
 		if (!res)
 		{
 			return res;
-		}
-
-		QObject* obj;
-		if (!value.getObject(&obj))
-		{
-			return errors::vm_generic_error(getLocation(), "Expected valid QObject subexpression for SetIndex");
-		}
-
-		if (!obj)
-		{
-			return errors::vm_generic_error(getLocation(), "Expected valid QObject subexpression for SetIndex (found null)");
 		}
 
 		QValue index;
@@ -612,13 +601,14 @@ namespace imq
 			return res;
 		}
 
+		QValue value;
 		res = valueExpr->execute(context, &value);
 		if (!res)
 		{
 			return res;
 		}
 
-		res = obj->setIndex(index, value);
+		res = objValue.setIndex(index, value);
 		if (!res)
 		{
 			return errors::vm_generic_error(getLocation(), res.getErr());
