@@ -47,4 +47,4 @@ before_script:
 
 script:
   - LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$(pwd)/deps/antlr4/runtime/Cpp/dist" valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ./bin/$CONFDIR/testimq
-  - LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$(pwd)/deps/antlr4/runtime/Cpp/dist" valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ./bin/$CONFDIR/iqc -s tests -f tests/init.imq
+  - LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$(pwd)/deps/antlr4/runtime/Cpp/dist" ./bin/$CONFDIR/iqc -s tests -f tests/init.imq
