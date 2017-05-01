@@ -3,8 +3,7 @@
 #include "platform.h"
 #include "context.h"
 #include "gc.h"
-
-#include <unordered_map>
+#include "fieldhelper.h"
 
 namespace imq
 {
@@ -147,20 +146,4 @@ namespace imq
 #define IMQ_DEFINE_TYPE_WITH_SIZE_FIELDS_CUSTOM(name, fields, val) \
 	IMQ_DEFINE_TYPE(name); \
 	size_t name::GC_getSize() const {return sizeof(name) + fields.GC_getSize() - sizeof(imq::ObjectFieldHelper) + (val);}
-
-	class IMQ_API ObjectFieldHelper
-	{
-	public:
-		void getter(const String& name, std::function<Result(QValue*)> getFunc);
-		void setter(const String& name, std::function<Result(const QValue&)> setFunc);
-
-		Result handleGet(QObject* obj, const String& name, QValue* result);
-		Result handleSet(QObject* obj, const String& name, const QValue& value);
-
-		size_t GC_getSize() const;
-
-	private:
-		std::unordered_map<String, std::function<Result(QValue*)>> getters;
-		std::unordered_map<String, std::function<Result(const QValue&)>> setters;
-	};
 }
