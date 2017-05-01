@@ -2,6 +2,7 @@
 
 #include "value.h"
 #include "object.h"
+#include "errors.h"
 
 namespace imq
 {

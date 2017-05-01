@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 ### Added
 - Added `getIndex` and `setIndex` to `QValue`. Strings can now be indexed.
+- Added `getField` and `setField` to `QValue`. This is currently just used as a passthrough to `QObject`.
 - `compile` function: Parses a string into a function object that can be called from within imquery.
 - `version` function: Get the version of imquery.
 - `char` function: Get a string from a character code.
