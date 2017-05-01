@@ -1,0 +1,9 @@
+print("Loading tests...");
+
+# IMPORT TESTS HERE
+import 'basics.imq';
+
+# END OF TESTS
+
+print("Running tests...");
+run_all_tests();

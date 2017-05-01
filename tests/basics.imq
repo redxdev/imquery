@@ -1,0 +1,13 @@
+import 'framework.imq';
+import 'assert.imq';
+
+test('basics.math', () {
+    assert_eq(2 + 3, 5);
+});
+
+test('basics.image_equality', () {
+    assert_eq(image(), image());
+    assert_eq(image(10, 30, {0.5}), image(10, 30, {0.5}));
+    assert_neq(image(10, 30, {0.5}), image(10, 40, {0.5}));
+    assert_neq(image(10, 30, {0.5}), image(10, 30, {0.6}));
+});

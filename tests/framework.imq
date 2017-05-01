@@ -1,0 +1,45 @@
+# imquery testing framework
+# This is meant to run alongside the native tests.
+
+tests = [];
+passed = [];
+failed = [];
+
+export func test(name, f) {
+    if typename(f) != 'Function' {
+        error("Tests must be valid functions.");
+    }
+
+    tests.insert([! 'name' = name, 'func' = f]);
+}
+
+export func run_test(t) {
+    print("Running " + t['name'] + "... ");
+    result = try(t['func']);
+    if result[0] {
+        print("Ok");
+        passed.insert(t);
+        return true;
+    }
+    else {
+        print(result[1]);
+        failed.insert(t);
+        return false;
+    }
+}
+
+export func run_all_tests() {
+    passed.clear();
+    failed.clear();
+
+    for t in tests {
+        run_test(t);
+    }
+
+    if failed.length > 0 {
+        print("The following tests failed:");
+        for fail in failed {
+            print("- " + fail['name']);
+        }
+    }
+}

@@ -1,0 +1,15 @@
+# Assertion framework
+
+export func assert(a) {
+    if not a {
+        error("assertion failed");
+    }
+}
+
+export func assert_eq(a, b) {
+    assert(a == b);
+}
+
+export func assert_neq(a, b) {
+    assert(a != b);
+}
