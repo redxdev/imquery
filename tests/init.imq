@@ -6,4 +6,6 @@ import 'basics.imq';
 # END OF TESTS
 
 print("Running tests...");
-run_all_tests();
+if not run_all_tests() {
+    error("Some tests failed.");
+}
