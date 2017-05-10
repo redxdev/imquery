@@ -1,0 +1,7 @@
+input = image_load('images/flowers.png');
+
+test('images.invert', () {
+    output = image(input.w, input.h);
+    output: (1-color+{0,1}).clamp() from input;
+    assert_image(output, 'invert.png');
+});

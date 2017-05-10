@@ -41,5 +41,9 @@ export func run_all_tests() {
         for fail in failed {
             print("- " + fail['name']);
         }
+
+        return false;
     }
+
+    return true;
 }

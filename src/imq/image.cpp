@@ -3,6 +3,7 @@
 #include <string>
 #include <cstring>
 #include <cmath>
+#include <limits>
 
 #include "thirdparty/stb_image.h"
 #include "thirdparty/stb_image_write.h"
@@ -81,6 +82,52 @@ namespace imq
 				*result = QValue::Float(std::sqrt(red * red + green * green + blue * blue));
 				return true;
 			});
+			return true;
+		});
+
+		fields.getter("nearly", [&](QValue* result) {
+			*result = QValue::Function(getVM(), this, [&](VMachine* vm, int32_t argCount, QValue* args, QValue* result) -> Result {
+				float near = std::numeric_limits<float>::epsilon();
+				if (argCount != 1 && argCount != 2)
+				{
+					return errors::args_count("QColor.nearly", 1, 2, argCount);
+				}
+
+				if (argCount == 2)
+				{
+					if (!args[1].getNumber(&near))
+					{
+						return errors::args_type("QColor.nearly", 1, "Number", args[1]);
+					}
+				}
+
+				QObject* other = nullptr;
+				if (!args[0].getObject(&other))
+				{
+					return errors::args_type("QColor.nearly", 0, "QColor", args[0]);
+				}
+
+				QColor* otherColor = objectCast<QColor>(other);
+				if (!otherColor)
+				{
+					return errors::args_type("QColor.nearly", 0, "QColor", args[0]);
+				}
+
+				if (fabs(red - otherColor->red) > near ||
+					fabs(green - otherColor->green) > near ||
+					fabs(blue - otherColor->blue) > near ||
+					fabs(alpha - otherColor->alpha) > near)
+				{
+					*result = QValue::Bool(false);
+				}
+				else
+				{
+					*result = QValue::Bool(true);
+				}
+
+				return true;
+			});
+
 			return true;
 		});
 

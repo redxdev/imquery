@@ -12,7 +12,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `compile` function: Parses a string into a function object that can be called from within imquery.
 - `version` function: Get the version of imquery.
 - `char` function: Get a string from a character code.
-- `find` function: find the position of a string
+- `find` function: find the position of a string.
+- `QColor.nearly` function: find out if a color is nearly equal to another.
+- Scripted testing framework
 
 ### Changed
 - Lambda block syntax now does away with the `=>`, while blockless syntax keeps it.

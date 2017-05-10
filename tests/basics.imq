@@ -1,6 +1,3 @@
-import 'framework.imq';
-import 'assert.imq';
-
 test('basics.math', () {
     assert_eq(2 + 3, 5);
 });

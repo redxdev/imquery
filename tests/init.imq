@@ -1,7 +1,11 @@
 print("Loading tests...");
 
+import 'framework.imq';
+import 'assert.imq';
+
 # IMPORT TESTS HERE
 import 'basics.imq';
+import 'images.imq';
 
 # END OF TESTS
 

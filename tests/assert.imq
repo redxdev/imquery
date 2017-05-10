@@ -13,3 +13,20 @@ export func assert_eq(a, b) {
 export func assert_neq(a, b) {
     assert(a != b);
 }
+
+export func assert_image_eq(a, b) {
+    assert_eq(a.width, b.width);
+    assert_eq(a.height, b.height);
+
+    for y = 0; y < a.height; y += 1; {
+        for x = 0; x < a.width; x += 1; {
+            ap = a.pixel(x, y);
+            bp = b.pixel(x, y);
+            assert(ap.nearly(bp, 0.01));
+        }
+    }
+}
+
+export func assert_image(img, path) {
+    assert_image_eq(img, image_load('result_images/' + path));
+}
