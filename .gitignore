@@ -16,3 +16,4 @@ deps/
 dist/
 *.vspx
 *.diagsession
+tests/result_images/test.png

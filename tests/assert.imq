@@ -22,11 +22,17 @@ export func assert_image_eq(a, b) {
         for x = 0; x < a.width; x += 1; {
             ap = a.pixel(x, y);
             bp = b.pixel(x, y);
-            assert(ap.nearly(bp, 0.01));
+            assert(ap == bp);
+            #assert(ap.nearly(bp, 0.01));
         }
     }
 }
 
 export func assert_image(img, path) {
-    assert_image_eq(img, image_load('result_images/' + path));
+    # Because the encoding process for images results in changes to colors, we encode the input image to disk
+    # and then reload it.
+    img.save('tests/result_images/test.png');
+    testimg = image_load('tests/result_images/test.png');
+
+    assert_image_eq(testimg, image_load('tests/result_images/' + path));
 }

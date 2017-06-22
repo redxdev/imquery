@@ -1,5 +1,10 @@
 test('basics.math', () {
+    # Basic order of operations tests
+
     assert_eq(2 + 3, 5);
+    assert_eq(9 + 5 - 4, 10);
+    assert_eq(9 * 5 - 4, 41);
+    assert_eq(9 * (5 - 4), 9);
 });
 
 test('basics.image_equality', () {
