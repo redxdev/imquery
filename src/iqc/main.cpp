@@ -209,7 +209,7 @@ int main(int argc, char** argv)
 	TCLAP::SwitchArg gcDebugArg("g", "gc-debug", "Enable gc debug mode", cmd, false);
 	TCLAP::ValueArg<std::string> gcModeArg("m", "gc-mode", "Change the garbage collection mode. Valid values are Barriers, Always, and NoBarriers.", false, "", "string", cmd);
 
-	TCLAP::MultiArg<std::string> inputArg("i", "input", "Inputs, in the form name=filepath", false, "string", cmd);
+	TCLAP::MultiArg<std::string> inputArg("i", "input", "Inputs, in the form name=expression", false, "string", cmd);
 	TCLAP::MultiArg<std::string> outputArg("o", "output", "Outputs, in the form name=filepath", false, "string", cmd);
 
 	TCLAP::MultiArg<std::string> searchPathArg("s", "search-path", "Search paths", false, "string", cmd);
